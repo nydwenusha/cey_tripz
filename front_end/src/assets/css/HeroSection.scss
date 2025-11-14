@@ -1,0 +1,25 @@
+.hero-container {
+  height: 90vh;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 1s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  
+}
+.hero-overlay {
+  background: rgba(0,0,0,0.5);
+  text-align: center;
+  padding: 40px;
+  border-radius: 20px;
+}
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+}
+.hero-desc {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}

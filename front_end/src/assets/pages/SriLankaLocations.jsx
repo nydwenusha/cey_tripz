@@ -1,0 +1,130 @@
+//Packages
+
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import "../css/SriLankaLocations.scss";
+
+const tourPackages = [
+  {
+    name: "Nine Arch bridge",
+    desc: "Explore the misty hills of Ella with tea gardens, waterfalls, and the Nine Arches Bridge.",
+    img: "https://windows10spotlight.com/wp-content/uploads/2022/10/637b7894db131e5d9b3d2bbb16ec1c7c.jpg",
+    route: "Colombo ➜ Kandy ➜ Ella",
+    days: "3 Days / 2 Nights",
+    price: "Rs. 4,000 / Person",
+  },
+  {
+    name: "Ambuluwawa tower",
+    desc: "Exploring its essence, Ambuluwawa unfolds as more than just the tower's name; rising proudly at 3,567 feet.",
+    img: "https://seekingstamps.com/wp-content/uploads/2023/01/ambuluwawa-tower-sri-lanka-scaled.jpeg",
+    route: "Colombo ➜ Ambuluwawa",
+    days: "4 Days / 3 Nights",
+    price: "Rs. 10,000",
+  },
+  {
+    name: "Jaffna",
+    desc: "Jaffna is the capital of Sri Lanka’s Northern Province and the administrative center of the Jaffna District.",
+    img: "https://www.lasociedadgeografica.com/blog/uploads/2020/06/costa-de-jaffna-en-sri-lanka.jpg",
+    route: "Colombo ➜ Jaffna",
+    days: "5 Days / 4 Nights",
+    price: "Rs. 40,000",
+  },
+  {
+    name: "Sigiriya",
+    desc: "Sigiriya Lion Rock is one of the most valuable historical monuments of Sri Lanka.",
+    img: "http://www.pearlceylon.com/images/destination/sigiriya/sigiriya-by-air.jpg",
+    route: "Colombo ➜ Kandy ➜ Ella",
+    days: "3 Days / 2 Nights",
+    price: "Rs. 20,500 ",
+  },
+  {
+    name: "Arugam Bay",
+    desc: "Arugam Bay is a popular destination for Israeli tourists.height waves and surfing.",
+    img: "https://www.sesathatravel.com.au/wp-content/uploads/2022/09/97583095_265777134828790_551214138274738278_n-1-1024x600.jpg",
+    route: "Colombo ➜ Pottuvil ➜ Arugam Bay",
+    days: "4 Days / 3 Nights",
+    price: "Rs. 55,000",
+  },
+  {
+    name: "Kandy & Central Highlands",
+    desc: "The city and the region have been known by many different names and versions of those names.",
+    img: "https://www.attractionsinsrilanka.com/wp-content/uploads/2019/07/Sri-Dalada-Maligawa-Temple-of-the-Tooth-Relic.jpg",
+    route: "Colombo ➜ Kandy",
+    days: "2 Days / 1 Night",
+    price: "Rs. 30,000",
+  },
+];
+
+function SriLankaLocations() {
+  const navigate = useNavigate();
+
+  const handleBooking = (pkg) => {
+    navigate("/booking", { 
+      state: { 
+        selectedPackage: pkg.name,
+        route: pkg.route,
+        duration: pkg.days,
+        price: pkg.price
+      } 
+    });
+  };
+
+  return (
+    <section className="locations-section py-5">
+      <Container>
+        <motion.h2
+          className="text-center mb-5 section-title"
+          initial={{ opacity: 0, y: -30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          Locations & Packages
+        </motion.h2>
+
+        <Row>
+          {tourPackages.map((pkg, index) => (
+            <Col md={4} sm={6} xs={12} key={index} className="mb-4">
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ scale: 1.03 }}
+                viewport={{ once: true }}
+              >
+                <Card className="tour-card shadow-sm border-0">
+                  <div className="img-wrapper">
+                    <motion.img
+                      src={pkg.img}
+                      alt={pkg.name}
+                      className="tour-img"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.4 }}
+                    />
+                  </div>
+                  <Card.Body>
+                    <Card.Title className="tour-name">{pkg.name}</Card.Title>
+                    <Card.Text className="tour-desc">{pkg.desc}</Card.Text>
+                    <p className="tour-route">🧭 Route: {pkg.route}</p>
+                    <p className="tour-days">📅 Duration: {pkg.days}</p>
+                    <p className="tour-price">💰 {pkg.price}</p>
+                    <Button 
+                      variant="primary" 
+                      className="book-btn"
+                      onClick={() => handleBooking(pkg)}
+                    >
+                      Book Now
+                    </Button>
+                  </Card.Body>
+                </Card>
+              </motion.div>
+            </Col>
+          ))}
+        </Row>
+      </Container>
+    </section>
+  );
+}
+
+export default SriLankaLocations;

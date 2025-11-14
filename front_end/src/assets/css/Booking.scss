@@ -1,0 +1,61 @@
+.booking{
+  background: url("https://img.freepik.com/premium-photo/electric-car-driving-road-with-green-nature-blue-sky-motion-blur-background-generative-ai_90099-3938.jpg")
+    no-repeat center center;
+  background-size: cover;
+}
+.booking-card {
+  background: rgba(255, 255, 255, 0.187);
+  background: transparent;
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,0.04);
+  color: var(--text);
+}
+
+.form-control,
+.form-select {
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  box-shadow: none !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(88,166,255,0.14);
+}
+
+.confirm-popup {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  z-index: 1000;
+}
+
+button.btn-primary {
+  background: rgb(0, 230, 0);
+  border: none;
+  transition: 0.2s ease;
+  border-radius: 10px;
+  color: #ffffff;
+}
+
+button.btn-primary:hover {
+  /* darken() can't operate on CSS variables at build time; use color-mix for runtime color blending */
+  scale: 1.03;
+  color: #ffffff;
+  background-color: rgb(122, 203, 0);
+}
+.booking-card{
+  padding-top: 100px;
+  padding-bottom: 10px;
+}
+.p-4-shadow-sm-booking-card{
+  background-color: transparent;
+  backdrop-filter: calc(10px);
+}
+
