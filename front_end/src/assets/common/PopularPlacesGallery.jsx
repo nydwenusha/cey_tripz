@@ -4,51 +4,60 @@
 import { Container } from "react-bootstrap";
 import { motion } from "framer-motion";
 import "../css/PopularPlacesGallery.scss";
+import sigiriyaImg from "../image/sigiriya-2.webp";
+import nineArchImg from "../image/ninearch.jpg";
+import mirissaImg from "../image/arugambay.jpg";
+import kandyTempleImg from "../image/dhaladamaligawa.jpg";
+import teaEstateImg from "../image/abtF2.jpg";
+import yalaImg from "../image/abtG3.jpg";
+import trincoImg from "../image/Nilaveli.webp";
+import colomboImg from "../image/colombo.jpg";
+import galleImg from "../image/abtG4.webp";
 
 const places = [
   {
     name: "Sigiriya Rock Fortress",
-    img: "https://wallpaperaccess.com/full/8208378.jpg",
+    img: sigiriyaImg,
     desc: "Ancient rock fortress with royal gardens and frescoes.",
   },
   {
     name: "Ella Nine Arches Bridge",
-    img: "https://www.orienthotelsl.com/wp-content/uploads/2023/01/Nine-Arch-Bridge-Ella-1200x630-1.jpg",
+    img: nineArchImg,
     desc: "Iconic bridge surrounded by misty tea plantations.",
   },
   {
     name: "Galle Fort",
-    img: "https://www.themorning.lk/_next/image?url=https:%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fthe-morning-39270.appspot.com%2Fo%2Farticles%252FxR3p67owvdTx9EYZ1XSP%3Falt%3Dmedia%26token%3D6102a5a0-3320-4437-8475-4ed42327cd4c&w=3840&q=80",
+    img: galleImg,
     desc: "Historic fort blending Dutch architecture and coastal charm.",
   },
   {
     name: "Mirissa Beach",
-    img: "https://i.pinimg.com/originals/5c/5c/8e/5c5c8eb5a9ef89b5d82e5eb417d0debc.jpg",
+    img: mirissaImg,
     desc: "Golden sandy beach famous for whale watching and sunsets.",
   },
   {
     name: "Kandy Temple of the Tooth",
-    img: "http://www.pearlceylon.com/images/destination/kandy/temple-of-tooth.jpg",
+    img: kandyTempleImg,
     desc: "Sacred Buddhist temple in the heart of the hill country.",
   },
   {
     name: "Nuwara Eliya Tea Estates",
-    img: "https://wallpaperaccess.com/full/6153887.jpg",
+    img: teaEstateImg,
     desc: "Cool climate and scenic tea plantations of central highlands.",
   },
   {
     name: "Yala National Park",
-    img: "https://cdn.getyourguide.com/img/location/5c83eb378b7ca.jpeg/88.jpg",
+    img: yalaImg,
     desc: "Sri Lanka’s top wildlife destination with leopards and elephants.",
   },
   {
     name: "Trincomalee Beach",
-    img: "https://saltinourhair.com/wp-content/uploads/2018/05/things-to-do-trincomalee-main-beach.jpg?x76699",
+    img: trincoImg,
     desc: "Crystal-clear waters and soft white sand on the east coast.",
   },
   {
     name: "Colombo City ",
-    img: "https://wowiwalkers.com/wp-content/uploads/2023/03/Price_Lotus-Tower_Colombo_Sri-Lanka_Blog-1024x683.jpg",
+    img: colomboImg,
     desc: "colombo is a strong fo the sri lanka.",
   },
 ];
@@ -64,7 +73,7 @@ function PopularPlacesGallery() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          🌅 Beauty Of Sri Lanka
+          Beauty Of Sri Lanka
         </motion.h2>
 
         <div className="gallery-grid">

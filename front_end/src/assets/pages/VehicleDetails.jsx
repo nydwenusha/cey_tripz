@@ -6,17 +6,25 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import "../css/VehicleDetails.scss";
 import Layout from "../../Layout";
+import wagonr1 from "../image/wagonr1.jpg";
+import wagonr2 from "../image/wagonr2.jpg";
+import wagonr3 from "../image/wagonr3.jpg";
+import premio1 from "../image/primio1.jpg";
+import premio2 from "../image/primio2.png";
+import premio3 from "../image/primio3.jpg";
+import kdh1 from "../image/kdh1.jpg";
+import kdh2 from "../image/kdh2.png";
+import kdh3 from "../image/kdh3.jpg";
+import alto1 from "../image/alto1.webp";
+import alto2 from "../image/alto02.jpg";
+import alto3 from "../image/alto1.webp";
 
 const vehicleData = [
   {
     id: 1,
     name: "Suzuki Wagon R",
     price: "Rs. 12,000/day",
-    images: [
-      "https://carsguide.ikman.lk/wp-content/uploads/2023/05/shutterstock_2204903329-e1685523842171.jpg",
-      "https://wallpapercave.com/wp/wp7368203.png",
-      "https://gaadiwaadi.com/wp-content/uploads/2024/11/New-Gen-Wagn-R-Rendering.jpg"
-    ],
+    images: [wagonr1, wagonr2, wagonr3],
     description:
       "This SUV provides excellent off-road performance and style. Perfect for hill country and long scenic routes.",
     specs: ["5 Seats", "AC", "4x4", "Automatic", "Bluetooth"]
@@ -25,11 +33,7 @@ const vehicleData = [
     id: 2,
     name: "Toyota Premio",
     price: "Rs. 12,000/day",
-    images: [
-      "https://i.pinimg.com/originals/7e/9e/bc/7e9ebccb69ad693e9c7c5aadd8253215.png",
-      "https://rentacarsctg.com/wp-content/uploads/2021/09/Toyota-Allion-2018.jpg",
-      "https://www.africhoice.com/airport-transfer-services/airport-transfer-standard-sedan.jpg"
-    ],
+    images: [premio1, premio2, premio3],
     description:
       "Comfort and class combined — best for couples and business trips.",
     specs: ["4 Seats", "AC", "sunroof", "Automatic", "Bluetooth"]
@@ -38,11 +42,7 @@ const vehicleData = [
     id: 3,
     name: "Toyota KDH",
     price: "Rs. 8,000/day",
-    images: [
-      "https://wallpaperaccess.com/full/8416028.jpg",
-      "https://wecaretaxi.com/wp-content/uploads/2023/01/toyota-kdh-flat-roof-van-rental-e1673449493237.png",
-      "https://img.indianautosblog.com/2017/08/JDM-spec-2017-Toyota-Hiace-profile.jpg"
-    ],
+    images: [kdh1, kdh2, kdh3],
     description:
       "family trips with comfort and space. Ideal for group tours across Sri Lanka.",
     specs: ["12 Seats", "AC", "Auto Gear", "USB", "Bluetooth"]
@@ -51,11 +51,7 @@ const vehicleData = [
     id: 4,
     name: "Suzuki Alto",
     price: "Rs. 18,000/day",
-    images: [
-      "https://ic1.maxabout.us/autos/cars_india/N/2018/8/new-maruti-suzuki-alto-800-india.jpg5",
-      "https://ic1.maxabout.us/autos/cars_india/N/2018/8/new-maruti-suzuki-alto-800-india.jpg",
-      "https://ic1.maxabout.us/autos/cars_india/N/2018/8/new-maruti-suzuki-alto-800-india.jpg"
-    ],
+    images: [alto1, alto2, alto3],
     description:
       "Ssafe and reliable compact car perfect for city trips and solo travel.",
     specs: ["4 Seats", "AC", "Automatic", "Large Storage", "WiFi"]
@@ -119,10 +115,14 @@ function VehicleDetails() {
                 <p>{vehicle.description}</p>
                 <ul className="spec-list">
                   {vehicle.specs.map((s, i) => (
-                    <li key={i}>🚘 {s}</li>
+                    <li key={i}> {s}</li>
                   ))}
                 </ul>
-                <Button variant="danger" size="lg" onClick={handleBooking}>
+                <Button
+                  size="lg"
+                  className="vehicle-book-btn"
+                  onClick={handleBooking}
+                >
                   Book Now
                 </Button>
               </Col>

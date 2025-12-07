@@ -1,5 +1,6 @@
+//sri lanka locations section styles
 .locations-section {
-  background-image: url(https://static.vecteezy.com/system/resources/thumbnails/021/666/605/small_2x/blurred-white-natural-bokeh-background-photo.JPG);
+  background-image: url(../image/packageBG.jpeg);
   color: #333;
   background-repeat: repeat;
   background-size: cover;
@@ -65,9 +66,12 @@
   font-weight: 600;
   border-radius: 8px;
   transition: all 0.3s ease;
+  background-color: #d61313;
+  border-color: #d61313;
+  color: #ffffff;
 }
 
 .book-btn:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
+  background-color: #9f0b0b;
+  border-color: #9f0b0b;
 }

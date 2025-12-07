@@ -2,25 +2,29 @@ import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../css/HeroSection.scss";
+import heroImg1 from "../image/hero1.jpg";
+import heroImg2 from "../image/hero2.jpg";
+import heroImg3 from "../image/hero3.jpg";
+import heroImg4 from "../image/hero4.jpg";
 
 const slides = [
   {
-    image: "https://wallpaperaccess.com/full/11885405.jpg",
+    image: heroImg1,
     title: "Explore Sri Lanka with Comfort",
     desc: "Book premium vehicles for your journey today!",
   },
   {
-    image: "https://wallpaperaccess.com/full/3558093.jpg",
+    image: heroImg2,
     title: "Adventure Awaits",
     desc: "From beaches to mountains — travel with ease!",
   },
   {
-    image: "https://wallpapers.com/images/hd/sri-lanka-stilt-fishing-sunset-senzn2oyh7mj7qt1.jpg",
+    image: heroImg3,
     title: "Your Trip, Your Way",
     desc: "Luxury, budget, or family vehicles — all in one place.",
   },
   {
-    image: "https://wallpapers.com/images/hd/sri-lanka-tangalle-beach-aerial-sj84qckd6uwxgwey.jpg",
+    image: heroImg4,
     title: "Safety and Reliability",
     desc: "Trust and explore with LankaTour's reliable services.",
   },

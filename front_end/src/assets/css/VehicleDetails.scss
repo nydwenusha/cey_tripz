@@ -1,12 +1,30 @@
+//vehicle details page styles
 
 .vehicle-details-page{
-  background-color: #0a2246ea;
-  background-image: url(https://wallpaperaccess.com/full/781989.jpg);
+  background:
+    linear-gradient(rgba(6, 15, 26, 0.55)),
+    url("../image/VCBG.jpg") center/cover fixed no-repeat;
   padding-top: 40px;
-  
+  color: #f8fafc;
+  min-height: 100vh;
 }
 .vehicle-details-card{
-  margin-top: 50px !important;
+  margin-top: 80px !important;
+  background: transparent!important;
+  backdrop-filter: blur(50px);
+  color: #f8fafc;
+}
+.vehicle-details-card li{
+  margin-bottom: 8px;
+  color: #f8fafc;
+}
+.vehicle-details-card h2{
+  margin-bottom: 8px;
+  color: #F2B426;
+}
+.vehicle-details-card p{
+  margin-bottom: 8px;
+  color: #f8fafc;
 }
 .main-image-container {
   
@@ -41,9 +59,25 @@
 }
 
 .thumbnail.active {
-  border-color: #0d6efd;
+  border-color: #0196f9;
   opacity: 0.8;
 }
 .nav-vehicle{
   padding-top: 100px;
+}
+
+.vehicle-book-btn {
+  background-color:#0e4a7b !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 0.75rem 2.5rem;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(14, 74, 123, 0.35);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.vehicle-book-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(244, 178, 35, 0.4);
+  background-color:#f4b223 !important;
 }

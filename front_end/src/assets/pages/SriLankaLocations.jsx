@@ -1,15 +1,21 @@
-//Packages
+//Packages section for Sri Lanka locations
 
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import "../css/SriLankaLocations.scss";
+import nineArchImg from "../image/ninearch.jpg";
+import ambuluwawaImg from "../image/ambuluwawa.jpeg";
+import jaffnaImg from "../image/jaffna.webp";
+import sigiriyaImg from "../image/sigiriya-2.webp";
+import arugamBayImg from "../image/arugambay.jpg";
+import daladaImg from "../image/dhaladamaligawa.jpg";
 
 const tourPackages = [
   {
     name: "Nine Arch bridge",
     desc: "Explore the misty hills of Ella with tea gardens, waterfalls, and the Nine Arches Bridge.",
-    img: "https://windows10spotlight.com/wp-content/uploads/2022/10/637b7894db131e5d9b3d2bbb16ec1c7c.jpg",
+    img: nineArchImg,
     route: "Colombo ➜ Kandy ➜ Ella",
     days: "3 Days / 2 Nights",
     price: "Rs. 4,000 / Person",
@@ -17,7 +23,7 @@ const tourPackages = [
   {
     name: "Ambuluwawa tower",
     desc: "Exploring its essence, Ambuluwawa unfolds as more than just the tower's name; rising proudly at 3,567 feet.",
-    img: "https://seekingstamps.com/wp-content/uploads/2023/01/ambuluwawa-tower-sri-lanka-scaled.jpeg",
+    img: ambuluwawaImg,
     route: "Colombo ➜ Ambuluwawa",
     days: "4 Days / 3 Nights",
     price: "Rs. 10,000",
@@ -25,7 +31,7 @@ const tourPackages = [
   {
     name: "Jaffna",
     desc: "Jaffna is the capital of Sri Lanka’s Northern Province and the administrative center of the Jaffna District.",
-    img: "https://www.lasociedadgeografica.com/blog/uploads/2020/06/costa-de-jaffna-en-sri-lanka.jpg",
+    img: jaffnaImg,
     route: "Colombo ➜ Jaffna",
     days: "5 Days / 4 Nights",
     price: "Rs. 40,000",
@@ -33,7 +39,7 @@ const tourPackages = [
   {
     name: "Sigiriya",
     desc: "Sigiriya Lion Rock is one of the most valuable historical monuments of Sri Lanka.",
-    img: "http://www.pearlceylon.com/images/destination/sigiriya/sigiriya-by-air.jpg",
+    img: sigiriyaImg,
     route: "Colombo ➜ Kandy ➜ Ella",
     days: "3 Days / 2 Nights",
     price: "Rs. 20,500 ",
@@ -41,7 +47,7 @@ const tourPackages = [
   {
     name: "Arugam Bay",
     desc: "Arugam Bay is a popular destination for Israeli tourists.height waves and surfing.",
-    img: "https://www.sesathatravel.com.au/wp-content/uploads/2022/09/97583095_265777134828790_551214138274738278_n-1-1024x600.jpg",
+    img: arugamBayImg,
     route: "Colombo ➜ Pottuvil ➜ Arugam Bay",
     days: "4 Days / 3 Nights",
     price: "Rs. 55,000",
@@ -49,7 +55,7 @@ const tourPackages = [
   {
     name: "Kandy & Central Highlands",
     desc: "The city and the region have been known by many different names and versions of those names.",
-    img: "https://www.attractionsinsrilanka.com/wp-content/uploads/2019/07/Sri-Dalada-Maligawa-Temple-of-the-Tooth-Relic.jpg",
+    img: daladaImg,
     route: "Colombo ➜ Kandy",
     days: "2 Days / 1 Night",
     price: "Rs. 30,000",

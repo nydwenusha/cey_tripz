@@ -1,13 +1,25 @@
 .hero-container {
-  height: 90vh;
+  min-height: 100vh;
   background-size: cover;
-  background-position: center;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   transition: background-image 1s ease-in-out;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #ffffff;
-  
+}
+.hero-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+//   background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.55));
+  z-index: 0;
+}
+.hero-container > * {
+  position: relative;
+  z-index: 1;
 }
 .hero-overlay {
   background: rgba(0,0,0,0.5);
@@ -22,4 +34,20 @@
 .hero-desc {
   font-size: 1.3rem;
   margin-bottom: 20px;
+}
+
+.hero-book-btn {
+  background-color:#0e4a7b !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 0.75rem 2.5rem;
+  border-radius: 999px;
+  box-shadow: 0 10px 26px rgba(14, 74, 123, 0.32);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-book-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(244, 178, 35, 0.4);
+  background-color:#f4b223 !important;
 }

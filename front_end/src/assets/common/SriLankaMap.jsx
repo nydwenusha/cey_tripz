@@ -65,7 +65,7 @@ function SriLankaMap() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        🗺️ Explore Sri Lanka's Popular Locations
+         Explore Sri Lanka's Popular Locations
       </motion.h2>
 
       <div className="map-container">

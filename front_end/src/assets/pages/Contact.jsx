@@ -1,92 +1,168 @@
-import { Container, Form, Button, Row, Col, Card } from "react-bootstrap";
+import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { motion } from "framer-motion";
-import "../css/contact.scss";
 import Layout from "../../Layout";
+import "../css/contact.scss";
 
 function Contact() {
+  const contactHighlights = [
+    {
+      title: "Travel Concierge",
+      copy: "Curated itineraries, multi-day tours, and bespoke experiences crafted in under 24 hours.",
+      detail: "+94 75 322 8869",
+      icon: "🌍",
+    },
+    {
+      title: "Fleet Hotline",
+      copy: "Real-time vehicle tracking, chauffeur briefings, and last-minute swaps handled instantly.",
+      detail: "+94 76 448 7775",
+      icon: "🚐",
+    },
+    {
+      title: "WhatsApp Desk",
+      copy: "Share pins, voice notes, or docs on the go — we reply in minutes around the clock.",
+      detail: "wa.me/94753228869",
+      icon: "💬",
+    },
+  ];
+
+  const serviceHours = [
+    { label: "Weekdays", value: "06:00 – 22:00 IST" },
+    { label: "Weekends", value: "08:00 – 20:00 IST" },
+    { label: "Emergency", value: "24/7 duty manager" },
+  ];
+
   return (
     <Layout>
-      <div className="contact-page">
-        <Container className="py-5">
-          <motion.h1
-            className="text-center contact-title mb-4"
+      <section className="contact-page">
+        <Container className="contact-wrapper py-5">
+          <motion.div
+            className="contact-hero text-center"
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
           >
-            Contact Us
-          </motion.h1>
+            <p className="contact-eyebrow">Direct line to island specialists</p>
+            <h1>Plan, confirm, or rescue any Sri Lankan itinerary</h1>
+            <p className="contact-lede">
+              From boutique hotel transfers to cross-country expeditions, our operations desk pairs you with
+              verified chauffeurs, live support, and detailed route intel.
+            </p>
+          </motion.div>
 
-          <Row className="justify-content-center">
-            <Col md={8}>
+          <Row className="g-4 contact-highlight-row">
+            {contactHighlights.map((item, index) => (
+              <Col md={4} key={item.title}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="contact-info-card h-100">
+                    <div className="contact-icon">{item.icon}</div>
+                    <h4>{item.title}</h4>
+                    <p>{item.copy}</p>
+                    <span>{item.detail}</span>
+                  </Card>
+                </motion.div>
+              </Col>
+            ))}
+          </Row>
+
+          <Row className="g-4 align-items-stretch contact-main">
+            <Col lg={7}>
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="h-100"
               >
-                <Card className="p-4 contact-card shadow-lg">
+                <Card className="contact-form-card h-100">
+                  <div className="form-heading">
+                    <h3>Tell us about your journey</h3>
+                    <p>Drop the essentials and a concierge will confirm availability within 2 hours.</p>
+                  </div>
                   <Form>
-                    <Form.Group className="mb-3" controlId="name">
-                      <Form.Label>Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter your full name"
-                        required
-                      />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="email">
-                      <Form.Label>Email</Form.Label>
-                      <Form.Control
-                        type="email"
-                        placeholder="Enter your email"
-                        required
-                      />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="message">
-                      <Form.Label>Message</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={4}
-                        placeholder="Type your message here..."
-                        required
-                      />
-                    </Form.Group>
-
-                    <div className="text-center">
-                      <Button
-                        type="submit"
-                        variant="outline-info"
-                        className="px-4 py-2"
-                      >
-                        Send Message
+                    <Row className="g-3">
+                      <Col md={6}>
+                        <Form.Group controlId="contactName">
+                          <Form.Label>Full Name</Form.Label>
+                          <Form.Control type="text" placeholder="Alex Perera" required />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group controlId="contactEmail">
+                          <Form.Label>Email</Form.Label>
+                          <Form.Control type="email" placeholder="alex@journeys.io" required />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group controlId="contactPhone">
+                          <Form.Label>Phone / WhatsApp</Form.Label>
+                          <Form.Control type="text" placeholder="(+94) 71 123 4567" required />
+                        </Form.Group>
+                      </Col>
+                      <Col md={12}>
+                        <Form.Group controlId="contactMessage">
+                          <Form.Label>Itinerary Details</Form.Label>
+                          <Form.Control as="textarea" rows={4} placeholder="Pickup city, stops, vehicle type..." />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                    <div className="text-end mt-4">
+                      <Button type="submit" className="contact-send-btn">
+                        Dispatch request
                       </Button>
                     </div>
                   </Form>
                 </Card>
               </motion.div>
-
+            </Col>
+            <Col lg={5}>
               <motion.div
-                className="text-center mt-4 contact-info"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+                className="contact-side-stack"
               >
-                <p>
-                  📍 <strong>Address:</strong> 45 Galle Road, Colombo, Sri Lanka
-                </p>
-                <p>
-                  📞 <strong>Phone:</strong> +94 71 234 5678
-                </p>
-                <p>
-                  📧 <strong>Email:</strong> info@lankatour.com
-                </p>
+                <Card className="contact-meta-card">
+                  <h5>Operations desk</h5>
+                  <p>We monitor every route via GPS and weather alerts so we can reroute before delays hit.</p>
+                  <ul>
+                    {serviceHours.map((slot) => (
+                      <li key={slot.label}>
+                        <span>{slot.label}</span>
+                        <strong>{slot.value}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="badge-row">
+                    <span>Response under 15 min</span>
+                    <span>Multi-lingual team</span>
+                    <span>Duty manager on-call</span>
+                  </div>
+                </Card>
+
+                <div className="contact-map-card">
+                  <div className="map-overlay">
+                    <p>Head office</p>
+                    <h4>45 Galle Road, Colombo</h4>
+                    <small>Drop by for coffee & route planning</small>
+                  </div>
+                  <iframe
+                    title="Cey Tripz HQ"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.896315101553!2d79.85207367601632!3d6.927078893068712!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae259338a0a15c5%3A0x56c1d9f4f7968d17!2sGalle%20Rd%2C%20Colombo%2000300!5e0!3m2!1sen!2slk!4v1700000000000!5m2!1sen!2slk"
+                    loading="lazy"
+                    allowFullScreen
+                  ></iframe>
+                </div>
               </motion.div>
             </Col>
           </Row>
         </Container>
-      </div>
+      </section>
     </Layout>
   );
 }

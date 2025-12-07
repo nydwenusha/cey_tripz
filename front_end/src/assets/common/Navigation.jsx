@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import "../css/navigation.scss";
 
 function NavbarComp() {
@@ -30,7 +30,10 @@ function NavbarComp() {
       ref={navRef}
     >
       <Container>
-        <Navbar.Brand as={Link} to="/">🚐 LankaTour</Navbar.Brand>
+        <Navbar.Brand as={Link} to="/" className="brand-logo">
+          <span className="brand-primary">Cey</span>
+          <span className="brand-secondary">Tripz</span>
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto align-items-center">
