@@ -44,24 +44,29 @@ function HeroSection() {
   };
 
   return (
-    <div
-      className="hero-container"
-      style={{ backgroundImage: `url(${slides[index].image})` }}
-    >
-      <div className="hero-overlay">
-        <h1 className="hero-title">{slides[index].title}</h1>
-        <p className="hero-desc">{slides[index].desc}</p>
+    <>
+      <div
+        className="hero-container"
+        style={{ backgroundImage: `url(${slides[index].image})` }}
+      >
+        <div className="hero-overlay">
+          <h1 className="hero-title">{slides[index].title}</h1>
+          <p className="hero-desc">{slides[index].desc}</p>
 
-        <Button
-          className="hero-book-btn"
-          variant="danger"
-          size="lg"
-          onClick={handleBookNow} // ✅ click handler
-        >
-          Book Now
-        </Button>
+          <Button
+            className="hero-book-btn"
+            variant="danger"
+            size="lg"
+            onClick={handleBookNow} // ✅ click handler
+          >
+            Book Now
+          </Button>
+        </div>
       </div>
-    </div>
+      <div className="hero-animated-text">
+        <span>Discover • Explore • Travel • Experience Sri Lanka With Cey <span style={{ color: "#F2B426" }}>Trips</span></span>
+      </div>
+    </>
   );
 }
 

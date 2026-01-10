@@ -1,3 +1,4 @@
+
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { motion } from "framer-motion";
 import "../css/About.scss";
@@ -13,161 +14,62 @@ import abtG5 from "../image/abtG5.webp";
 import abtG6 from "../image/abtG6.avif";
 
 function About() {
-  const stats = [
-    { label: "Happy Travelers", value: "18K+" },
-    { label: "Partner Drivers", value: "320+" },
-    { label: "Fleet Vehicles", value: "140+" },
-    { label: "Destinations", value: "65" },
-  ];
-
-  const journeyMilestones = [
-    "2016: Started with a handful of chauffeurs serving Colombo.",
-    "2018: Expanded to hill-country expeditions and wildlife routes.",
-    "2021: Introduced curated experience planning with local experts.",
-    "2024: Partnered with boutique stays to offer seamless multi-day tours.",
-  ];
-
-  const mosaicImages = [abtF1, abtF2, abtF3];
-
-  const galleryImages = [abtG1, abtG2, abtG3, abtG4, abtG5, abtG6];
-
-  return (
-    <>
-      <Layout>
-        <div className="about-page">
-          <Container className="py-5 about-content">
-            <motion.div
-              initial={{ opacity: 0, y: -40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="text-center about-hero"
-            >
-              <p className="eyebrow">Crafting journeys since 2016</p>
-              <h1 className="about-title">Beyond Transfers — Tailored Island Adventures</h1>
-              <p className="hero-copy">
-                We pair luxury vehicles with storytellers on wheels so every kilometer across Sri Lanka
-                feels curated, safe, and unforgettable.
-              </p>
-              <Button className="about-cta" size="lg" href="/booking">
-                Plan Your Experience
-              </Button>
-            </motion.div>
-
-            <Row className="align-items-center mb-5 g-4 about-highlight">
-              <Col md={6}>
-                <motion.div
-                  initial={{ opacity: 0, x: -50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.7 }}
-                  viewport={{ once: true }}
-                >
-                  <Card className="about-card p-4">
-                    <h3>Who We Are</h3>
-                    <p>
-                      LankaTour is Sri Lanka’s most trusted tourism vehicle booking platform —
-                      connecting travelers with professional drivers, curated stays, and
-                      premium vehicles for unforgettable journeys.
-                    </p>
-                    <p>
-                      We specialize in <strong>hyper-personalized itineraries</strong> that blend
-                      coastal escapes, heritage explorations, and misty mountain adventures, all
-                      powered by data-backed route planning.
-                    </p>
-                  </Card>
-                </motion.div>
-              </Col>
-
-              <Col md={6}>
-                <motion.div
-                  className="about-mosaic"
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.7 }}
-                  viewport={{ once: true }}
-                >
-                  {mosaicImages.map((img, idx) => (
-                    <img key={idx} src={img} alt={`highlight-${idx}`} />
-                  ))}
-                </motion.div>
-              </Col>
-            </Row>
-
-            <div className="stats-grid">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  className="stats-card"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <span className="value">{stat.value}</span>
-                  <span className="label">{stat.label}</span>
-                </motion.div>
-              ))}
-            </div>
-
-            <Row className="gy-4 about-story align-items-center">
-              <Col md={6}>
-                <motion.div
-                  className="journey-card"
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6 }}
-                  viewport={{ once: true }}
-                >
-                  <h3>Our Journey</h3>
-                  <ul>
-                    {journeyMilestones.map((item, idx) => (
-                      <li key={idx}>{item}</li>
-                    ))}
-                  </ul>
-                </motion.div>
-              </Col>
-              <Col md={6}>
-                <motion.div
-                  className="experience-card"
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6 }}
-                  viewport={{ once: true }}
-                >
-                  <h4>Why travelers choose us</h4>
-                  <p>
-                    Dedicated concierges, real-time vehicle tracking, and 24/7 support ensure every
-                    itinerary runs like clockwork. From surf vans to chauffeured sedans, we match the
-                    perfect ride with your travel rhythm.
-                  </p>
-                  <div className="badge-grid">
-                    <span>Safety First</span>
-                    <span>Local Insights</span>
-                    <span>Eco Routes</span>
-                    <span>Concierge Support</span>
-                  </div>
-                </motion.div>
-              </Col>
-            </Row>
-
-            <motion.div
-              className="photo-grid"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              {galleryImages.map((img, index) => (
-                <div key={index} className="photo-item">
-                  <img src={img} alt={`gallery-${index}`} />
-                </div>
-              ))}
-            </motion.div>
-          </Container>
-        </div>
-
-      </Layout>
-    </>
-  );
+	return (
+		<Layout>
+			<div className="about-page">
+				<Container className="about-content">
+					<div className="about-hero text-center">
+						<div className="eyebrow mb-2">About Us</div>
+						<h1 className="about-title">Ayubowan....!<br/>WELCOME TO SRI LANKA</h1>
+						<p className="hero-copy">
+							We are grateful that you have chosen <b>CEYTRIPZ</b> for your visit.<br/>
+							We take pride in being able to provide a high-quality rental car service in Sri Lanka that is efficient, reliable, responsible, and safe, catering to your needs in a way that perfectly suits your travel requirements.<br/>
+							We are committed to safely and reliably transporting you, whether you are a resident of Sri Lanka or visiting the country to experience its beauty, to any destination in Sri Lanka. This is done using well-maintained vehicles driven by our highly experienced and disciplined drivers, at reasonable prices, ensuring a convenient and efficient journey.
+						</p>
+					</div>
+					<Row className="about-highlight mb-5">
+						<Col md={7}>
+							<Card className="about-card mb-4">
+								<Card.Body>
+									<Card.Title as="h3">Why should you choose our rental car service?</Card.Title>
+									<ul>
+										<li>The opportunity to select a vehicle for your trips from our rental fleet according to the requirements of those occasions.</li>
+										<li>This allows you to travel alone, with your assistant, or with your family.</li>
+										<li>Our service experience has shown that while traveling within Sri Lanka, your travel plans may unexpectedly change. In such situations, we are here to assist you in reaching your destination at any time according to your needs.</li>
+										<li>We provide taxi services 24 hours a day, every day.</li>
+										<li>Upon arriving at the airport from abroad to experience the beauty of Sri Lanka, our service representatives will come to the airport to welcome you.</li>
+										<li>Our rental vehicle service can be easily booked online through the website and conveniently via WhatsApp.</li>
+									</ul>
+									<p className="mt-3">
+										Experience comfort on your journey with CEYTRIPZ, join us for a safe and reliable service.
+									</p>
+									<div className="text-start mt-4">
+										<span className="fw-bold">Thank you</span><br/>
+										<span>FOUNDER OF CEYTRIPZ</span>
+									</div>
+								</Card.Body>
+							</Card>
+						</Col>
+						<Col md={5}>
+							<div className="about-mosaic">
+								<img className="mosaic-img main" src={abtG1} alt="Sri Lanka travel" />
+								<img className="mosaic-img side-top" src={abtG6} alt="Ceytripz Sri Lanka" />
+								<img className="mosaic-img side-bottom" src={abtG2} alt="Ceytripz journey" />
+							</div>
+						</Col>
+					</Row>
+					<Row className="photo-grid">
+						<Col className="photo-item"><img src={abtF1} alt="Fleet 1" /></Col>
+						<Col className="photo-item"><img src={abtF2} alt="Fleet 2" /></Col>
+						<Col className="photo-item"><img src={abtF3} alt="Fleet 3" /></Col>
+						<Col className="photo-item"><img src={abtG3} alt="Gallery 3" /></Col>
+						<Col className="photo-item"><img src={abtG4} alt="Gallery 4" /></Col>
+						<Col className="photo-item"><img src={abtG5} alt="Gallery 5" /></Col>
+					</Row>
+				</Container>
+			</div>
+		</Layout>
+	);
 }
 
 export default About;

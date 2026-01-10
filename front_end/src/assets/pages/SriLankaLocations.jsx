@@ -18,7 +18,7 @@ const tourPackages = [
     img: nineArchImg,
     route: "Colombo ➜ Kandy ➜ Ella",
     days: "3 Days / 2 Nights",
-    price: "Rs. 4,000 / Person",
+    price: "$2 / 2KM",
   },
   {
     name: "Ambuluwawa tower",
@@ -26,7 +26,7 @@ const tourPackages = [
     img: ambuluwawaImg,
     route: "Colombo ➜ Ambuluwawa",
     days: "4 Days / 3 Nights",
-    price: "Rs. 10,000",
+    price: "$2 / 2KM",
   },
   {
     name: "Jaffna",
@@ -34,7 +34,7 @@ const tourPackages = [
     img: jaffnaImg,
     route: "Colombo ➜ Jaffna",
     days: "5 Days / 4 Nights",
-    price: "Rs. 40,000",
+    price: "$2 / 2KM",
   },
   {
     name: "Sigiriya",
@@ -42,7 +42,7 @@ const tourPackages = [
     img: sigiriyaImg,
     route: "Colombo ➜ Kandy ➜ Ella",
     days: "3 Days / 2 Nights",
-    price: "Rs. 20,500 ",
+    price: "$2 / 2KM",
   },
   {
     name: "Arugam Bay",
@@ -50,7 +50,7 @@ const tourPackages = [
     img: arugamBayImg,
     route: "Colombo ➜ Pottuvil ➜ Arugam Bay",
     days: "4 Days / 3 Nights",
-    price: "Rs. 55,000",
+    price: "$2 / 2KM",
   },
   {
     name: "Kandy & Central Highlands",
@@ -58,7 +58,7 @@ const tourPackages = [
     img: daladaImg,
     route: "Colombo ➜ Kandy",
     days: "2 Days / 1 Night",
-    price: "Rs. 30,000",
+    price: "$2 / 2KM",
   },
 ];
 

@@ -27,20 +27,41 @@
   color: #f8fafc;
 }
 .main-image-container {
-  
+  width: 100%;
+  aspect-ratio: 4 / 3;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  overflow: hidden;
 }
 
 .main-image {
   width: 100%;
-  max-height: 380px;
+  height: 100%;
   object-fit: cover;
   border-radius: 15px;
   transition: transform 0.3s ease;
+  display: block;
 }
 
 .main-image:hover {
-  transform: scale(1.02);
+  transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-image-container {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+@media (max-width: 576px) {
+  .main-image-container {
+    aspect-ratio: 16 / 9;
+  }
 }
 
 .thumbnail-row img {

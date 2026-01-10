@@ -11,7 +11,7 @@ import Booking from "./assets/pages/Booking";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./assets/index.scss";
 
-// function Layout() {
+// function Layout() {                       
 //   return (
 //     <>
 //       <Navigation />
@@ -34,9 +34,9 @@ function NotFound() {
 const router = createBrowserRouter([
 
   { path: "/", element: <Home /> },
+  { path: "/about", element: <About /> },
   { path: "/vehicles", element: <VehicleDetails /> },
   { path: "/vehicles/:id", element: <VehicleDetails /> },
-  { path: "/about", element: <About /> },
   { path: "/contact", element: <Contact /> },
   { path: "/booking", element: <Booking /> },
 

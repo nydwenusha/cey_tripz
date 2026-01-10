@@ -47,6 +47,13 @@ function NavbarComp() {
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15 }}
+            >
+              <Nav.Link as={Link} to="/about" className="nav-link-animated">About</Nav.Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               <Nav.Link as={Link} to="/vehicles" className="nav-link-animated">Vehicles</Nav.Link>
@@ -55,13 +62,6 @@ function NavbarComp() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-            >
-              <Nav.Link as={Link} to="/about" className="nav-link-animated">About</Nav.Link>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.4 }}
             >
               <Nav.Link as={Link} to="/contact" className="nav-link-animated">Contact</Nav.Link>
             </motion.div>
