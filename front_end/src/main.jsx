@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider, } from "react-router-dom";
 import Home from "./assets/pages/Home";
 import VehicleDetails from "./assets/pages/VehicleDetails";
+import Vehicles from "./assets/pages/Vehicles";
 import About from "./assets/pages/About";
 import Contact from "./assets/pages/Contact";
 import Booking from "./assets/pages/Booking";
@@ -35,7 +36,7 @@ const router = createBrowserRouter([
 
   { path: "/", element: <Home /> },
   { path: "/about", element: <About /> },
-  { path: "/vehicles", element: <VehicleDetails /> },
+  { path: "/vehicles", element: <Vehicles /> },
   { path: "/vehicles/:id", element: <VehicleDetails /> },
   { path: "/contact", element: <Contact /> },
   { path: "/booking", element: <Booking /> },
