@@ -267,10 +267,11 @@
 }
 
 .team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2.5rem;
   margin-bottom: 4rem;
+  row-gap: 0;
+  column-gap: 0;
+  --bs-gutter-x: 0;
+  --bs-gutter-y: 0;
 }
 
 .team-card {
@@ -284,6 +285,38 @@
   text-align: center;
   color: #ffffff;
   overflow: hidden;
+}
+
+.assistant-card {
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.founder-card {
+  display: flex;
+  gap: 1.5rem;
+  align-items: stretch;
+  padding: 1.25rem;
+}
+
+.founder-image {
+  flex: 0 0 320px;
+  max-width: 320px;
+  height: auto;
+  border-radius: 14px;
+}
+
+.founder-image img {
+  border-radius: 14px;
+}
+
+.founder-info {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .team-card:hover {
@@ -384,11 +417,29 @@
 
   .team-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 0.5rem;
   }
 
   .team-card {
     padding: 1.5rem;
+  }
+
+  .founder-card {
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  .founder-image,
+  .founder-image img {
+    width: 100%;
+    max-width: none;
+    border-radius: 12px;
+  }
+
+  .founder-info {
+    text-align: center;
+    align-items: center;
   }
 }
 

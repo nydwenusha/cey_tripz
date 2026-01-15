@@ -39,22 +39,23 @@ function About() {
 							<p className="team-subtitle">Meet the dedicated professionals behind CEYTRIPZ</p>
 						</div>
 						<Row className="team-grid">
-							<Col md={4} className="mb-4">
-								<div className="team-card">
-									<div className="team-image-placeholder">
-									<img src={PRO1} alt="Isuru Gamage" />
+							<Col md={12} className="mb-4">
+								<div className="team-card founder-card">
+									<div className="team-image-placeholder founder-image">
+										<img src={PRO1} alt="Isuru Gamage" />
 									</div>
-									<div className="team-info">
+									<div className="team-info founder-info">
 										<h4 className="team-name">Isuru Gamage</h4>
 										<p className="team-role">Chairman & Director</p>
+										<p className="team-mission">"Every journey deserves a trusted partner. We exist to make each mile safe, comfortable, and memorable for every traveler who chooses Sri Lanka."</p>
 										<div className="team-contact">
 											<p><strong>Tel:</strong> <a href="tel:0710877100">0710 877 100</a></p>
 										</div>
 									</div>
 								</div>
 							</Col>
-							<Col md={4} className="mb-4">
-								<div className="team-card">
+							<Col className="mb-4">
+								<div className="team-card assistant-card">
 									<div className="team-image-placeholder">
 									<img src={PRO2} alt="Tharindu Dilshan" />
 									</div>
@@ -68,8 +69,8 @@ function About() {
 									</div>
 								</div>
 							</Col>
-							<Col md={4} className="mb-4">
-								<div className="team-card">
+							<Col className="mb-4">
+								<div className="team-card assistant-card">
 									<div className="team-image-placeholder">
 									<img src={PRO3} alt="Shashika Prasadani" />
 									</div>

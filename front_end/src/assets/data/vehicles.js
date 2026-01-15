@@ -28,6 +28,7 @@ export const vehicles = [
 	{
 		id: 1,
 		name: "Suzuki Wagon R FZ",
+		category: "Hatchback Car",
 		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard,
 		price: "Rs. 12,000/day",
@@ -40,6 +41,7 @@ export const vehicles = [
 	{
 		id: 2,
 		name: "Suzuki Alto",
+		category: "Mini Car",
 		shortDesc: "Comfort and class combined — best for couples and business trips.",
 		cardImg: altoCard,
 		price: "Rs. 12,000/day",
@@ -51,7 +53,8 @@ export const vehicles = [
 	{
 		id: 3,
 		name: "Suzuki Wagon R FZ",
-		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",// want to change
+		category: "Hatchback Car",
+		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard1,
 		price: "Rs. 12,000/day",
 		images: [wagonr21, wagonr22, wagonr23],
@@ -63,6 +66,7 @@ export const vehicles = [
 	{
 		id: 4,
 		name: "Suzuki Alto",
+		category: "Mini Car",
 		shortDesc: "Safe and reliable compact car perfect for city trips and solo travel.",
 		cardImg: altoCard2,
 		price: "Rs. 18,000/day",
@@ -74,7 +78,8 @@ export const vehicles = [
 	{
 		id: 5,
 		name: "Suzuki Wagon R FX",
-		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",// want to change
+		category: "Hatchback Car",
+		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard2,
 		price: "Rs. 12,000/day",
 		images: [wagonr31, wagonr32],

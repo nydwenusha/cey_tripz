@@ -7,6 +7,39 @@
   padding: 60px 0;
 }
 
+.hero-animated-text {
+  width: 100%;
+  background: transparent;
+  padding: 10px 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.hero-animated-text span {
+  font-size: 8rem;
+  font-weight: 900;
+  color: #0e4a7b;
+  white-space: nowrap;
+  animation: none;
+  padding: -10px -10px;
+  transform: translateX(100%);
+}
+
+.hero-animated-text.animate span {
+  animation: slideLeft 15s linear infinite;
+  animation-delay: 0s;
+}
+
+@keyframes slideLeft {
+  0% {
+    transform: translateX(30%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 .vehicle-section h2 {
   color: #007bff;
   font-weight: 700;
@@ -48,8 +81,27 @@
 
 .vehicle-card .card-title {
   font-weight: 700;
-  color: var(--text);
+  color: #0b2f50;
+  margin-bottom: 0.5rem;
 }
+
+.vehicle-category {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f4b223;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+  display: inline-block;
+  background: rgba(244, 178, 35, 0.1);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(244, 178, 35, 0.3);
+}
+
+
+//   color: var(--text);
+// }
 
 .vehicle-card .card-text {
   color: rgba(6,17,26,0.7);

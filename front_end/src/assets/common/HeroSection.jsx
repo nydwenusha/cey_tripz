@@ -63,9 +63,6 @@ function HeroSection() {
           </Button>
         </div>
       </div>
-      <div className="hero-animated-text">
-        <span>Discover • Explore • Travel • Experience Sri Lanka With Cey<span style={{ color: "#F2B426" }}>Tripz</span></span>
-      </div>
     </>
   );
 }
