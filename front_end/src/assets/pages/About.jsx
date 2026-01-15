@@ -12,6 +12,10 @@ import abtG3 from "../image/abtG3.jpg";
 import abtG4 from "../image/abtG4.webp";
 import abtG5 from "../image/abtG5.webp";
 import abtG6 from "../image/abtG6.avif";
+import PRO1 from "../image/Pro1.jpeg";
+import PRO2 from "../image/Pro2.jpeg";
+import PRO3 from "../image/Pro3.jpeg";
+
 
 function About() {
 	return (
@@ -26,6 +30,59 @@ function About() {
 							We take pride in being able to provide a high-quality rental car service in Sri Lanka that is efficient, reliable, responsible, and safe, catering to your needs in a way that perfectly suits your travel requirements.<br/>
 							We are committed to safely and reliably transporting you, whether you are a resident of Sri Lanka or visiting the country to experience its beauty, to any destination in Sri Lanka. This is done using well-maintained vehicles driven by our highly experienced and disciplined drivers, at reasonable prices, ensuring a convenient and efficient journey.
 						</p>
+					</div>
+
+					{/* Team Section */}
+					<div className="team-section mb-5">
+						<div className="team-header text-center mb-5">
+							<h2 className="team-title">Our Leadership Team</h2>
+							<p className="team-subtitle">Meet the dedicated professionals behind CEYTRIPZ</p>
+						</div>
+						<Row className="team-grid">
+							<Col md={4} className="mb-4">
+								<div className="team-card">
+									<div className="team-image-placeholder">
+									<img src={PRO1} alt="Isuru Gamage" />
+									</div>
+									<div className="team-info">
+										<h4 className="team-name">Isuru Gamage</h4>
+										<p className="team-role">Chairman & Director</p>
+										<div className="team-contact">
+											<p><strong>Tel:</strong> <a href="tel:0710877100">0710 877 100</a></p>
+										</div>
+									</div>
+								</div>
+							</Col>
+							<Col md={4} className="mb-4">
+								<div className="team-card">
+									<div className="team-image-placeholder">
+									<img src={PRO2} alt="Tharindu Dilshan" />
+									</div>
+									<div className="team-info">
+										<h4 className="team-name">Tharindu Dilshan</h4>
+										<p className="team-role">Assistant Director</p>
+										<div className="team-contact">
+											<p><strong>Tel:</strong> <a href="tel:0717191657">0717 191 657</a></p>
+											<p><strong>WhatsApp:</strong> <a href="https://wa.me/0787041588">0787 041 588</a></p>
+										</div>
+									</div>
+								</div>
+							</Col>
+							<Col md={4} className="mb-4">
+								<div className="team-card">
+									<div className="team-image-placeholder">
+									<img src={PRO3} alt="Shashika Prasadani" />
+									</div>
+									<div className="team-info">
+										<h4 className="team-name">Shashika Prasadani</h4>
+										<p className="team-role">Assistant Director</p>
+										<div className="team-contact">
+											<p><strong>Tel:</strong> <a href="tel:0710454734">0710 454 734</a></p>
+										</div>
+									</div>
+								</div>
+							</Col>
+						</Row>
 					</div>
 					<Row className="about-highlight mb-5">
 						<Col md={7}>
