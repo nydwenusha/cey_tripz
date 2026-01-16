@@ -17,7 +17,7 @@ const tourPackages = [
     desc: "Explore the misty hills of Ella with tea gardens, waterfalls, and the Nine Arches Bridge.",
     img: nineArchImg,
     route: "Colombo ➜ Kandy ➜ Ella",
-    days: "3 Days / 2 Nights",
+    // days: "3 Days / 2 Nights",
     price: "$2 / 2KM",
   },
   {
@@ -25,7 +25,7 @@ const tourPackages = [
     desc: "Exploring its essence, Ambuluwawa unfolds as more than just the tower's name; rising proudly at 3,567 feet.",
     img: ambuluwawaImg,
     route: "Colombo ➜ Ambuluwawa",
-    days: "4 Days / 3 Nights",
+    // days: "4 Days / 3 Nights",
     price: "$2 / 2KM",
   },
   {
@@ -33,7 +33,7 @@ const tourPackages = [
     desc: "Jaffna is the capital of Sri Lanka’s Northern Province and the administrative center of the Jaffna District.",
     img: jaffnaImg,
     route: "Colombo ➜ Jaffna",
-    days: "5 Days / 4 Nights",
+    // days: "5 Days / 4 Nights",
     price: "$2 / 2KM",
   },
   {
@@ -41,7 +41,7 @@ const tourPackages = [
     desc: "Sigiriya Lion Rock is one of the most valuable historical monuments of Sri Lanka.",
     img: sigiriyaImg,
     route: "Colombo ➜ Kandy ➜ Ella",
-    days: "3 Days / 2 Nights",
+    // days: "3 Days / 2 Nights",
     price: "$2 / 2KM",
   },
   {
@@ -49,7 +49,7 @@ const tourPackages = [
     desc: "Arugam Bay is a popular destination for Israeli tourists.height waves and surfing.",
     img: arugamBayImg,
     route: "Colombo ➜ Pottuvil ➜ Arugam Bay",
-    days: "4 Days / 3 Nights",
+    // days: "4 Days / 3 Nights",
     price: "$2 / 2KM",
   },
   {
@@ -57,7 +57,7 @@ const tourPackages = [
     desc: "The city and the region have been known by many different names and versions of those names.",
     img: daladaImg,
     route: "Colombo ➜ Kandy",
-    days: "2 Days / 1 Night",
+    // days: "2 Days / 1 Night",
     price: "$2 / 2KM",
   },
 ];
