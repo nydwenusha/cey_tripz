@@ -12,7 +12,7 @@ import teaEstateImg from "../image/abtF2.jpg";
 import yalaImg from "../image/abtG3.jpg";
 import trincoImg from "../image/Nilaveli.webp";
 import colomboImg from "../image/colombo.jpg";
-import galleImg from "../image/abtG4.webp";
+import galleImg from "../image/galleF.jpg";
 
 const places = [
   {
