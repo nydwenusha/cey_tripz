@@ -1,4 +1,6 @@
+
 import { Container, Row, Col } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import "../css/Footer.scss";
 
 function Footer() {
@@ -9,9 +11,9 @@ function Footer() {
           <Col md={4} sm={12} className="footer-col">
             <h5 className="footer-title">Quick Links</h5>
             <ul className="footer-links">
-              <li><a href="/">Home</a></li>
-              <li><a href="/about">About Us</a></li>
-              <li><a href="/contact">Contact</a></li>
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/about">About Us</Link></li>
+              <li><Link to="/contact">Contact</Link></li>
             </ul>
           </Col>
 

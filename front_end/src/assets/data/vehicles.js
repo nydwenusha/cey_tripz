@@ -27,7 +27,7 @@ import wagonr32 from "../image/WWW2.jpeg";
 export const vehicles = [
 	{
 		id: 1,
-		name: "Suzuki Wagon R FZ",
+		name: "Suzuki Wagon R Stingray",
 		category: "Hatchback Car",
 		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard,
@@ -52,7 +52,7 @@ export const vehicles = [
 
 	{
 		id: 3,
-		name: "Suzuki Wagon R FZ",
+		name: "Suzuki Wagon R Stingray",
 		category: "Hatchback Car",
 		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard1,
@@ -77,7 +77,7 @@ export const vehicles = [
 
 	{
 		id: 5,
-		name: "Suzuki Wagon R FX",
+		name: "Suzuki Wagon R FZ",
 		category: "Hatchback Car",
 		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard2,
