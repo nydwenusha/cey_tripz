@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import "../css/navigation.scss";
 
 function NavbarComp() {
@@ -30,7 +30,10 @@ function NavbarComp() {
       ref={navRef}
     >
       <Container>
-        <Navbar.Brand as={Link} to="/">🚐 LankaTour</Navbar.Brand>
+        <Navbar.Brand as={Link} to="/" className="brand-logo">
+          <span className="brand-primary">Cey</span>
+          <span className="brand-secondary">Tripz</span>
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto align-items-center">
@@ -44,6 +47,13 @@ function NavbarComp() {
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15 }}
+            >
+              <Nav.Link as={Link} to="/about" className="nav-link-animated">About</Nav.Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               <Nav.Link as={Link} to="/vehicles" className="nav-link-animated">Vehicles</Nav.Link>
@@ -52,13 +62,6 @@ function NavbarComp() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-            >
-              <Nav.Link as={Link} to="/about" className="nav-link-animated">About</Nav.Link>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.4 }}
             >
               <Nav.Link as={Link} to="/contact" className="nav-link-animated">Contact</Nav.Link>
             </motion.div>

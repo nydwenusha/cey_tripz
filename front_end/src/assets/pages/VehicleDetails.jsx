@@ -3,70 +3,20 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../css/VehicleDetails.scss";
 import Layout from "../../Layout";
-
-const vehicleData = [
-  {
-    id: 1,
-    name: "Suzuki Wagon R",
-    price: "Rs. 12,000/day",
-    images: [
-      "https://carsguide.ikman.lk/wp-content/uploads/2023/05/shutterstock_2204903329-e1685523842171.jpg",
-      "https://wallpapercave.com/wp/wp7368203.png",
-      "https://gaadiwaadi.com/wp-content/uploads/2024/11/New-Gen-Wagn-R-Rendering.jpg"
-    ],
-    description:
-      "This SUV provides excellent off-road performance and style. Perfect for hill country and long scenic routes.",
-    specs: ["5 Seats", "AC", "4x4", "Automatic", "Bluetooth"]
-  },
-  {
-    id: 2,
-    name: "Toyota Premio",
-    price: "Rs. 12,000/day",
-    images: [
-      "https://i.pinimg.com/originals/7e/9e/bc/7e9ebccb69ad693e9c7c5aadd8253215.png",
-      "https://rentacarsctg.com/wp-content/uploads/2021/09/Toyota-Allion-2018.jpg",
-      "https://www.africhoice.com/airport-transfer-services/airport-transfer-standard-sedan.jpg"
-    ],
-    description:
-      "Comfort and class combined — best for couples and business trips.",
-    specs: ["4 Seats", "AC", "sunroof", "Automatic", "Bluetooth"]
-  },
-  {
-    id: 3,
-    name: "Toyota KDH",
-    price: "Rs. 8,000/day",
-    images: [
-      "https://wallpaperaccess.com/full/8416028.jpg",
-      "https://wecaretaxi.com/wp-content/uploads/2023/01/toyota-kdh-flat-roof-van-rental-e1673449493237.png",
-      "https://img.indianautosblog.com/2017/08/JDM-spec-2017-Toyota-Hiace-profile.jpg"
-    ],
-    description:
-      "family trips with comfort and space. Ideal for group tours across Sri Lanka.",
-    specs: ["12 Seats", "AC", "Auto Gear", "USB", "Bluetooth"]
-  },
-  {
-    id: 4,
-    name: "Suzuki Alto",
-    price: "Rs. 18,000/day",
-    images: [
-      "https://ic1.maxabout.us/autos/cars_india/N/2018/8/new-maruti-suzuki-alto-800-india.jpg5",
-      "https://ic1.maxabout.us/autos/cars_india/N/2018/8/new-maruti-suzuki-alto-800-india.jpg",
-      "https://ic1.maxabout.us/autos/cars_india/N/2018/8/new-maruti-suzuki-alto-800-india.jpg"
-    ],
-    description:
-      "Ssafe and reliable compact car perfect for city trips and solo travel.",
-    specs: ["4 Seats", "AC", "Automatic", "Large Storage", "WiFi"]
-  }
-];
+import { getVehicleById } from "../data/vehicles";
 
 function VehicleDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const vehicle = vehicleData.find((v) => v.id === parseInt(id));
-  const [mainImg, setMainImg] = useState(vehicle?.images[0]);
+  const vehicle = getVehicleById(id);
+  const [mainImg, setMainImg] = useState(vehicle?.images?.[0]);
+
+  useEffect(() => {
+    setMainImg(vehicle?.images?.[0]);
+  }, [vehicle]);
 
   if (!vehicle)
     return (
@@ -119,10 +69,14 @@ function VehicleDetails() {
                 <p>{vehicle.description}</p>
                 <ul className="spec-list">
                   {vehicle.specs.map((s, i) => (
-                    <li key={i}>🚘 {s}</li>
+                    <li key={i}> {s}</li>
                   ))}
                 </ul>
-                <Button variant="danger" size="lg" onClick={handleBooking}>
+                <Button
+                  size="lg"
+                  className="vehicle-book-btn"
+                  onClick={handleBooking}
+                >
                   Book Now
                 </Button>
               </Col>

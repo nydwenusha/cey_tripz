@@ -6,8 +6,8 @@
 }
 
 .vehicles-title {
-  color: var(--accent);
-  text-shadow: 0 0 8px rgb(235, 57, 37);
+  color: #0d6efd;
+  text-shadow: 0 0 8px rgba(13, 110, 253, 0.35);
   font-weight: bold;
 }
 
@@ -53,14 +53,18 @@
 }
 
 .book-btn {
-  border-color: var(--accent);
-  color: var(--accent);
+  background-color: #d61313;
+  border-color: #d61313;
+  color: #ffffff;
   transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(214, 19, 19, 0.25);
 }
 
 .book-btn:hover {
-  background-color: var(--accent);
+  background-color: #9f0b0b;
+  border-color: #9f0b0b;
   color: #ffffff;
+  box-shadow: 0 8px 20px rgba(159, 11, 11, 0.35);
 }
 
 .vehicle-card-wrapper {

@@ -73,10 +73,28 @@ function Booking() {
                 <Form.Label>Vehicle Type</Form.Label>
                 <Form.Select required>
                   <option value="">Select Vehicle</option>
-                  <option>wagon R (CAA-7722)</option>
-                  <option>KDH</option>
-                  <option>Premio</option>
-                  <option>Alto</option>
+                  <optgroup label="Mini Car">
+                    <option>Suzuki Alto</option>
+                  </optgroup>
+                  <optgroup label="Exclusive / Sedan Car">
+                    <option>Toyota Prius</option>
+                    <option>Honda Shuttle</option>
+                    <option>Toyota Axio</option>
+                  </optgroup>
+                  <optgroup label="Hatchback Car">
+                    <option>Suzuki Wagon R (FX)</option>
+                    <option>Suzuki Wagon R (FZ)</option>
+                    <option>Suzuki Wagon R (Stingray)</option>
+                  </optgroup>
+                  <optgroup label="Mini Van">
+                    <option>Suzuki Every</option>
+                  </optgroup>
+                  <optgroup label="Seater Van (Flat Roof)">
+                    <option>Toyota KDH</option>
+                  </optgroup>
+                  <optgroup label="Seater Van (High Roof)">
+                    <option>Toyota Hiace</option>
+                  </optgroup>
                 </Form.Select>
               </Form.Group>
             </Col>

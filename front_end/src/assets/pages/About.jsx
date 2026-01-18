@@ -1,100 +1,133 @@
-import { Container, Row, Col, Card } from "react-bootstrap";
+
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { motion } from "framer-motion";
 import "../css/About.scss";
 import Layout from "../../Layout";
+import abtF1 from "../image/abtF1.jpg";
+import abtF2 from "../image/abtF2.jpg";
+import abtF3 from "../image/abtF3.jpg";
+import abtG1 from "../image/abtG1.jpg";
+import abtG2 from "../image/abtG2.jpeg";
+import abtG3 from "../image/abtG3.jpg";
+import abtG4 from "../image/abtG4.webp";
+import abtG5 from "../image/abtG5.webp";
+import abtG6 from "../image/abtG6.avif";
+import PRO1 from "../image/Pro1.jpeg";
+import PRO2 from "../image/Pro2.jpeg";
+import PRO3 from "../image/Pro3.jpeg";
+
 
 function About() {
-  return (
-    <>
-      <Layout>
-        <Container className="py-5 about-page">
-          <motion.h1
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-4 about-title"
-          >
-            About LankaTour
-          </motion.h1>
+	return (
+		<Layout>
+			<div className="about-page">
+				<Container className="about-content">
+					<div className="about-hero text-center">
+						<div className="eyebrow mb-2">About Us</div>
+						<h1 className="about-title">Ayubowan....!<br/>WELCOME TO SRI LANKA</h1>
+						<p className="hero-copy">
+							We are grateful that you have chosen <b>CEYTRIPZ</b> for your visit.<br/>
+							We take pride in being able to provide a high-quality rental car service in Sri Lanka that is efficient, reliable, responsible, and safe, catering to your needs in a way that perfectly suits your travel requirements.<br/>
+							We are committed to safely and reliably transporting you, whether you are a resident of Sri Lanka or visiting the country to experience its beauty, to any destination in Sri Lanka. This is done using well-maintained vehicles driven by our highly experienced and disciplined drivers, at reasonable prices, ensuring a convenient and efficient journey.
+						</p>
+					</div>
 
-          <Row className="align-items-center mb-5">
-            <Col md={6}>
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-              >
-                <Card className="about-card p-4">
-                  <h3>Who We Are</h3>
-                  <p>
-                    LankaTour is Sri Lanka’s most trusted tourism vehicle booking
-                    platform — connecting travelers with professional drivers and
-                    premium vehicles for unforgettable journeys.
-                  </p>
-                  <p>
-                    We specialize in creating <strong>personalized travel experiences</strong>
-                    across the island — from coastal drives in Galle to mountain
-                    adventures in Nuwara Eliya.
-                  </p>
-                </Card>
-              </motion.div>
-            </Col>
-
-            <Col md={6}>
-              <motion.img
-                src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
-                alt="Sri Lanka Tour"
-                className="img-fluid rounded shadow-lg"
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-              />
-            </Col>
-          </Row>
-
-          <Row>
-            <Col md={4}>
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-center p-3"
-              >
-                <i className="bi bi-car-front-fill feature-icon"></i>
-                <h5>Premium Vehicles</h5>
-                <p>Choose from a luxury fleet maintained to perfection.</p>
-              </motion.div>
-            </Col>
-            <Col md={4}>
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="text-center p-3"
-              >
-                <i className="bi bi-person-bounding-box feature-icon"></i>
-                <h5>Professional Drivers</h5>
-                <p>Friendly, trained, and multilingual local drivers.</p>
-              </motion.div>
-            </Col>
-            <Col md={4}>
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-                className="text-center p-3"
-              >
-                <i className="bi bi-globe feature-icon"></i>
-                <h5>Island-Wide Service</h5>
-                <p>Explore every corner of Sri Lanka with ease.</p>
-              </motion.div>
-            </Col>
-          </Row>
-        </Container>
-
-      </Layout>
-    </>
-  );
+					{/* Team Section */}
+					<div className="team-section mb-5">
+						<div className="team-header text-center mb-5">
+							<h2 className="team-title">Our Leadership Team</h2>
+							<p className="team-subtitle">Meet the dedicated professionals behind CEYTRIPZ</p>
+						</div>
+						<Row className="team-grid">
+							<Col md={12} className="mb-4">
+								<div className="team-card founder-card">
+									<div className="team-image-placeholder founder-image">
+										<img src={PRO1} alt="Isuru Gamage" />
+									</div>
+									<div className="team-info founder-info">
+										<h4 className="team-name">Isuru Gamage</h4>
+										<p className="team-role">Chairman & Director</p>
+										<p className="team-mission">"Every journey deserves a trusted partner. We exist to make each mile safe, comfortable, and memorable for every traveler who chooses Sri Lanka."</p>
+										<div className="team-contact">
+											<p><strong>Tel:</strong> <a href="tel:0710877100">0710 877 100</a></p>
+										</div>
+									</div>
+								</div>
+							</Col>
+							<Col className="mb-4">
+								<div className="team-card assistant-card">
+									<div className="team-image-placeholder">
+									<img src={PRO2} alt="Tharindu Dilshan" />
+									</div>
+									<div className="team-info">
+										<h4 className="team-name">Tharindu Dilshan</h4>
+										<p className="team-role">Assistant Director</p>
+										<div className="team-contact">
+											<p><strong>Tel:</strong> <a href="tel:0717191657">0717 191 657</a></p>
+											{/* <p><strong>WhatsApp:</strong> <a href="https://wa.me/0787041588">0787 041 588</a></p> */}
+										</div>
+									</div>
+								</div>
+							</Col>
+							<Col className="mb-4">
+								<div className="team-card assistant-card">
+									<div className="team-image-placeholder">
+									<img src={PRO3} alt="Shashika Prasadani" />
+									</div>
+									<div className="team-info">
+										<h4 className="team-name">Shashika Prasadani</h4>
+										<p className="team-role">Assistant Director</p>
+										<div className="team-contact">
+											<p><strong>Tel:</strong> <a href="tel:0710454734">0710 454 734</a></p>
+										</div>
+									</div>
+								</div>
+							</Col>
+						</Row>
+					</div>
+					<Row className="about-highlight mb-5">
+						<Col md={7}>
+							<Card className="about-card mb-4">
+								<Card.Body>
+									<Card.Title as="h3">Why should you choose our rental car service?</Card.Title>
+									<ul>
+										<li>The opportunity to select a vehicle for your trips from our rental fleet according to the requirements of those occasions.</li>
+										<li>This allows you to travel alone, with your assistant, or with your family.</li>
+										<li>Our service experience has shown that while traveling within Sri Lanka, your travel plans may unexpectedly change. In such situations, we are here to assist you in reaching your destination at any time according to your needs.</li>
+										<li>We provide taxi services 24 hours a day, every day.</li>
+										<li>Upon arriving at the airport from abroad to experience the beauty of Sri Lanka, our service representatives will come to the airport to welcome you.</li>
+										<li>Our rental vehicle service can be easily booked online through the website and conveniently via WhatsApp.</li>
+									</ul>
+									<p className="mt-3">
+										Experience comfort on your journey with CEYTRIPZ, join us for a safe and reliable service.
+									</p>
+									<div className="text-start mt-4">
+										<span className="fw-bold">Thank you</span><br/>
+										<span>FOUNDER OF CEYTRIPZ</span>
+									</div>
+								</Card.Body>
+							</Card>
+						</Col>
+						<Col md={5}>
+							<div className="about-mosaic">
+								<img className="mosaic-img main" src={abtG1} alt="Sri Lanka travel" />
+								<img className="mosaic-img side-top" src={abtG6} alt="Ceytripz Sri Lanka" />
+								<img className="mosaic-img side-bottom" src={abtG2} alt="Ceytripz journey" />
+							</div>
+						</Col>
+					</Row>
+					<Row className="photo-grid">
+						<Col className="photo-item"><img src={abtF1} alt="Fleet 1" /></Col>
+						<Col className="photo-item"><img src={abtF2} alt="Fleet 2" /></Col>
+						<Col className="photo-item"><img src={abtF3} alt="Fleet 3" /></Col>
+						<Col className="photo-item"><img src={abtG3} alt="Gallery 3" /></Col>
+						<Col className="photo-item"><img src={abtG4} alt="Gallery 4" /></Col>
+						<Col className="photo-item"><img src={abtG5} alt="Gallery 5" /></Col>
+					</Row>
+				</Container>
+			</div>
+		</Layout>
+	);
 }
 
 export default About;

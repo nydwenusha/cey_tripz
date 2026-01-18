@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider, } from "react-router-dom";
 import Home from "./assets/pages/Home";
 import VehicleDetails from "./assets/pages/VehicleDetails";
+import Vehicles from "./assets/pages/Vehicles";
 import About from "./assets/pages/About";
 import Contact from "./assets/pages/Contact";
 import Booking from "./assets/pages/Booking";
@@ -11,7 +12,7 @@ import Booking from "./assets/pages/Booking";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./assets/index.scss";
 
-// function Layout() {
+// function Layout() {                       
 //   return (
 //     <>
 //       <Navigation />
@@ -20,6 +21,7 @@ import "./assets/index.scss";
 //     </>
 //   );
 // }
+
 
 function NotFound() {
   return (
@@ -33,9 +35,9 @@ function NotFound() {
 const router = createBrowserRouter([
 
   { path: "/", element: <Home /> },
-  { path: "/vehicles", element: <VehicleDetails /> },
-  { path: "/vehicles/:id", element: <VehicleDetails /> },
   { path: "/about", element: <About /> },
+  { path: "/vehicles", element: <Vehicles /> },
+  { path: "/vehicles/:id", element: <VehicleDetails /> },
   { path: "/contact", element: <Contact /> },
   { path: "/booking", element: <Booking /> },
 
