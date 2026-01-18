@@ -64,7 +64,7 @@ function About() {
 										<p className="team-role">Assistant Director</p>
 										<div className="team-contact">
 											<p><strong>Tel:</strong> <a href="tel:0717191657">0717 191 657</a></p>
-											<p><strong>WhatsApp:</strong> <a href="https://wa.me/0787041588">0787 041 588</a></p>
+											{/* <p><strong>WhatsApp:</strong> <a href="https://wa.me/0787041588">0787 041 588</a></p> */}
 										</div>
 									</div>
 								</div>
