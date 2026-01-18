@@ -62,7 +62,7 @@ function Footer() {
       <div className="footer-bottom">
         <Container className="text-center">
           <h5 className="footer-logo">Cey<span>Trips</span></h5>
-          <p>Copyright © 2025 CeyTrips. All Rights Reserved.</p>
+          <p>Copyright © {new Date().getFullYear()} CeyTripz. All Rights Reserved.</p>
         </Container>
       </div>
     </footer>
