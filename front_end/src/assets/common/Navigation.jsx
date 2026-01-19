@@ -30,7 +30,8 @@ function NavbarComp() {
       ref={navRef}
     >
       <Container>
-        <Navbar.Brand as={Link} to="/" className="brand-logo">
+        <Navbar.Brand as={Link} to="/" className="brand-logo" style={{display: 'flex', alignItems: 'center', gap: '0px'}}>
+          <img src="/favicon.png" alt="Logo" style={{width: '64px', height: '64px'}} />
           <span className="brand-primary">Cey</span>
           <span className="brand-secondary">Tripz</span>
         </Navbar.Brand>
