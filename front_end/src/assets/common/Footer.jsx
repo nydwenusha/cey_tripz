@@ -64,7 +64,11 @@ function Footer() {
       <div className="footer-bottom">
         <Container className="text-center">
           <h5 className="footer-logo">Cey<span>Tripz</span></h5>
-          <p>Copyright © {new Date().getFullYear()} CeyTripz. All Rights Reserved.</p>
+          <p sx={{mb:0}}>Copyright © {new Date().getFullYear()} CeyTripz. All Rights Reserved</p>
+          <small sx={{fontSize:'8px !important'}}><a href="https://theanzwer.com" target="_blank" >Design & Developed by 
+            The Anzwer IT Solutions
+          </a></small>
+
         </Container>
       </div>
     </footer>

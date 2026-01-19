@@ -108,7 +108,16 @@
 
     p {
       font-size: 0.9rem;
+      margin-bottom: 2px !important;
+    }
+
+    small{
       color: #bbb;
+      font-size: 13px !important;
+      a{
+        color: #bbb;
+        
+      }
     }
   }
 }
