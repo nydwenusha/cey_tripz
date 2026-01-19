@@ -8,19 +8,22 @@ function Contact() {
     {
       title: "Travel Concierge",
       copy: "Curated itineraries, multi-day tours, and bespoke experiences crafted in under 24 hours.",
-      detail: "+94 75 322 8869",
+      target: "callto:",
+      detail: "+94753228869",
       icon: "🌍",
     },
     {
       title: "Fleet Hotline",
       copy: "Real-time vehicle tracking, chauffeur briefings, and last-minute swaps handled instantly.",
-      detail: "+94 76 448 7775",
+      target: "callto:",
+      detail: "+94764487775",
       icon: "🚐",
     },
     {
       title: "WhatsApp Desk",
       copy: "Share pins, voice notes, or docs on the go — we reply in minutes around the clock.",
-      detail: "wa.me/94753228869",
+      target:"",
+      detail: "https://wa.me/94710877100",
       icon: "💬",
     },
   ];
@@ -62,7 +65,7 @@ function Contact() {
                     <div className="contact-icon">{item.icon}</div>
                     <h4>{item.title}</h4>
                     <p>{item.copy}</p>
-                    <span>{item.detail}</span>
+                    <a href={`${item.target}.${item.detail}`} target="_blank" rel="noopener noreferrer">{item.detail}</a>
                   </Card>
                 </motion.div>
               </Col>
@@ -159,6 +162,7 @@ function Contact() {
                   ></iframe>
                 </div>
               </motion.div>
+             
             </Col>
           </Row>
         </Container>
