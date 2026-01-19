@@ -20,7 +20,7 @@ function Home() {
       <SriLankaLocations />
       <SriLankaMap />
       <PopularPlacesGallery />
-      <Teatmonials />
+      {/* <Teatmonials /> */}
     </Layout>
   );
 }
