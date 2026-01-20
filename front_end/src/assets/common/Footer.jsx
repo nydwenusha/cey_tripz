@@ -20,7 +20,7 @@ function Footer() {
           <Col md={4} sm={12} className="footer-col">
             <h5 className="footer-title">Contact Info</h5>
             <ul className="footer-contact">
-              <li><i className="bi bi-envelope-fill"></i> Info@ceytrips.lk</li>
+              <li><i className="bi bi-envelope-fill"></i> ceytripz@gmail.com</li>
               <li><i className="bi bi-telephone-fill"></i> +94 75 322 8869</li>
               <li><i className="bi bi-telephone-fill"></i> +94 76 448 7775</li>
             </ul>
@@ -30,7 +30,7 @@ function Footer() {
             <h5 className="footer-title">Follow Us On Social Media</h5>
             <div className="footer-social">
               <a
-                href="https://www.facebook.com/"
+                href="https://www.facebook.com/share/1DqDgdZeft/"
                 className="social-icon social-facebook"
                 aria-label="Facebook"
                 target="_blank"
@@ -39,7 +39,7 @@ function Footer() {
                 <i className="fa-brands fa-facebook-f"></i>
               </a>
               <a
-                href="https://www.instagram.com/"
+                href="https://www.instagram.com/ceytripz?igsh=bjYxMHB5ZWpkZ3Zt"
                 className="social-icon social-instagram"
                 aria-label="Instagram"
                 target="_blank"
@@ -48,7 +48,7 @@ function Footer() {
                 <i className="fa-brands fa-instagram"></i>
               </a>
               <a
-                href="https://wa.me/94753228869"
+                href="https://wa.me/94710877100"
                 className="social-icon social-whatsapp"
                 aria-label="WhatsApp"
                 target="_blank"
@@ -63,8 +63,12 @@ function Footer() {
 
       <div className="footer-bottom">
         <Container className="text-center">
-          <h5 className="footer-logo">Cey<span>Trips</span></h5>
-          <p>Copyright © 2025 CeyTrips. All Rights Reserved.</p>
+          <h5 className="footer-logo">Cey<span>Tripz</span></h5>
+          <p sx={{mb:0}}>Copyright © {new Date().getFullYear()} CeyTripz. All Rights Reserved</p>
+          <small sx={{fontSize:'8px !important'}}><a href="https://theanzwer.com" target="_blank" >Design & Developed by 
+            The Anzwer IT Solutions
+          </a></small>
+
         </Container>
       </div>
     </footer>

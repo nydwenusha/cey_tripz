@@ -96,7 +96,7 @@ export const vehicles = [
 	{
 		id: 6,
 		name: "Toyota Hiace KDH",
-		category: "Seater van  ( Flat Roof van ",
+		category: "Seater Van  ( Flat Roof Van )",
 		cardImg: KDHIMG,
 		price: "Rs. 25,000/day",
 		images: [KDH1, KDH2, KDH3, KDH4],
