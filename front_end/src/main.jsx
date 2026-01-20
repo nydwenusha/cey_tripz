@@ -7,20 +7,9 @@ import Vehicles from "./assets/pages/Vehicles";
 import About from "./assets/pages/About";
 import Contact from "./assets/pages/Contact";
 import Booking from "./assets/pages/Booking";
-// import Navigation from "./assets/common/Navigation";
-// import Footer from "./assets/common/Footer";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./assets/index.scss";
-
-// function Layout() {                       
-//   return (
-//     <>
-//       <Navigation />
-//       <Outlet />
-//       <Footer />
-//     </>
-//   );
-// }
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 
 function NotFound() {

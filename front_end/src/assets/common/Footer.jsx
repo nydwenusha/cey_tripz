@@ -20,9 +20,9 @@ function Footer() {
           <Col md={4} sm={12} className="footer-col">
             <h5 className="footer-title">Contact Info</h5>
             <ul className="footer-contact">
-              <li><i className="bi bi-envelope-fill"></i> ceytripz@gmail.com</li>
-              <li><i className="bi bi-telephone-fill"></i> +94 75 322 8869</li>
-              <li><i className="bi bi-telephone-fill"></i> +94 76 448 7775</li>
+              <li><i className="bi bi-envelope-fill"></i>info@ceytripz.com</li>
+              <li><i className="bi bi-telephone-fill"></i>+94&nbsp;&nbsp;71&nbsp;&nbsp;719&nbsp;&nbsp;1657</li>
+              <li><i className="bi bi-telephone-fill"></i>+94&nbsp;75&nbsp;879&nbsp;3281</li>
             </ul>
           </Col>
 
