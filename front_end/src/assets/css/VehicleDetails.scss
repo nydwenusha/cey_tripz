@@ -56,11 +56,36 @@
   .main-image-container {
     aspect-ratio: 3 / 2;
   }
+
+  .thumbnail-row {
+    justify-content: center;
+  }
+
+  .thumbnail-row img {
+    width: 80px;
+    height: 60px;
+  }
 }
 
 @media (max-width: 576px) {
   .main-image-container {
     aspect-ratio: 16 / 9;
+  }
+
+  .vehicle-details-card {
+    padding: 1.25rem !important;
+  }
+
+  .thumbnail-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    justify-content: flex-start;
+  }
+
+  .thumbnail-row img {
+    width: 72px;
+    height: 54px;
   }
 }
 
@@ -72,6 +97,15 @@
   cursor: pointer;
   border: 2px solid transparent;
   transition: all 0.2s ease;
+}
+
+.thumbnail-row {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.thumbnail-row img {
+  flex: 0 0 auto;
 }
 
 .thumbnail-row img:hover {
