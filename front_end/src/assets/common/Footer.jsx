@@ -21,8 +21,8 @@ function Footer() {
             <h5 className="footer-title">Contact Info</h5>
             <ul className="footer-contact">
               <li><i className="bi bi-envelope-fill"></i>info@ceytripz.com</li>
-              <li><a href="tel:+94717191657" sx={{color:'#fff !important',textDecoration:'none !important'}}><i className="bi bi-telephone-fill"></i>+94&nbsp;&nbsp;71&nbsp;&nbsp;719&nbsp;&nbsp;1657</a></li>
-              <li><a href="tel:+94758793281" sx={{color:'#fff !important',textDecoration:'none !important'}}><i className="bi bi-telephone-fill"></i>+94&nbsp;75&nbsp;879&nbsp;3281</a></li>
+              <li><a href="tel:+94717191657"><i className="bi bi-telephone-fill"></i>+94&nbsp;&nbsp;71&nbsp;&nbsp;719&nbsp;&nbsp;1657</a></li>
+              <li><a href="tel:+94758793281"><i className="bi bi-telephone-fill"></i>+94&nbsp;75&nbsp;879&nbsp;3281</a></li>
             </ul>
           </Col>
 

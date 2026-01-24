@@ -23,12 +23,12 @@
       margin-bottom: 10px;
 
       a {
-        color: #ddd;
+        color: rgb(221, 221, 221);
         text-decoration: none;
         transition: 0.3s;
 
         &:hover {
-          color: #ff8c00;
+          color: rgb(221, 221, 221);
           text-decoration: underline;
         }
       }
@@ -45,6 +45,11 @@
       margin-bottom: 10px;
       display: flex;
       align-items: center;
+
+      a {
+        color: rgb(221, 221, 221);
+        text-decoration: none;
+      }
 
       i {
         color: #ff8c00;
@@ -115,7 +120,7 @@
       color: #bbb;
       font-size: 13px !important;
       a{
-        color: #bbb;
+        color: rgb(221, 221, 221);
         
       }
     }
