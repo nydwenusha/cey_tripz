@@ -9,6 +9,7 @@ import SriLankaLocations from "./SriLankaLocations";
 import SriLankaMap from "../common/SriLankaMap";
 import "leaflet/dist/leaflet.css";
 import Layout from "../../Layout";
+import ShareExperience from "../common/ShareExperience";
 
 
 function Home() {
@@ -20,6 +21,7 @@ function Home() {
       <SriLankaLocations />
       <SriLankaMap />
       <PopularPlacesGallery />
+      <ShareExperience />
       {/* <Teatmonials /> */}
     </Layout>
   );

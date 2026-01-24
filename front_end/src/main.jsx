@@ -10,6 +10,8 @@ import Booking from "./assets/pages/Booking";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./assets/index.scss";
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import TravelerStoryDetail from "./assets/pages/TravelerStoryDetail";
+import AllStoriesPage from "./assets/pages/AllStoriesPage";
 
 
 function NotFound() {
@@ -29,8 +31,8 @@ const router = createBrowserRouter([
   { path: "/vehicles/:id", element: <VehicleDetails /> },
   { path: "/contact", element: <Contact /> },
   { path: "/booking", element: <Booking /> },
-
-
+  { path: "/story/:id", element: <TravelerStoryDetail /> },
+  {path:"/stories", element: <AllStoriesPage />}
 ]);
 
 createRoot(document.getElementById("root")).render(
