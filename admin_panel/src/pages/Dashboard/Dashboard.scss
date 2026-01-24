@@ -1,0 +1,623 @@
+// Dashboard specific styles
+// Dashboard.scss
+@import "../../styles/_variables";
+@import "../../styles/_mixins";
+
+.dashboard-container {
+  padding: 0;
+  width: 100%;
+
+  // Page Header Styles
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+
+    @include respond-to("md") {
+      flex-wrap: nowrap;
+    }
+
+    .page-title {
+      font-size: $font-size-xxl;
+      font-weight: $font-weight-bold;
+      color: $text-primary;
+      margin: 0;
+      line-height: 1.2;
+
+      @include respond-to("md") {
+        font-size: $font-size-xxxl;
+      }
+    }
+
+    .page-actions {
+      display: flex;
+      gap: $spacing-sm;
+      flex-wrap: wrap;
+
+      @include respond-to("sm") {
+        flex-wrap: nowrap;
+      }
+
+      .action-button {
+        text-transform: none;
+        font-weight: $font-weight-medium;
+        border-radius: $border-radius-md;
+
+        &.primary {
+          background-color: $primary-color;
+          color: white;
+
+          &:hover {
+            background-color: darken($primary-color, 10%);
+          }
+        }
+
+        &.outlined {
+          border-color: $border-color;
+          color: $text-secondary;
+
+          &:hover {
+            border-color: $primary-color;
+            color: $primary-color;
+            background-color: rgba($primary-color, 0.04);
+          }
+        }
+      }
+    }
+  }
+
+  // KPI Grid
+  .kpi-grid {
+    margin-bottom: $spacing-xl;
+
+    .kpi-card {
+      height: 100%;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-md;
+      }
+
+      .kpi-content {
+        padding: $spacing-lg;
+
+        .kpi-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: $spacing-md;
+
+          .kpi-title {
+            font-size: $font-size-sm;
+            color: $text-secondary;
+            font-weight: $font-weight-medium;
+            margin: 0;
+          }
+
+          .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: $border-radius-md;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            svg {
+              font-size: $font-size-xl;
+            }
+          }
+        }
+
+        .kpi-body {
+          margin-bottom: $spacing-sm;
+
+          .kpi-value {
+            font-size: $font-size-xxl;
+            font-weight: $font-weight-bold;
+            color: $text-primary;
+            margin-bottom: $spacing-xs;
+            line-height: 1;
+          }
+
+          .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: $spacing-xs;
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+
+            &.positive {
+              color: $success-color;
+            }
+
+            &.negative {
+              color: $error-color;
+            }
+
+            svg {
+              font-size: $font-size-sm;
+            }
+          }
+        }
+
+        .kpi-footer {
+          .kpi-subtitle {
+            font-size: $font-size-xs;
+            color: $text-disabled;
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+
+  // Chart Cards
+  .chart-card {
+    height: 100%;
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-lg;
+      padding: $spacing-lg $spacing-lg 0;
+
+      .chart-title {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+        margin: 0;
+      }
+    }
+
+    .chart-container {
+      height: 350px;
+      padding: 0 $spacing-lg $spacing-lg;
+
+      .recharts-wrapper {
+        .recharts-cartesian-grid-horizontal line,
+        .recharts-cartesian-grid-vertical line {
+          stroke: $divider-color;
+          stroke-dasharray: 3 3;
+        }
+
+        .recharts-text {
+          fill: $text-secondary;
+          font-size: $font-size-xs;
+        }
+
+        .recharts-tooltip-wrapper {
+          .recharts-default-tooltip {
+            background-color: white;
+            border: 1px solid $border-color;
+            border-radius: $border-radius-sm;
+            box-shadow: $shadow-sm;
+
+            .recharts-tooltip-label {
+              color: $text-primary;
+              font-weight: $font-weight-medium;
+              margin-bottom: $spacing-xs;
+            }
+
+            .recharts-tooltip-item {
+              color: $text-secondary;
+              font-size: $font-size-sm;
+            }
+          }
+        }
+
+        .recharts-legend-wrapper {
+          .recharts-default-legend {
+            .recharts-legend-item {
+              .recharts-legend-item-text {
+                color: $text-secondary;
+                font-size: $font-size-sm;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Table Container
+  .table-container {
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-lg;
+      padding: $spacing-lg $spacing-lg 0;
+
+      .table-title {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+        margin: 0;
+      }
+    }
+
+    .MuiDataGrid-root {
+      border: none;
+
+      .MuiDataGrid-columnHeaders {
+        background-color: $bg-default;
+        border-bottom: 1px solid $divider-color;
+
+        .MuiDataGrid-columnHeader {
+          &:focus {
+            outline: none;
+          }
+
+          .MuiDataGrid-columnHeaderTitle {
+            font-weight: $font-weight-semibold;
+            font-size: $font-size-sm;
+          }
+        }
+      }
+
+      .MuiDataGrid-virtualScroller {
+        .MuiDataGrid-row {
+          &:hover {
+            background-color: rgba($primary-color, 0.02);
+          }
+
+          &.Mui-selected {
+            background-color: rgba($primary-color, 0.08);
+
+            &:hover {
+              background-color: rgba($primary-color, 0.12);
+            }
+          }
+        }
+
+        .MuiDataGrid-cell {
+          &:focus {
+            outline: none;
+          }
+
+          .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $border-radius-sm;
+            font-size: $font-size-xs;
+            font-weight: $font-weight-semibold;
+
+            &.confirmed {
+              background-color: rgba($success-color, 0.1);
+              color: darken($success-color, 10%);
+            }
+
+            &.pending {
+              background-color: rgba($warning-color, 0.1);
+              color: darken($warning-color, 10%);
+            }
+
+            &.cancelled {
+              background-color: rgba($error-color, 0.1);
+              color: darken($error-color, 10%);
+            }
+          }
+        }
+      }
+
+      .MuiDataGrid-footerContainer {
+        border-top: 1px solid $divider-color;
+        background-color: $bg-default;
+      }
+    }
+  }
+
+  // Quick Stats
+  .quick-stats {
+    border-radius: $border-radius-lg;
+
+    .stats-grid {
+      .stat-card {
+        height: 100%;
+        border: 1px solid $border-color;
+        border-radius: $border-radius-md;
+        transition: border-color 0.2s ease;
+
+        &:hover {
+          border-color: $primary-color;
+        }
+
+        .stat-content {
+          padding: $spacing-md;
+
+          .stat-label {
+            font-size: $font-size-sm;
+            color: $text-secondary;
+            margin-bottom: $spacing-xs;
+            display: block;
+          }
+
+          .stat-value-container {
+            display: flex;
+            align-items: baseline;
+            gap: $spacing-xs;
+
+            .stat-value {
+              font-size: $font-size-xl;
+              font-weight: $font-weight-bold;
+              color: $text-primary;
+              line-height: 1;
+            }
+
+            .stat-change {
+              font-size: $font-size-xs;
+              font-weight: $font-weight-medium;
+
+              &.positive {
+                color: $success-color;
+              }
+
+              &.negative {
+                color: $error-color;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Upcoming Tours
+  .upcoming-tours {
+    border-radius: $border-radius-lg;
+
+    .tour-list {
+      .tour-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $spacing-md;
+        border-radius: $border-radius-md;
+        background-color: $bg-default;
+        margin-bottom: $spacing-sm;
+        transition: background-color 0.2s ease;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        &:hover {
+          background-color: rgba($primary-color, 0.04);
+        }
+
+        .tour-info {
+          flex: 1;
+          min-width: 0;
+
+          .tour-name {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-semibold;
+            color: $text-primary;
+            margin-bottom: $spacing-xs;
+            @include text-ellipsis;
+          }
+
+          .tour-date {
+            font-size: $font-size-xs;
+            color: $text-secondary;
+          }
+        }
+
+        .tour-meta {
+          display: flex;
+          align-items: center;
+          gap: $spacing-md;
+
+          .tour-seats {
+            font-size: $font-size-sm;
+            color: $text-secondary;
+            white-space: nowrap;
+          }
+
+          .tour-status {
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $border-radius-sm;
+            font-size: $font-size-xs;
+            font-weight: $font-weight-semibold;
+            white-space: nowrap;
+
+            &.available {
+              background-color: rgba($success-color, 0.1);
+              color: darken($success-color, 10%);
+            }
+
+            &.limited {
+              background-color: rgba($warning-color, 0.1);
+              color: darken($warning-color, 10%);
+            }
+
+            &.almost-full {
+              background-color: rgba($error-color, 0.1);
+              color: darken($error-color, 10%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Pie Chart Legend
+  .pie-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    justify-content: center;
+    margin-top: $spacing-md;
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-xs $spacing-sm;
+      border-radius: $border-radius-sm;
+      background-color: rgba($primary-color, 0.05);
+
+      .legend-color {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .legend-label {
+        font-size: $font-size-xs;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+      }
+    }
+  }
+
+  // Actions Menu
+  .actions-menu {
+    .MuiPaper-root {
+      border-radius: $border-radius-md;
+      box-shadow: $shadow-md;
+      border: 1px solid $border-color;
+
+      .MuiMenuItem-root {
+        font-size: $font-size-sm;
+        padding: $spacing-sm $spacing-md;
+        min-height: auto;
+
+        &:hover {
+          background-color: rgba($primary-color, 0.04);
+        }
+
+        &.delete {
+          color: $error-color;
+
+          &:hover {
+            background-color: rgba($error-color, 0.04);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Adjustments
+@include respond-to("sm-down") {
+  .dashboard-container {
+    .kpi-grid {
+      .kpi-card {
+        .kpi-content {
+          padding: $spacing-md;
+
+          .kpi-body {
+            .kpi-value {
+              font-size: $font-size-xl;
+            }
+          }
+        }
+      }
+    }
+
+    .chart-card {
+      .chart-container {
+        height: 300px;
+      }
+    }
+
+    .upcoming-tours {
+      .tour-list {
+        .tour-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: $spacing-sm;
+
+          .tour-meta {
+            width: 100%;
+            justify-content: space-between;
+          }
+        }
+      }
+    }
+  }
+}
+
+@include respond-to("xs") {
+  .dashboard-container {
+    .page-header {
+      .page-actions {
+        width: 100%;
+
+        .action-button {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+
+    .chart-card {
+      .chart-container {
+        height: 250px;
+      }
+    }
+  }
+}
+
+// Dark Mode Support
+[data-theme="dark"] {
+  .dashboard-container {
+    .chart-card,
+    .table-container,
+    .quick-stats,
+    .upcoming-tours {
+      background-color: $bg-dark-paper;
+    }
+
+    .quick-stats {
+      .stat-card {
+        border-color: $border-dark-color;
+        background-color: rgba($primary-color, 0.05);
+
+        &:hover {
+          border-color: $primary-color;
+        }
+      }
+    }
+
+    .upcoming-tours {
+      .tour-list {
+        .tour-item {
+          background-color: rgba($primary-color, 0.05);
+
+          &:hover {
+            background-color: rgba($primary-color, 0.1);
+          }
+        }
+      }
+    }
+
+    .MuiDataGrid-root {
+      color: $text-dark-primary;
+
+      .MuiDataGrid-columnHeaders {
+        background-color: rgba($primary-color, 0.1);
+        border-bottom-color: $border-dark-color;
+      }
+
+      .MuiDataGrid-footerContainer {
+        background-color: rgba($primary-color, 0.1);
+        border-top-color: $border-dark-color;
+      }
+    }
+  }
+}

@@ -1,0 +1,335 @@
+import React, { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+    Drawer,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    Divider,
+    Collapse,
+    Tooltip,
+    IconButton,
+    Box,
+    Typography,
+    Avatar,
+    useTheme,
+    useMediaQuery,
+} from '@mui/material';
+import {
+    Dashboard as DashboardIcon,
+    Luggage as TourIcon,
+    CalendarMonth as BookingIcon,
+    People as CustomerIcon,
+    Payment as PaymentIcon,
+    Article as ContentIcon,
+    Reviews as ReviewIcon,
+    Analytics as AnalyticsIcon,
+    Settings as SettingsIcon,
+    ExpandLess,
+    ExpandMore,
+    ChevronLeft,
+    ChevronRight,
+    Menu as MenuIcon,
+    FlightTakeoff,
+} from '@mui/icons-material';
+import './Sidebar.scss';
+import { useAuth } from '../../../hooks/useAuth';
+
+const menuItems = [
+    {
+        title: 'Dashboard',
+        icon: <DashboardIcon />,
+        path: '/dashboard',
+    },
+    {
+        title: 'Tour Management',
+        icon: <TourIcon />,
+        path: '/tours',
+        subItems: [
+            { title: 'All Tours', path: '/tours' },
+            { title: 'Add New Tour', path: '/tours/new' },
+            { title: 'Categories', path: '/tours/categories' },
+        ],
+    },
+    {
+        title: 'Booking Management',
+        icon: <BookingIcon />,
+        path: '/bookings',
+    },
+    {
+        title: 'Customer Management',
+        icon: <CustomerIcon />,
+        path: '/customers',
+    },
+    {
+        title: 'Payment Management',
+        icon: <PaymentIcon />,
+        path: '/payments',
+    },
+    {
+        title: 'Content Management',
+        icon: <ContentIcon />,
+        path: '/content',
+        subItems: [
+            { title: 'Destinations', path: '/content/destinations' },
+            { title: 'Blog Posts', path: '/content/blog' },
+            { title: 'Offers', path: '/content/offers' },
+        ],
+    },
+    {
+        title: 'Reviews & Ratings',
+        icon: <ReviewIcon />,
+        path: '/reviews',
+    },
+    {
+        title: 'Reports & Analytics',
+        icon: <AnalyticsIcon />,
+        path: '/reports',
+    },
+    {
+        title: 'Settings',
+        icon: <SettingsIcon />,
+        path: '/settings',
+        subItems: [
+            { title: 'General', path: '/settings/general' },
+            { title: 'Users & Roles', path: '/settings/users' },
+            { title: 'Notifications', path: '/settings/notifications' },
+        ],
+    },
+];
+
+const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
+    const { user } = useAuth();
+    const location = useLocation();
+    const [expandedItems, setExpandedItems] = useState({});
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    const toggleExpand = (title) => {
+        setExpandedItems((prev) => ({
+            ...prev,
+            [title]: !prev[title],
+        }));
+    };
+
+    const isActive = (path) => {
+        return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    };
+
+    const renderMenuItem = (item, depth = 0) => {
+        const hasSubItems = item.subItems && item.subItems.length > 0;
+        const isExpanded = expandedItems[item.title];
+
+        return (
+            <React.Fragment key={item.title}>
+                <ListItem disablePadding sx={{ display: 'block' }}>
+                    <ListItemButton
+                        component={hasSubItems ? 'div' : NavLink}
+                        to={hasSubItems ? null : item.path}
+                        onClick={hasSubItems ? () => toggleExpand(item.title) : null}
+                        sx={{
+                            pl: depth * 2 + 2,
+                            minHeight: 48,
+                            justifyContent: open ? 'initial' : 'center',
+                            backgroundColor: isActive(item.path) ? 'primary.main' : 'transparent',
+                            color: isActive(item.path) ? 'primary.contrastText' : 'text.secondary',
+                            '&:hover': {
+                                backgroundColor: isActive(item.path) ? 'primary.dark' : 'action.hover',
+                            },
+                        }}
+                    >
+                        <ListItemIcon
+                            sx={{
+                                minWidth: 0,
+                                mr: open ? 3 : 'auto',
+                                justifyContent: 'center',
+                                color: isActive(item.path) ? 'primary.contrastText' : 'inherit',
+                            }}
+                        >
+                            {item.icon}
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={item.title}
+                            sx={{ opacity: open ? 1 : 0 }}
+                            primaryTypographyProps={{
+                                fontSize: '0.875rem',
+                                fontWeight: isActive(item.path) ? 600 : 400,
+                            }}
+                        />
+                        {hasSubItems && open && (
+                            <Box sx={{ ml: 'auto' }}>
+                                {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                            </Box>
+                        )}
+                    </ListItemButton>
+                </ListItem>
+                {hasSubItems && open && (
+                    <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                        <List component="div" disablePadding>
+                            {item.subItems.map((subItem) => (
+                                <ListItem key={subItem.title} disablePadding>
+                                    <ListItemButton
+                                        component={NavLink}
+                                        to={subItem.path}
+                                        sx={{
+                                            pl: depth * 2 + 6,
+                                            minHeight: 40,
+                                            backgroundColor: isActive(subItem.path) ? 'primary.light' : 'transparent',
+                                            color: isActive(subItem.path) ? 'primary.contrastText' : 'text.secondary',
+                                            '&:hover': {
+                                                backgroundColor: isActive(subItem.path) ? 'primary.main' : 'action.hover',
+                                            },
+                                        }}
+                                    >
+                                        <ListItemText
+                                            primary={subItem.title}
+                                            sx={{ opacity: 1 }}
+                                            primaryTypographyProps={{
+                                                fontSize: '0.8125rem',
+                                                fontWeight: isActive(subItem.path) ? 500 : 400,
+                                            }}
+                                        />
+                                    </ListItemButton>
+                                </ListItem>
+                            ))}
+                        </List>
+                    </Collapse>
+                )}
+            </React.Fragment>
+        );
+    };
+
+    return (
+        <Drawer
+            variant={variant}
+            open={open}
+            onClose={onClose}
+            sx={{
+                width: open ? 280 : 72,
+                flexShrink: 0,
+                '& .MuiDrawer-paper': {
+                    width: open ? 280 : 72,
+                    boxSizing: 'border-box',
+                    borderRight: '1px solid',
+                    borderColor: 'divider',
+                    transition: theme.transitions.create('width', {
+                        easing: theme.transitions.easing.sharp,
+                        duration: theme.transitions.duration.enteringScreen,
+                    }),
+                },
+            }}
+        >
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    p: 2,
+                    minHeight: 64,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                }}
+            >
+                {open ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                        <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }} noWrap>
+                                TravelPro
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                                Management Dashboard
+                            </Typography>
+                        </Box>
+                        {!isMobile && (
+                            <Tooltip title={open ? "Collapse sidebar" : "Expand sidebar"}>
+                                <IconButton
+                                    onClick={onToggle}
+                                    size="small"
+                                    sx={{
+                                        ml: 1,
+                                    }}
+                                >
+                                    <ChevronLeft sx={{
+                                        transform: open ? 'rotate(0deg)' : 'rotate(180deg)',
+                                        transition: theme.transitions.create('transform', {
+                                            duration: theme.transitions.duration.shortest,
+                                        }),
+                                    }} />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Box>
+                ) : (
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                        <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
+                        {!isMobile && (
+                            <Tooltip title="Expand sidebar">
+                                <IconButton
+                                    onClick={onToggle}
+                                    size="small"
+                                    sx={{
+                                        position: 'absolute',
+                                        right: -12,
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        backgroundColor: 'background.paper',
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        '&:hover': {
+                                            backgroundColor: 'action.hover',
+                                        },
+                                        width: 24,
+                                        height: 24,
+                                    }}
+                                >
+                                    <ChevronRight />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Box>
+                )}
+                {variant === 'temporary' && (
+                    <IconButton onClick={onClose}>
+                        <ChevronLeft />
+                    </IconButton>
+                )}
+            </Box>
+
+            <List sx={{ flexGrow: 1, py: 1, overflow: 'auto' }}>
+                {menuItems.map((item) => renderMenuItem(item))}
+            </List>
+
+            <Divider />
+
+            <Box sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, position: 'relative' }}>
+                    <Avatar
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            bgcolor: 'primary.main',
+                            fontSize: '1rem',
+                        }}
+                    >
+                        {user?.name?.charAt(0) || 'A'}
+                    </Avatar>
+                    {open && (
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                            <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+                                {user?.name || 'Admin User'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                                {user?.role || 'Administrator'}
+                            </Typography>
+                        </Box>
+                    )}
+                </Box>
+            </Box>
+        </Drawer>
+    );
+};
+
+export default Sidebar;
