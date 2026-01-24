@@ -9,14 +9,14 @@ function Contact() {
       title: "Travel Concierge",
       copy: "Curated itineraries, multi-day tours, and bespoke experiences crafted in under 24 hours.",
       target: "callto:",
-      detail: "+94753228869",
+      detail: "+94717191657",
       icon: "🌍",
     },
     {
       title: "Fleet Hotline",
       copy: "Real-time vehicle tracking, chauffeur briefings, and last-minute swaps handled instantly.",
       target: "callto:",
-      detail: "+94764487775",
+      detail: "+94758793281",
       icon: "🚐",
     },
     {
