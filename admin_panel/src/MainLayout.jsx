@@ -4,12 +4,16 @@ import { Box, useTheme, useMediaQuery } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar/Sidebar';
 import Header from './components/layout/Header/Header.jsx';
+import './MainLayout.scss';
 
-const MainLayout = ({children}) => {
+const MainLayout = ({ children }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
     const [themeMode, setThemeMode] = useState('light');
+
+    // Calculate sidebar width
+    const sidebarWidth = sidebarOpen ? 280 : 72;
 
     const handleDrawerToggle = () => {
         setSidebarOpen(!sidebarOpen);
@@ -20,8 +24,8 @@ const MainLayout = ({children}) => {
     };
 
     return (
-        <Box sx={{ display: 'flex' }}>
-            
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+
             {/* Sidebar */}
             <Sidebar
                 open={sidebarOpen}
@@ -30,12 +34,12 @@ const MainLayout = ({children}) => {
                 variant={isMobile ? 'temporary' : 'permanent'}
             />
 
-            {/* Header - Pass sidebarOpen prop */}
+            {/* Header */}
             <Header
                 onMenuClick={handleDrawerToggle}
                 onThemeToggle={handleThemeToggle}
                 themeMode={themeMode}
-                sidebarOpen={sidebarOpen} // Pass this!
+                sidebarOpen={sidebarOpen}
             />
 
             {/* Main content area */}
@@ -43,20 +47,34 @@ const MainLayout = ({children}) => {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                   
-                    width: '100%',
+                    pt: { xs: 8, sm: 9 }, // Top padding to account for fixed header
+                    width: {
+                        xs: '100%',
+                        sm: `calc(100% - ${sidebarWidth}px)` // Simplified calculation
+                    },
+                    ml: {
+                        xs: 0,
+                        sm: 0, // Margin left for sidebar
+                        
+                    },
+                    position: 'absolute',
+                    left: {
+                        lg:sidebarWidth,
+                        md:0,
+                        xs:0,
+                    },
+                    ml:0,
                     minHeight: '100vh',
-                    backgroundColor: 'background.default',
-                    
+                    backgroundColor: 'background.default', // Changed from 'red'
                     transition: theme.transitions.create(['margin', 'width'], {
                         easing: theme.transitions.easing.sharp,
                         duration: theme.transitions.duration.leavingScreen,
                     }),
                 }}
             >
-                {/* This is where your page content renders */}
-                <Box>
-                    {children}
+                {/* Page container with padding */}
+                <Box className="page-container">
+                    {children || <Outlet />} {/* Support both children and Outlet */}
                 </Box>
             </Box>
         </Box>

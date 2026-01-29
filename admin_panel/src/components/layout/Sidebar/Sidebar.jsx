@@ -220,6 +220,7 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                     }),
                     overflowX: 'hidden',
                 },
+                zIndex: 2000,
             }}
         >
             {/* Header with toggle button */}
@@ -281,6 +282,7 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                                 width: 24,
                                 height: 24,
                                 display: variant === 'permanent' ? 'flex' : 'none',
+                                zIndex: 2000,
                             }}
                         >
                             <ChevronRight fontSize="small" />

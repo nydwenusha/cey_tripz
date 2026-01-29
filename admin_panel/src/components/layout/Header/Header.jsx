@@ -87,6 +87,7 @@ const Header = ({
                     easing: theme.transitions.easing.sharp,
                     duration: theme.transitions.duration.enteringScreen,
                 }),
+                zIndex: 1500,
             }}
         >
             <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
