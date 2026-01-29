@@ -218,9 +218,11 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                         easing: theme.transitions.easing.sharp,
                         duration: theme.transitions.duration.enteringScreen,
                     }),
+                    overflowX: 'hidden',
                 },
             }}
         >
+            {/* Header with toggle button */}
             <Box
                 sx={{
                     display: 'flex',
@@ -230,82 +232,73 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                     minHeight: 64,
                     borderBottom: '1px solid',
                     borderColor: 'divider',
+                    position: 'relative',
                 }}
             >
                 {open ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-                        <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }} noWrap>
-                                TravelPro
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" noWrap>
-                                Management Dashboard
-                            </Typography>
+                    <>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
+                            <Box>
+                                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                                    TravelPro
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    Management Dashboard
+                                </Typography>
+                            </Box>
                         </Box>
-                        {!isMobile && (
-                            <Tooltip title={open ? "Collapse sidebar" : "Expand sidebar"}>
-                                <IconButton
-                                    onClick={onToggle}
-                                    size="small"
-                                    sx={{
-                                        ml: 1,
-                                    }}
-                                >
-                                    <ChevronLeft sx={{
-                                        transform: open ? 'rotate(0deg)' : 'rotate(180deg)',
-                                        transition: theme.transitions.create('transform', {
-                                            duration: theme.transitions.duration.shortest,
-                                        }),
-                                    }} />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-                    </Box>
+                        <IconButton
+                            onClick={onToggle}
+                            size="small"
+                            sx={{
+                                color: 'text.secondary',
+                                '&:hover': {
+                                    backgroundColor: 'action.hover',
+                                },
+                            }}
+                        >
+                            <ChevronLeft />
+                        </IconButton>
+                    </>
                 ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                        <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
-                        {!isMobile && (
-                            <Tooltip title="Expand sidebar">
-                                <IconButton
-                                    onClick={onToggle}
-                                    size="small"
-                                    sx={{
-                                        position: 'absolute',
-                                        right: -12,
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        backgroundColor: 'background.paper',
-                                        border: '1px solid',
-                                        borderColor: 'divider',
-                                        '&:hover': {
-                                            backgroundColor: 'action.hover',
-                                        },
-                                        width: 24,
-                                        height: 24,
-                                    }}
-                                >
-                                    <ChevronRight />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-                    </Box>
-                )}
-                {variant === 'temporary' && (
-                    <IconButton onClick={onClose}>
-                        <ChevronLeft />
-                    </IconButton>
+                    <>
+                        <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main', mx: 'auto' }} />
+                        <IconButton
+                            onClick={onToggle}
+                            size="small"
+                            sx={{
+                                position: 'absolute',
+                                right: -12,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                backgroundColor: 'background.paper',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                '&:hover': {
+                                    backgroundColor: 'action.hover',
+                                },
+                                width: 24,
+                                height: 24,
+                                display: variant === 'permanent' ? 'flex' : 'none',
+                            }}
+                        >
+                            <ChevronRight fontSize="small" />
+                        </IconButton>
+                    </>
                 )}
             </Box>
 
+            {/* Menu items */}
             <List sx={{ flexGrow: 1, py: 1, overflow: 'auto' }}>
                 {menuItems.map((item) => renderMenuItem(item))}
             </List>
 
             <Divider />
 
+            {/* User profile */}
             <Box sx={{ p: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, position: 'relative' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar
                         sx={{
                             width: 40,

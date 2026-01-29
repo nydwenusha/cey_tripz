@@ -12,8 +12,6 @@ import {
     MenuItem,
 } from '@mui/material';
 import {
-    TrendingUp,
-    TrendingDown,
     MoreVert,
     Visibility,
     ShoppingCart,
@@ -25,8 +23,6 @@ import {
 import {
     LineChart,
     Line,
-    BarChart,
-    Bar,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -41,6 +37,10 @@ import PageContainer from '../../components/layout/PageContainer/PageContainer';
 import KpiCard from '../../components/common/KpiCard/KpiCard';
 import DataTable from '../../components/common/DataTable/DataTable';
 import './Dashboard.scss';
+import MainLayout from '../../MainLayout';
+
+// Remove MainLayout import - it's already wrapping routes in App.jsx
+// import MainLayout from '../../MainLayout';
 
 const Dashboard = () => {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -219,269 +219,275 @@ const Dashboard = () => {
     ];
 
     return (
-        <PageContainer title="Dashboard Overview">
-            {/* KPI Cards */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-                {kpiData.map((kpi, index) => (
-                    <Grid item xs={12} sm={6} md={3} key={index}>
-                        <KpiCard {...kpi} />
-                    </Grid>
-                ))}
-            </Grid>
-
-            {/* Charts and Tables */}
-            <Grid container spacing={3}>
-                {/* Booking Trends Chart */}
-                <Grid item xs={12} lg={8}>
-                    <Paper sx={{ p: 3, height: '100%' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                Booking Trends
-                            </Typography>
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                endIcon={<ArrowForward />}
-                            >
-                                View Report
-                            </Button>
-                        </Box>
-                        <Box sx={{ height: 350 }}>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={bookingData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                                    <XAxis dataKey="month" stroke="#666" />
-                                    <YAxis stroke="#666" />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="bookings"
-                                        stroke="#1a4d8c"
-                                        strokeWidth={2}
-                                        activeDot={{ r: 8 }}
-                                        name="Bookings"
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="revenue"
-                                        stroke="#ff7e5f"
-                                        strokeWidth={2}
-                                        name="Revenue ($)"
-                                        yAxisId={1}
-                                    />
-                                    <YAxis yAxisId={1} orientation="right" stroke="#ff7e5f" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </Box>
-                    </Paper>
-                </Grid>
-
-                {/* Top Destinations Chart */}
-                <Grid item xs={12} lg={4}>
-                    <Paper sx={{ p: 3, height: '100%' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-                            Top Destinations
-                        </Typography>
-                        <Box sx={{ height: 350, display: 'flex', flexDirection: 'column' }}>
-                            <ResponsiveContainer width="100%" height="80%">
-                                <PieChart>
-                                    <Pie
-                                        data={destinationData}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                        outerRadius={80}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                    >
-                                        {destinationData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
-                                {destinationData.map((dest) => (
-                                    <Box
-                                        key={dest.name}
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 0.5,
-                                            px: 1.5,
-                                            py: 0.5,
-                                            borderRadius: 1,
-                                            backgroundColor: `${dest.color}15`,
-                                        }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                width: 8,
-                                                height: 8,
-                                                borderRadius: '50%',
-                                                backgroundColor: dest.color,
-                                            }}
-                                        />
-                                        <Typography variant="caption" sx={{ fontWeight: 500 }}>
-                                            {dest.name}
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </Box>
-                        </Box>
-                    </Paper>
-                </Grid>
-
-                {/* Recent Bookings Table */}
-                <Grid item xs={12}>
-                    <Paper sx={{ p: 3 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                Recent Bookings
-                            </Typography>
-                            <Button
-                                variant="contained"
-                                startIcon={<CalendarToday />}
-                            >
-                                View All Bookings
-                            </Button>
-                        </Box>
-                        <DataTable
-                            rows={recentBookings}
-                            columns={columns}
-                            pageSize={5}
-                            autoHeight
-                            disableSelectionOnClick
-                        />
-                    </Paper>
-                </Grid>
-
-                {/* Quick Stats */}
-                <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 3 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-                            Quick Stats
-                        </Typography>
-                        <Grid container spacing={2}>
-                            {[
-                                { label: 'Avg. Booking Value', value: '$2,450', change: '+5.2%' },
-                                { label: 'Conversion Rate', value: '12.5%', change: '+1.8%' },
-                                { label: 'Customer Satisfaction', value: '4.8/5', change: '+0.3' },
-                                { label: 'Repeat Customers', value: '42%', change: '+3.1%' },
-                            ].map((stat, index) => (
-                                <Grid item xs={6} key={index}>
-                                    <Card variant="outlined" sx={{ height: '100%' }}>
-                                        <CardContent sx={{ p: 2 }}>
-                                            <Typography variant="body2" color="text.secondary" gutterBottom>
-                                                {stat.label}
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                                                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                                                    {stat.value}
-                                                </Typography>
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        color: stat.change.startsWith('+') ? 'success.main' : 'error.main',
-                                                        fontWeight: 600,
-                                                    }}
-                                                >
-                                                    {stat.change}
-                                                </Typography>
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            ))}
+        // REMOVE MainLayout wrapper - only PageContainer
+        // MainLayout is already wrapping all routes in App.jsx
+        <MainLayout>
+            <PageContainer title="Dashboard Overview">
+                {/* KPI Cards */}
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                    {kpiData.map((kpi, index) => (
+                        <Grid item xs={12} sm={6} md={3} key={index}>
+                            <KpiCard {...kpi} />
                         </Grid>
-                    </Paper>
+                    ))}
                 </Grid>
 
-                {/* Upcoming Tours */}
-                <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 3 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-                            Upcoming Tours
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            {[
-                                { tour: 'Bali Adventure', date: 'Mar 20-27', seats: '8/12', status: 'Almost Full' },
-                                { tour: 'Thai Cultural', date: 'Mar 22-29', seats: '5/15', status: 'Available' },
-                                { tour: 'Maldives Luxury', date: 'Mar 25-30', seats: '2/8', status: 'Limited' },
-                                { tour: 'Japan Spring', date: 'Apr 1-10', seats: '12/20', status: 'Available' },
-                            ].map((tour, index) => (
-                                <Box
-                                    key={index}
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        p: 2,
-                                        borderRadius: 1,
-                                        backgroundColor: 'background.default',
-                                        '&:hover': {
-                                            backgroundColor: 'action.hover',
-                                        },
-                                    }}
+                {/* Charts and Tables */}
+                <Grid container spacing={3}>
+                    {/* Booking Trends Chart */}
+                    <Grid item xs={12} lg={8}>
+                        <Paper sx={{ p: 3, height: '100%' }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    Booking Trends
+                                </Typography>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    endIcon={<ArrowForward />}
                                 >
-                                    <Box>
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                            {tour.tour}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {tour.date}
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        <Typography variant="body2">{tour.seats} seats</Typography>
+                                    View Report
+                                </Button>
+                            </Box>
+                            <Box sx={{ height: 350 }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={bookingData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                                        <XAxis dataKey="month" stroke="#666" />
+                                        <YAxis stroke="#666" />
+                                        <Tooltip />
+                                        <Legend />
+                                        <Line
+                                            type="monotone"
+                                            dataKey="bookings"
+                                            stroke="#1a4d8c"
+                                            strokeWidth={2}
+                                            activeDot={{ r: 8 }}
+                                            name="Bookings"
+                                        />
+                                        <Line
+                                            type="monotone"
+                                            dataKey="revenue"
+                                            stroke="#ff7e5f"
+                                            strokeWidth={2}
+                                            name="Revenue ($)"
+                                            yAxisId={1}
+                                        />
+                                        <YAxis yAxisId={1} orientation="right" stroke="#ff7e5f" />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </Box>
+                        </Paper>
+                    </Grid>
+
+                    {/* Top Destinations Chart */}
+                    <Grid item xs={12} lg={4}>
+                        <Paper sx={{ p: 3, height: '100%' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                                Top Destinations
+                            </Typography>
+                            <Box sx={{ height: 350, display: 'flex', flexDirection: 'column' }}>
+                                <ResponsiveContainer width="100%" height="80%">
+                                    <PieChart>
+                                        <Pie
+                                            data={destinationData}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                            outerRadius={80}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                        >
+                                            {destinationData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                                <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+                                    {destinationData.map((dest) => (
                                         <Box
+                                            key={dest.name}
                                             sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 0.5,
                                                 px: 1.5,
                                                 py: 0.5,
                                                 borderRadius: 1,
-                                                fontSize: '0.75rem',
-                                                fontWeight: 600,
-                                                backgroundColor:
-                                                    tour.status === 'Almost Full'
-                                                        ? 'warning.light'
-                                                        : tour.status === 'Limited'
-                                                            ? 'error.light'
-                                                            : 'success.light',
-                                                color:
-                                                    tour.status === 'Almost Full'
-                                                        ? 'warning.dark'
-                                                        : tour.status === 'Limited'
-                                                            ? 'error.dark'
-                                                            : 'success.dark',
+                                                backgroundColor: `${dest.color}15`,
                                             }}
                                         >
-                                            {tour.status}
+                                            <Box
+                                                sx={{
+                                                    width: 8,
+                                                    height: 8,
+                                                    borderRadius: '50%',
+                                                    backgroundColor: dest.color,
+                                                }}
+                                            />
+                                            <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                                                {dest.name}
+                                            </Typography>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            </Box>
+                        </Paper>
+                    </Grid>
+
+                    {/* Recent Bookings Table */}
+                    <Grid item xs={12}>
+                        <Paper sx={{ p: 3 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    Recent Bookings
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    startIcon={<CalendarToday />}
+                                >
+                                    View All Bookings
+                                </Button>
+                            </Box>
+                            <DataTable
+                                rows={recentBookings}
+                                columns={columns}
+                                pageSize={5}
+                                autoHeight
+                                disableSelectionOnClick
+                            />
+                        </Paper>
+                    </Grid>
+
+                    {/* Quick Stats */}
+                    <Grid item xs={12} md={6}>
+                        <Paper sx={{ p: 3 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                                Quick Stats
+                            </Typography>
+                            <Grid container spacing={2}>
+                                {[
+                                    { label: 'Avg. Booking Value', value: '$2,450', change: '+5.2%' },
+                                    { label: 'Conversion Rate', value: '12.5%', change: '+1.8%' },
+                                    { label: 'Customer Satisfaction', value: '4.8/5', change: '+0.3' },
+                                    { label: 'Repeat Customers', value: '42%', change: '+3.1%' },
+                                ].map((stat, index) => (
+                                    <Grid item xs={6} key={index}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardContent sx={{ p: 2 }}>
+                                                <Typography variant="body2" color="text.secondary" gutterBottom>
+                                                    {stat.label}
+                                                </Typography>
+                                                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                                                    <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                                                        {stat.value}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            color: stat.change.startsWith('+') ? 'success.main' : 'error.main',
+                                                            fontWeight: 600,
+                                                        }}
+                                                    >
+                                                        {stat.change}
+                                                    </Typography>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Paper>
+                    </Grid>
+
+                    {/* Upcoming Tours */}
+                    <Grid item xs={12} md={6}>
+                        <Paper sx={{ p: 3 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                                Upcoming Tours
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                {[
+                                    { tour: 'Bali Adventure', date: 'Mar 20-27', seats: '8/12', status: 'Almost Full' },
+                                    { tour: 'Thai Cultural', date: 'Mar 22-29', seats: '5/15', status: 'Available' },
+                                    { tour: 'Maldives Luxury', date: 'Mar 25-30', seats: '2/8', status: 'Limited' },
+                                    { tour: 'Japan Spring', date: 'Apr 1-10', seats: '12/20', status: 'Available' },
+                                ].map((tour, index) => (
+                                    <Box
+                                        key={index}
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            p: 2,
+                                            borderRadius: 1,
+                                            backgroundColor: 'background.default',
+                                            '&:hover': {
+                                                backgroundColor: 'action.hover',
+                                            },
+                                        }}
+                                    >
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                                {tour.tour}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {tour.date}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <Typography variant="body2">{tour.seats} seats</Typography>
+                                            <Box
+                                                sx={{
+                                                    px: 1.5,
+                                                    py: 0.5,
+                                                    borderRadius: 1,
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 600,
+                                                    backgroundColor:
+                                                        tour.status === 'Almost Full'
+                                                            ? 'warning.light'
+                                                            : tour.status === 'Limited'
+                                                                ? 'error.light'
+                                                                : 'success.light',
+                                                    color:
+                                                        tour.status === 'Almost Full'
+                                                            ? 'warning.dark'
+                                                            : tour.status === 'Limited'
+                                                                ? 'error.dark'
+                                                                : 'success.dark',
+                                                }}
+                                            >
+                                                {tour.status}
+                                            </Box>
                                         </Box>
                                     </Box>
-                                </Box>
-                            ))}
-                        </Box>
-                    </Paper>
+                                ))}
+                            </Box>
+                        </Paper>
+                    </Grid>
                 </Grid>
-            </Grid>
 
-            {/* Actions Menu */}
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-            >
-                <MenuItem onClick={handleMenuClose}>View Details</MenuItem>
-                <MenuItem onClick={handleMenuClose}>Edit Booking</MenuItem>
-                <MenuItem onClick={handleMenuClose}>Send Invoice</MenuItem>
-                <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
-                    Cancel Booking
-                </MenuItem>
-            </Menu>
-        </PageContainer>
+                {/* Actions Menu */}
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                >
+                    <MenuItem onClick={handleMenuClose}>View Details</MenuItem>
+                    <MenuItem onClick={handleMenuClose}>Edit Booking</MenuItem>
+                    <MenuItem onClick={handleMenuClose}>Send Invoice</MenuItem>
+                    <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+                        Cancel Booking
+                    </MenuItem>
+                </Menu>
+            </PageContainer>
+        </MainLayout>
+
+        
     );
 };
 

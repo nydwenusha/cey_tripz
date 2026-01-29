@@ -29,7 +29,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 
 // Styles
 import './styles/global.scss';
-import Sidebar from './components/layout/Sidebar/SideBar';
+import Sidebar from './components/layout/Sidebar/Sidebar.jsx';
 
 // Main Layout Component
 const MainLayout = ({ themeMode, toggleTheme }) => {
@@ -45,34 +45,25 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
     };
 
     return (
-        <div className="app-container">
-            <Sidebar
-                open={sidebarOpen}
-                onClose={handleDrawerToggle}
-                variant="permanent"
-            />
-            <div className={`main-content ${!sidebarOpen ? 'sidebar-collapsed' : ''}`}>
-                <Header
-                    onMenuClick={handleDrawerToggle}
-                    onThemeToggle={toggleTheme}
-                    themeMode={themeMode}
-                />
-                    <Routes>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/tours" element={<ToursList />} />
-                        <Route path="/tours/new" element={<TourEdit />} />
-                        <Route path="/tours/:id/edit" element={<TourEdit />} />
-                        <Route path="/bookings" element={<Bookings />} />
-                        <Route path="/customers" element={<Customers />} />
-                        <Route path="/payments" element={<Payments />} />
-                        <Route path="/content/*" element={<Content />} />
-                        <Route path="/reviews" element={<Reviews />} />
-                        <Route path="/reports" element={<Reports />} />
-                        <Route path="/settings/*" element={<Settings />} />
-                        <Route path="/" element={<Navigate to="/dashboard" />} />
-                    </Routes>
-            </div>
-        </div>
+
+       
+
+        <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/tours" element={<ToursList />} />
+            <Route path="/tours/new" element={<TourEdit />} />
+            <Route path="/tours/:id/edit" element={<TourEdit />} />
+            <Route path="/bookings" element={<Bookings />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/payments" element={<Payments />} />
+            <Route path="/content/*" element={<Content />} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/settings/*" element={<Settings />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+        </Routes>
+
+
     );
 };
 

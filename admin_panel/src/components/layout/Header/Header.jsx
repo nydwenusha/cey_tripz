@@ -12,7 +12,6 @@ import {
     TextField,
     InputAdornment,
     Tooltip,
-    Switch,
     Divider,
     Chip,
 } from '@mui/material';
@@ -30,10 +29,18 @@ import {
 import './Header.scss';
 import { useAuth } from '../../../hooks/useAuth';
 
-const Header = ({ onMenuClick, onThemeToggle, themeMode = 'light' }) => {
+const Header = ({
+    onMenuClick,
+    onThemeToggle,
+    themeMode = 'light',
+    sidebarOpen = true  // Add this prop
+}) => {
     const { user, logout } = useAuth();
     const [anchorEl, setAnchorEl] = useState(null);
     const [notificationsAnchor, setNotificationsAnchor] = useState(null);
+
+    // Calculate dynamic width based on sidebar state
+    const sidebarWidth = sidebarOpen ? 280 : 72;
 
     const handleProfileClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -69,13 +76,17 @@ const Header = ({ onMenuClick, onThemeToggle, themeMode = 'light' }) => {
         <AppBar
             position="fixed"
             sx={{
-                width: { sm: `calc(100% - ${240}px)` },
-                ml: { sm: `${240}px` },
+                width: { sm: `calc(100% - ${sidebarWidth}px)` },
+                ml: { sm: `${sidebarWidth}px` },
                 backgroundColor: 'background.paper',
                 color: 'text.primary',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                 borderBottom: '1px solid',
                 borderColor: 'divider',
+                transition: (theme) => theme.transitions.create(['width', 'margin'], {
+                    easing: theme.transitions.easing.sharp,
+                    duration: theme.transitions.duration.enteringScreen,
+                }),
             }}
         >
             <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
@@ -95,7 +106,7 @@ const Header = ({ onMenuClick, onThemeToggle, themeMode = 'light' }) => {
                         variant="outlined"
                         size="small"
                         sx={{
-                            width: { xs: '100%', sm: 320 },
+                            width: { xs: '100%', sm: sidebarOpen ? 320 : 280 }, // Adjust search width
                             '& .MuiOutlinedInput-root': {
                                 borderRadius: 20,
                                 backgroundColor: 'background.default',
@@ -110,7 +121,13 @@ const Header = ({ onMenuClick, onThemeToggle, themeMode = 'light' }) => {
                         }}
                     />
 
-                    <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+                    <Box sx={{
+                        display: {
+                            xs: 'none',
+                            md: sidebarOpen ? 'flex' : 'none' // Hide chips when sidebar collapsed
+                        },
+                        gap: 1
+                    }}>
                         <Chip label="Today: 42 Bookings" size="small" color="primary" variant="outlined" />
                         <Chip label="Revenue: $12,450" size="small" color="success" variant="outlined" />
                     </Box>
@@ -169,7 +186,12 @@ const Header = ({ onMenuClick, onThemeToggle, themeMode = 'light' }) => {
                         >
                             {user?.name?.charAt(0) || 'A'}
                         </Avatar>
-                        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                        <Box sx={{
+                            display: {
+                                xs: 'none',
+                                sm: sidebarOpen ? 'block' : 'none' // Hide user name when sidebar collapsed
+                            }
+                        }}>
                             <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
                                 {user?.name || 'Admin User'}
                             </Typography>
