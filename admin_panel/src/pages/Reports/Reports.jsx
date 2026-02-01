@@ -10,7 +10,8 @@ import {
 
 const Reports = () => {
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <MainLayout>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Typography variant="h4" gutterBottom>
         Reports & Analytics
       </Typography>
@@ -44,6 +45,7 @@ const Reports = () => {
         </Grid>
       </Grid>
     </Container>
+    </MainLayout>
   );
 };
 

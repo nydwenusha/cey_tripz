@@ -1,0 +1,646 @@
+// Categories.scss
+.categories-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .categories-header {
+    background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+    color: white;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 24px;
+
+      .page-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 1.5rem;
+      }
+
+      .add-button {
+        background: white;
+        color: #1976d2;
+        font-weight: 600;
+        padding: 10px 24px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        min-width: 140px;
+
+        &:hover {
+          background: #f5f5f5;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+      }
+    }
+  }
+
+  .stats-grid {
+    margin-bottom: 24px;
+    
+    // Force equal width for all stat items
+    .stat-item {
+      display: flex;
+      height: 100%;
+      width: 25%; // Each takes 25% of the row (4 boxes)
+      
+      @media (max-width: 768px) {
+        width: 50%; // 2 boxes per row on tablet
+      }
+      
+      @media (max-width: 480px) {
+        width: 100%; // 1 box per row on mobile
+      }
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+      height: 100%;
+      width: 100%; // Takes full width of parent
+      border: 1px solid #e0e0e0;
+      min-height: 120px;
+      position: relative;
+      overflow: hidden;
+
+      // Ensure all cards have same dimensions
+      flex: 1;
+      min-width: 0; // Important for equal sizing
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
+        border-color: #1976d2;
+        
+        .stat-icon {
+          transform: scale(1.1);
+          opacity: 0.4;
+        }
+      }
+
+      .stat-content {
+        flex: 1;
+        min-width: 0;
+        z-index: 1;
+        
+        .stat-number {
+          font-weight: 700;
+          font-size: 2rem;
+          margin-bottom: 8px;
+          color: #1976d2;
+          line-height: 1.2;
+          letter-spacing: -0.5px;
+        }
+        
+        .stat-label {
+          font-size: 0.875rem;
+          line-height: 1.3;
+          color: #666;
+          font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .stat-icon {
+        font-size: 48px;
+        color: #1976d2;
+        opacity: 0.2;
+        flex-shrink: 0;
+        margin-left: 16px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 0;
+      }
+      
+      // Add subtle background pattern
+      &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(25, 118, 210, 0.03) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      &:hover::before {
+        opacity: 1;
+      }
+    }
+    
+    // Remove Grid spacing and use margin instead
+    .MuiGrid-spacing-xs-2 {
+      margin: 0 !important;
+      width: 100%;
+      
+      .MuiGrid-item {
+        padding: 0 !important;
+        margin: 0;
+        
+        &:not(:last-child) {
+          padding-right: 16px !important;
+          
+          @media (max-width: 768px) {
+            padding-right: 8px !important;
+          }
+        }
+      }
+    }
+  }
+
+  .filters-paper {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e0e0e0;
+
+    .filters-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+
+      .search-field {
+        flex: 1;
+        min-width: 300px;
+        max-width: 400px;
+
+        .MuiOutlinedInput-root {
+          border-radius: 8px;
+          background: #f8fafc;
+          
+          &:hover {
+            background: #f0f7ff;
+            
+            .MuiOutlinedInput-notchedOutline {
+              border-color: #1976d2;
+            }
+          }
+          
+          &.Mui-focused {
+            background: white;
+            
+            .MuiOutlinedInput-notchedOutline {
+              border-color: #1976d2;
+              border-width: 2px;
+            }
+          }
+        }
+      }
+
+      .filter-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        .MuiChip-root {
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border-color: #e0e0e0;
+          font-weight: 500;
+          padding: 6px 12px;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          &.MuiChip-colorPrimary {
+            background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+          }
+          
+          &.MuiChip-colorSuccess {
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            color: white;
+            border-color: transparent;
+          }
+          
+          &.MuiChip-colorError {
+            background: linear-gradient(135deg, #c62828 0%, #f44336 100%);
+            color: white;
+            border-color: transparent;
+          }
+          
+          &.MuiChip-colorWarning {
+            background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
+            color: white;
+            border-color: transparent;
+          }
+        }
+      }
+    }
+  }
+
+  .categories-grid {
+    .category-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #e0e0e0;
+      position: relative;
+
+      &:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 32px rgba(25, 118, 210, 0.2);
+        border-color: #1976d2;
+        
+        .category-icon {
+          transform: rotate(5deg) scale(1.1);
+        }
+      }
+
+      .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 20px 20px 0 20px;
+
+        .category-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #1976d2;
+          background: linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%);
+          transition: transform 0.3s ease;
+          
+          svg {
+            font-size: 32px;
+          }
+        }
+
+        .category-actions {
+          .MuiIconButton-root {
+            color: #666;
+            background: rgba(0, 0, 0, 0.04);
+            margin-left: 4px;
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: rgba(25, 118, 210, 0.15);
+              color: #1976d2;
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+
+      .category-content {
+        padding: 20px;
+        flex: 1;
+
+        .category-name {
+          font-weight: 700;
+          margin-bottom: 8px;
+          color: #1976d2;
+          font-size: 1.125rem;
+          letter-spacing: -0.3px;
+        }
+
+        .category-description {
+          margin-bottom: 20px;
+          line-height: 1.5;
+          min-height: 60px;
+          color: #666;
+          font-size: 0.9rem;
+        }
+
+        .category-stats {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+
+          .tour-count {
+            font-weight: 600;
+            color: #1976d2;
+            font-size: 0.9rem;
+          }
+          
+          .MuiChip-root {
+            font-weight: 500;
+            font-size: 0.75rem;
+            height: 24px;
+            
+            .MuiChip-label {
+              padding: 0 8px;
+            }
+          }
+        }
+
+        .tour-progress {
+          height: 6px;
+          border-radius: 3px;
+          margin-bottom: 8px;
+          overflow: hidden;
+          
+          .MuiLinearProgress-bar {
+            transition: transform 0.4s ease;
+          }
+        }
+      }
+
+      .category-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: #f8fafc;
+        border-top: 1px solid #e0e0e0;
+
+        .MuiFormControlLabel-root {
+          margin-right: 0;
+
+          .MuiTypography-root {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+          }
+          
+          .MuiSwitch-root {
+            .MuiSwitch-track {
+              background-color: #bdbdbd;
+            }
+            
+            .MuiSwitch-switchBase.Mui-checked {
+              color: #1976d2;
+              
+              + .MuiSwitch-track {
+                background-color: #1976d2;
+              }
+            }
+          }
+        }
+
+        .featured-active {
+          color: #ffc107;
+          animation: pulse 2s infinite;
+
+          svg {
+            fill: currentColor;
+          }
+          
+          &:hover {
+            animation: none;
+            transform: scale(1.2);
+          }
+        }
+        
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+      }
+    }
+  }
+
+  // Edit Dialog Styles
+  .edit-form {
+    padding: 8px 0;
+
+    .icon-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      justify-content: center;
+
+      .icon-option {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f5f5;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+        color: #666;
+
+        &:hover {
+          background: #e0e0e0;
+          transform: scale(1.1);
+          border-color: #1976d2;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        &.selected {
+          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+          border-color: #1976d2;
+          color: #1976d2;
+          transform: scale(1.1);
+          box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+        }
+
+        svg {
+          font-size: 28px;
+        }
+      }
+    }
+  }
+
+  // Dialog buttons
+  .MuiDialogActions-root {
+    padding: 20px 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e0e0e0;
+    
+    .save-button {
+      background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+      color: white;
+      font-weight: 600;
+      padding: 10px 28px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: linear-gradient(135deg, #1565c0 0%, #1e88e5 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px rgba(25, 118, 210, 0.4);
+      }
+    }
+  }
+
+  // Snackbar
+  .MuiSnackbar-root {
+    .MuiAlert-root {
+      border-radius: 10px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      
+      &.MuiAlert-filledSuccess {
+        background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+      }
+      
+      &.MuiAlert-filledError {
+        background: linear-gradient(135deg, #c62828 0%, #f44336 100%);
+      }
+      
+      &.MuiAlert-filledInfo {
+        background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .categories-container {
+    padding: 16px;
+
+    .categories-header {
+      .header-content {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 20px;
+        padding: 20px;
+
+        .page-title {
+          font-size: 1.3rem;
+        }
+
+        .add-button {
+          width: 100%;
+          max-width: 300px;
+          margin: 0 auto;
+        }
+      }
+    }
+    
+    .stats-grid {
+      .stat-card {
+        min-height: 110px;
+        padding: 20px;
+        
+        .stat-number {
+          font-size: 1.6rem;
+        }
+        
+        .stat-icon {
+          font-size: 36px;
+          margin-left: 12px;
+        }
+      }
+    }
+
+    .filters-paper {
+      padding: 16px;
+      
+      .filters-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+
+        .search-field {
+          min-width: 100%;
+          max-width: 100%;
+        }
+
+        .filter-buttons {
+          justify-content: center;
+        }
+      }
+    }
+    
+    .categories-grid {
+      .category-card {
+        .category-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+          
+          .category-actions {
+            align-self: flex-end;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-container {
+    padding: 12px;
+    
+    .stats-grid {
+      .stat-card {
+        min-height: 100px;
+        padding: 16px;
+        
+        .stat-number {
+          font-size: 1.4rem;
+        }
+        
+        .stat-icon {
+          font-size: 32px;
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+}
+
+// Animation for cards when they appear
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.categories-grid .category-card {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+// Stagger animation for cards
+@for $i from 1 through 12 {
+  .categories-grid .category-card:nth-child(#{$i}) {
+    animation-delay: #{$i * 0.05}s;
+  }
+}

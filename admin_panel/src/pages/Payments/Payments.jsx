@@ -10,6 +10,7 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
+import MainLayout from '../../MainLayout';
 
 const Payments = () => {
   // Mock data
@@ -19,38 +20,40 @@ const Payments = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Payments Management
-      </Typography>
+    <MainLayout>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Payments Management
+        </Typography>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Booking ID</TableCell>
-              <TableCell>Customer</TableCell>
-              <TableCell>Amount ($)</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Date</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {payments.map((payment) => (
-              <TableRow key={payment.id}>
-                <TableCell>{payment.id}</TableCell>
-                <TableCell>{payment.bookingId}</TableCell>
-                <TableCell>{payment.customer}</TableCell>
-                <TableCell>{payment.amount}</TableCell>
-                <TableCell>{payment.status}</TableCell>
-                <TableCell>{payment.date}</TableCell>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Booking ID</TableCell>
+                <TableCell>Customer</TableCell>
+                <TableCell>Amount ($)</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Date</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Container>
+            </TableHead>
+            <TableBody>
+              {payments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell>{payment.id}</TableCell>
+                  <TableCell>{payment.bookingId}</TableCell>
+                  <TableCell>{payment.customer}</TableCell>
+                  <TableCell>{payment.amount}</TableCell>
+                  <TableCell>{payment.status}</TableCell>
+                  <TableCell>{payment.date}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
+    </MainLayout>
   );
 };
 

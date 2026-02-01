@@ -11,6 +11,7 @@ import {
   Paper,
   Rating,
 } from '@mui/material';
+import MainLayout from '../../MainLayout';
 
 const Reviews = () => {
   // Mock data
@@ -20,40 +21,42 @@ const Reviews = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Reviews Management
-      </Typography>
+    <MainLayout>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Reviews Management
+        </Typography>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Customer</TableCell>
-              <TableCell>Tour</TableCell>
-              <TableCell>Rating</TableCell>
-              <TableCell>Comment</TableCell>
-              <TableCell>Date</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {reviews.map((review) => (
-              <TableRow key={review.id}>
-                <TableCell>{review.id}</TableCell>
-                <TableCell>{review.customer}</TableCell>
-                <TableCell>{review.tour}</TableCell>
-                <TableCell>
-                  <Rating value={review.rating} readOnly />
-                </TableCell>
-                <TableCell>{review.comment}</TableCell>
-                <TableCell>{review.date}</TableCell>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Customer</TableCell>
+                <TableCell>Tour</TableCell>
+                <TableCell>Rating</TableCell>
+                <TableCell>Comment</TableCell>
+                <TableCell>Date</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Container>
+            </TableHead>
+            <TableBody>
+              {reviews.map((review) => (
+                <TableRow key={review.id}>
+                  <TableCell>{review.id}</TableCell>
+                  <TableCell>{review.customer}</TableCell>
+                  <TableCell>{review.tour}</TableCell>
+                  <TableCell>
+                    <Rating value={review.rating} readOnly />
+                  </TableCell>
+                  <TableCell>{review.comment}</TableCell>
+                  <TableCell>{review.date}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
+    </MainLayout>
   );
 };
 

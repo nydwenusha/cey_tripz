@@ -10,6 +10,7 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
+import MainLayout from '../../MainLayout';
 
 const Customers = () => {
   // Mock data
@@ -19,36 +20,38 @@ const Customers = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Customers Management
-      </Typography>
+    <MainLayout>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Customers Management
+        </Typography>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Total Bookings</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {customers.map((customer) => (
-              <TableRow key={customer.id}>
-                <TableCell>{customer.id}</TableCell>
-                <TableCell>{customer.name}</TableCell>
-                <TableCell>{customer.email}</TableCell>
-                <TableCell>{customer.phone}</TableCell>
-                <TableCell>{customer.bookings}</TableCell>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Phone</TableCell>
+                <TableCell>Total Bookings</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Container>
+            </TableHead>
+            <TableBody>
+              {customers.map((customer) => (
+                <TableRow key={customer.id}>
+                  <TableCell>{customer.id}</TableCell>
+                  <TableCell>{customer.name}</TableCell>
+                  <TableCell>{customer.email}</TableCell>
+                  <TableCell>{customer.phone}</TableCell>
+                  <TableCell>{customer.bookings}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
+    </MainLayout>
   );
 };
 

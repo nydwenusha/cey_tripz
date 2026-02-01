@@ -135,7 +135,7 @@ const Dashboard = () => {
                     marginRight: '0 !important'
                 }}>
                     {/* Left Column - Performance Metrics */}
-                    <Grid item xs={12} md={8}>
+                    <Grid item xs={12} sx={{width:{lg:'calc(60% - 24px)'}}}>
                         {/* Performance Metrics */}
                         <Card className="metrics-card">
                             <CardContent>
@@ -238,8 +238,8 @@ const Dashboard = () => {
                     </Grid>
 
                     {/* Right Column - Top Destinations */}
-                    <Grid item xs={12} md={4}>
-                        <Card className="destinations-card">
+                    <Grid item xs={12} sx={{width:{lg:'calc(40%)'}}}>
+                        <Card className="destinations-card" sx={{width:'100%'}}>
                             <CardContent>
                                 <Typography variant="h6" gutterBottom className="section-title">
                                     Top Destinations

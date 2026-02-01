@@ -10,6 +10,7 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
+import MainLayout from '../../MainLayout';
 
 const Bookings = () => {
   // Mock data
@@ -19,36 +20,38 @@ const Bookings = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Bookings Management
-      </Typography>
+    <MainLayout>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Bookings Management
+        </Typography>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Customer</TableCell>
-              <TableCell>Tour</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Status</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {bookings.map((booking) => (
-              <TableRow key={booking.id}>
-                <TableCell>{booking.id}</TableCell>
-                <TableCell>{booking.customer}</TableCell>
-                <TableCell>{booking.tour}</TableCell>
-                <TableCell>{booking.date}</TableCell>
-                <TableCell>{booking.status}</TableCell>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Customer</TableCell>
+                <TableCell>Tour</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Status</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Container>
+            </TableHead>
+            <TableBody>
+              {bookings.map((booking) => (
+                <TableRow key={booking.id}>
+                  <TableCell>{booking.id}</TableCell>
+                  <TableCell>{booking.customer}</TableCell>
+                  <TableCell>{booking.tour}</TableCell>
+                  <TableCell>{booking.date}</TableCell>
+                  <TableCell>{booking.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
+    </MainLayout>
   );
 };
 

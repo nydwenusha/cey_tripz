@@ -30,6 +30,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 // Styles
 import './styles/global.scss';
 import Sidebar from './components/layout/Sidebar/Sidebar.jsx';
+import Categories from './pages/Tours/Categories.jsx';
 
 // Main Layout Component
 const MainLayout = ({ themeMode, toggleTheme }) => {
@@ -51,8 +52,10 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
         <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/tours" element={<ToursList />} />
-            <Route path="/tours/new" element={<TourEdit />} />
-            <Route path="/tours/:id/edit" element={<TourEdit />} />
+            <Route path="/addtours" element={<TourEdit />} />
+            <Route path="/addtours" element={<TourEdit />} />
+            <Route path="/categories" element={<Categories />} />
+
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/payments" element={<Payments />} />

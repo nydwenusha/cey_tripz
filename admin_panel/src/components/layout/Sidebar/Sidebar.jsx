@@ -41,7 +41,7 @@ const menuItems = [
     {
         title: 'Dashboard',
         icon: <DashboardIcon />,
-        path: '/dashboard',
+        path: '/',
     },
     {
         title: 'Tour Management',
@@ -49,8 +49,8 @@ const menuItems = [
         path: '/tours',
         subItems: [
             { title: 'All Tours', path: '/tours' },
-            { title: 'Add New Tour', path: '/tours/new' },
-            { title: 'Categories', path: '/tours/categories' },
+            { title: 'Add New Tour', path: '/addtours' },
+            { title: 'Categories', path: '/categories' },
         ],
     },
     {
