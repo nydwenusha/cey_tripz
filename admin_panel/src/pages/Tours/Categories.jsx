@@ -214,26 +214,7 @@ const Categories = () => {
                     variant="gradient"
                 />
 
-                <Card className="page-header">
-                    <CardContent>
-                        <Box className="header-content">
-                            <Box>
-                                <Typography variant="h5" className="page-title">
-                                    Tour Categories
-                                </Typography>
-
-                            </Box>
-                            <Button
-                                variant="contained"
-                                startIcon={<Add />}
-                                onClick={handleNewCategory}
-                                className="add-button"
-                            >
-                                Add Category
-                            </Button>
-                        </Box>
-                    </CardContent>
-                </Card>
+             
 
                 {/* Stats */}
                 <Grid container spacing={2} className="stats-grid">

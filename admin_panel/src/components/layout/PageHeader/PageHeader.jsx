@@ -1,6 +1,6 @@
 // PageHeader.jsx
 import React from 'react';
-import { Box, Typography, Button, Breadcrumbs, Link, IconButton, Tooltip } from '@mui/material';
+import { Box, Typography, Button, Breadcrumbs, Link, IconButton, Tooltip, useTheme, useMediaQuery } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   Refresh as RefreshIcon,
@@ -45,6 +45,10 @@ const PageHeader = ({
     return variants[variant] || variants.default;
   };
 
+  const theme = useTheme();
+  const isMidUp = useMediaQuery(theme.breakpoints.up('md'));
+
+
   return (
     <Box sx={{ mb: 4 }}>
       {/* Breadcrumbs */}
@@ -68,13 +72,13 @@ const PageHeader = ({
       )}
 
       {/* Main Header Container */}
-      <Box sx={{ 
+      <Box sx={{
         p: variant === 'minimal' ? 0 : 3,
         ...getVariantStyles()
       }}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'flex-start',
           flexWrap: 'wrap',
           gap: 2
@@ -83,27 +87,27 @@ const PageHeader = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
             {showBackButton && (
               <Tooltip title="Go back">
-                <IconButton 
+                <IconButton
                   onClick={onBackClick}
-                  sx={{ 
+                  sx={{
                     bgcolor: variant === 'gradient' ? 'rgba(255,255,255,0.2)' : 'action.hover',
                     '&:hover': {
                       bgcolor: variant === 'gradient' ? 'rgba(255,255,255,0.3)' : 'action.selected'
                     }
                   }}
                 >
-                  <ArrowBackIcon sx={{ 
-                    color: variant === 'gradient' ? 'white' : 'inherit' 
+                  <ArrowBackIcon sx={{
+                    color: variant === 'gradient' ? 'white' : 'inherit'
                   }} />
                 </IconButton>
               </Tooltip>
             )}
 
             <Box>
-              <Typography 
-                variant="h4" 
-                component="h1" 
-                sx={{ 
+              <Typography
+                variant="h4"
+                component="h1"
+                sx={{
                   fontWeight: 700,
                   color: variant === 'gradient' ? 'white' : 'text.primary',
                   mb: subtitle ? 0.5 : 0
@@ -111,11 +115,11 @@ const PageHeader = ({
               >
                 {title}
               </Typography>
-              
+
               {subtitle && (
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
+                <Typography
+                  variant="body1"
+                  sx={{
                     color: variant === 'gradient' ? 'rgba(255,255,255,0.9)' : 'text.secondary',
                     fontSize: '0.95rem'
                   }}
@@ -126,9 +130,12 @@ const PageHeader = ({
             </Box>
           </Box>
 
+          {!isMidUp &&
+            <br />
+          }
           {/* Right Section - Actions */}
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             gap: 1,
             alignItems: 'center',
             flexWrap: 'wrap'
@@ -180,8 +187,8 @@ const PageHeader = ({
                   }
                 }}
               >
-                <RefreshIcon sx={{ 
-                  color: variant === 'gradient' ? 'white' : 'inherit' 
+                <RefreshIcon sx={{
+                  color: variant === 'gradient' ? 'white' : 'inherit'
                 }} />
               </IconButton>
             </Tooltip>
@@ -195,8 +202,8 @@ const PageHeader = ({
                   }
                 }}
               >
-                <HelpIcon sx={{ 
-                  color: variant === 'gradient' ? 'white' : 'inherit' 
+                <HelpIcon sx={{
+                  color: variant === 'gradient' ? 'white' : 'inherit'
                 }} />
               </IconButton>
             </Tooltip>
@@ -210,8 +217,8 @@ const PageHeader = ({
                   }
                 }}
               >
-                <SettingsIcon sx={{ 
-                  color: variant === 'gradient' ? 'white' : 'inherit' 
+                <SettingsIcon sx={{
+                  color: variant === 'gradient' ? 'white' : 'inherit'
                 }} />
               </IconButton>
             </Tooltip>
