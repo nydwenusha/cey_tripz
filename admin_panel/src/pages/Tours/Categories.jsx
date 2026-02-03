@@ -42,11 +42,16 @@ import {
     History,
     Spa,
     FamilyRestroom,
-    Diamond
+    Diamond,
+    Download,
+    Print,
+    Email
 } from '@mui/icons-material';
 import './Categories.scss';
-import './../../components/layout/PageHeader/PageHeader.scss';
+
 import MainLayout from '../../MainLayout';
+import PageHeader from '../../components/layout/PageHeader/PageHeader.jsx';
+import '../../components/layout/PageHeader/PageHeader.scss';
 
 const Categories = () => {
     const [categories, setCategories] = useState([
@@ -186,6 +191,29 @@ const Categories = () => {
         <MainLayout>
             <Box className="categories-container">
                 {/* Header */}
+                <PageHeader
+                    title="Tour Categories"
+                    subtitle="Manage your all categories in one place."
+                    primaryAction={{
+                        label: 'Export',
+                        onClick: () => handleExport(),
+                        icon: <Download />
+                    }}
+                    secondaryActions={[
+                        {
+                            label: 'Print All',
+                            onClick: () => handlePrintAll(),
+                            icon: <Print />
+                        },
+                        {
+                            label: 'Email All',
+                            onClick: () => handleEmailAll(),
+                            icon: <Email />
+                        }
+                    ]}
+                    variant="gradient"
+                />
+
                 <Card className="page-header">
                     <CardContent>
                         <Box className="header-content">
@@ -193,7 +221,7 @@ const Categories = () => {
                                 <Typography variant="h5" className="page-title">
                                     Tour Categories
                                 </Typography>
-                               
+
                             </Box>
                             <Button
                                 variant="contained"
