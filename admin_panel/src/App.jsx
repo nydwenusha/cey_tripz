@@ -15,7 +15,7 @@ import Header from './components/layout/Header/Header';
 import Dashboard from './pages/Dashboard/Dashboard';
 import ToursList from './pages/Tours/ToursList';
 import TourEdit from './pages/Tours/TourEdit';
-import Bookings from './pages/Bookings/Bookings';
+import Booking from './pages/Bookings/Booking';
 import Customers from './pages/Customers/Customers';
 import Payments from './pages/Payments/Payments';
 import Content from './pages/Content/Content';
@@ -56,7 +56,7 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
             <Route path="/addtours" element={<TourEdit />} />
             <Route path="/categories" element={<Categories />} />
 
-            <Route path="/bookings" element={<Bookings />} />
+            <Route path="/bookings" element={<Booking />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/content/*" element={<Content />} />

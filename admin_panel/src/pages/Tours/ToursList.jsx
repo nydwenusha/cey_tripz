@@ -45,10 +45,15 @@ import {
   LocationOn,
   AttachMoney,
   CheckCircle,
-  Cancel
+  Cancel,
+  Download,
+  Email,
+  Print
 } from '@mui/icons-material';
 import './TourList.scss';
 import MainLayout from '../../MainLayout';
+import './../../components/layout/PageHeader/PageHeader.scss';
+import PageHeader from '../../components/layout/PageHeader/PageHeader';
 
 const TourList = ({ tours: initialTours = [], onEdit, onDelete, onAddNew }) => {
   const [page, setPage] = useState(0);
@@ -300,39 +305,29 @@ const TourList = ({ tours: initialTours = [], onEdit, onDelete, onAddNew }) => {
     <MainLayout>
       <Box className="tour-list">
         {/* Header with Search and Actions */}
-        <Card className="tour-list-header" sx={{ mb: 3 }}>
-          <CardContent>
-            <Box className="header-content">
-              <Typography variant="h5" className="page-title">
-                Tour Management
-              </Typography>
-              <Box className="header-actions">
-                <TextField
-                  placeholder="Search tours..."
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search />
-                      </InputAdornment>
-                    ),
-                  }}
-                  size="small"
-                  className="search-field"
-                />
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={onAddNew}
-                  className="add-button"
-                >
-                  Add Tour
-                </Button>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+        <PageHeader
+          title="Tour Management"
+          subtitle="You can add new tours here"
+          primaryAction={{
+            label: 'Export',
+            onClick: () => handleExport(),
+            icon: <Download />
+          }}
+          secondaryActions={[
+            {
+              label: 'Print All',
+              onClick: () => handlePrintAll(),
+              icon: <Print />
+            },
+            {
+              label: 'Email All',
+              onClick: () => handleEmailAll(),
+              icon: <Email />
+            }
+          ]}
+          variant="gradient"
+        />
+        
 
         {/* Filters */}
         <Card className="filters-card" sx={{ mb: 3 }}>

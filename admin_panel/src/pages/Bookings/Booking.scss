@@ -1,0 +1,235 @@
+// Booking.scss - Updated with action buttons styling
+.booking-container {
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  border-radius: 16px;
+  min-height: calc(100vh - 48px);
+
+ 
+  .booking-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      .MuiChip-root {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+
+  .booking-table-container {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    background: white;
+
+    .booking-table {
+      .table-head {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .table-header-cell {
+          color: white;
+          font-weight: 600;
+          font-size: 0.875rem;
+          letter-spacing: 0.5px;
+          border-bottom: none;
+          padding: 16px;
+
+          &:first-child {
+            border-radius: 12px 0 0 0;
+          }
+
+          &:last-child {
+            border-radius: 0 12px 0 0;
+          }
+        }
+      }
+
+      .table-row {
+        transition: all 0.2s ease;
+
+        &:hover {
+          background-color: rgba(102, 126, 234, 0.04);
+          transform: scale(1.002);
+
+          .action-buttons {
+            opacity: 1;
+          }
+        }
+
+        td {
+          padding: 16px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .customer-cell {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          .customer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+          }
+        }
+
+        .tour-cell,
+        .date-cell {
+          display: flex;
+          align-items: center;
+          font-weight: 500;
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 4px;
+          opacity: 0.7;
+          transition: opacity 0.2s ease;
+
+          .MuiIconButton-root {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(102, 126, 234, 0.1);
+
+            &:hover {
+              background: rgba(102, 126, 234, 0.2);
+            }
+
+            &.MuiIconButton-colorSuccess {
+              background: rgba(76, 175, 80, 0.1);
+              &:hover { background: rgba(76, 175, 80, 0.2); }
+            }
+
+            &.MuiIconButton-colorWarning {
+              background: rgba(255, 152, 0, 0.1);
+              &:hover { background: rgba(255, 152, 0, 0.2); }
+            }
+
+            &.MuiIconButton-colorError {
+              background: rgba(244, 67, 54, 0.1);
+              &:hover { background: rgba(244, 67, 54, 0.2); }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .booking-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding: 16px 0;
+
+    .MuiTablePagination-root {
+      padding: 0;
+    }
+  }
+}
+
+// Booking Details Dialog
+.booking-details {
+  .MuiTypography-h6 {
+    margin-bottom: 4px;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .booking-container {
+    padding: 16px;
+
+    .booking-header {
+      flex-direction: column;
+      align-items: stretch;
+
+      .header-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+    }
+
+    .booking-controls {
+      flex-direction: column;
+      align-items: stretch;
+
+      .MuiTextField-root {
+        width: 100% !important;
+      }
+
+      .filter-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    }
+
+    .booking-footer {
+      flex-direction: column;
+      gap: 16px;
+    }
+  }
+
+  .booking-table-container {
+    overflow-x: auto;
+
+    .booking-table {
+      min-width: 800px;
+
+      .table-row {
+        .action-buttons {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .booking-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+
+    .booking-table-container {
+      background: #0f3460;
+
+      .table-head {
+        background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+      }
+
+      .table-row {
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        td {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          color: #e0e0e0;
+        }
+      }
+    }
+  }
+}

@@ -38,7 +38,10 @@ import {
   Description,
   LocationOn,
   Category,
-  Star
+  Star,
+  Download,
+  Email,
+  Print
 } from '@mui/icons-material';
 import './TourEdit.scss';
 import MainLayout from '../../MainLayout';
@@ -266,10 +269,33 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
     <MainLayout>
       <Box className="tour-edit">
         {/* Page Header */}
-        <PageHeader props={{title: initialData ? 'Edit Tour' : 'Create New Tour', cancel: onCancel, submit: handleSubmit, saveButtonText:'Save', cancelButtonText: 'Cancel'}} />
-        
+        <PageHeader
+          title="Add New Tour "
+          subtitle="You can add new tours here"
+          primaryAction={{
+            label: 'Export',
+            onClick: () => handleExport(),
+            icon: <Download />
+          }}
+          secondaryActions={[
+            {
+              label: 'Print All',
+              onClick: () => handlePrintAll(),
+              icon: <Print />
+            },
+            {
+              label: 'Email All',
+              onClick: () => handleEmailAll(),
+              icon: <Email />
+            }
+          ]}
+          variant="gradient"
+        />
 
-          
+        <PageHeader props={{ title: initialData ? 'Edit Tour' : 'Create New Tour', cancel: onCancel, submit: handleSubmit, saveButtonText: 'Save', cancelButtonText: 'Cancel' }} />
+
+
+
         <Stepper activeStep={activeStep} className="form-stepper">
           {steps.map((label) => (
             <Step key={label}>

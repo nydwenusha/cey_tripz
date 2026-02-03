@@ -45,6 +45,7 @@ import {
     Diamond
 } from '@mui/icons-material';
 import './Categories.scss';
+import './../../components/layout/PageHeader/PageHeader.scss';
 import MainLayout from '../../MainLayout';
 
 const Categories = () => {
@@ -185,16 +186,14 @@ const Categories = () => {
         <MainLayout>
             <Box className="categories-container">
                 {/* Header */}
-                <Card className="categories-header">
+                <Card className="page-header">
                     <CardContent>
                         <Box className="header-content">
                             <Box>
                                 <Typography variant="h5" className="page-title">
                                     Tour Categories
                                 </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                    Manage tour categories and their properties
-                                </Typography>
+                               
                             </Box>
                             <Button
                                 variant="contained"

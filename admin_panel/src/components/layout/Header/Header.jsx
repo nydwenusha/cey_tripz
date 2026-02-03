@@ -76,7 +76,7 @@ const Header = ({
         <AppBar
             position="fixed"
             sx={{
-                width: { sm: `calc(100% - ${sidebarWidth}px)` },
+                width: { xs:`100%`, sm: `100%`, md: `calc(100% - ${sidebarWidth}px)` },
                 ml: { sm: `${sidebarWidth}px` },
                 backgroundColor: 'background.paper',
                 color: 'text.primary',
@@ -96,7 +96,7 @@ const Header = ({
                     aria-label="open drawer"
                     edge="start"
                     onClick={onMenuClick}
-                    sx={{ mr: 2, display: { sm: 'none' } }}
+                    sx={{ mr: 2, display: { md: 'none' } }}
                 >
                     <MenuIcon />
                 </IconButton>

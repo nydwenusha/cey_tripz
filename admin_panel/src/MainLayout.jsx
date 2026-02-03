@@ -50,7 +50,8 @@ const MainLayout = ({ children }) => {
                     pt: { xs: 8, sm: 9 }, // Top padding to account for fixed header
                     width: {
                         xs: '100%',
-                        sm: `calc(100% - ${sidebarWidth}px)` // Simplified calculation
+                        sm:'100%',
+                        md: `calc(100% - ${sidebarWidth}px)` // Simplified calculation
                     },
                     ml: {
                         xs: 0,
@@ -59,21 +60,25 @@ const MainLayout = ({ children }) => {
                     },
                     position: 'absolute',
                     left: {
-                        lg:sidebarWidth,
-                        md:0,
+                        md:sidebarWidth,
+                        sm:0,
                         xs:0,
                     },
                     ml:0,
+                    
                     minHeight: '100vh',
                     backgroundColor: 'background.default', // Changed from 'red'
                     transition: theme.transitions.create(['margin', 'width'], {
                         easing: theme.transitions.easing.sharp,
                         duration: theme.transitions.duration.leavingScreen,
                     }),
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                 }}
             >
                 {/* Page container with padding */}
-                <Box className="page-container">
+                <Box className="page-container" sx={{width:'100%'}}>
                     {children || <Outlet />} {/* Support both children and Outlet */}
                 </Box>
             </Box>
