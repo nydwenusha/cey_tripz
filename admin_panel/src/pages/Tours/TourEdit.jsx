@@ -292,10 +292,6 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
           variant="gradient"
         />
 
-        <PageHeader props={{ title: initialData ? 'Edit Tour' : 'Create New Tour', cancel: onCancel, submit: handleSubmit, saveButtonText: 'Save', cancelButtonText: 'Cancel' }} />
-
-
-
         <Stepper activeStep={activeStep} className="form-stepper">
           {steps.map((label) => (
             <Step key={label}>
