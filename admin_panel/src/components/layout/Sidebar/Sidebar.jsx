@@ -242,7 +242,7 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                             <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
                             <Box>
                                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                                    TravelPro
+                                    CeyTripz
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">
                                     Management Dashboard
