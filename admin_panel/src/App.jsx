@@ -31,6 +31,8 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import './styles/global.scss';
 import Sidebar from './components/layout/Sidebar/Sidebar.jsx';
 import Categories from './pages/Tours/Categories.jsx';
+import Vehicles from './pages/Tours/Vehicles.jsx';
+import AddVehicles from './pages/Tours/AddVehicles.jsx';
 
 // Main Layout Component
 const MainLayout = ({ themeMode, toggleTheme }) => {
@@ -47,7 +49,7 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
 
     return (
 
-       
+
 
         <Routes>
             <Route path="/" element={<Dashboard />} />
@@ -55,7 +57,8 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
             <Route path="/addtours" element={<TourEdit />} />
             <Route path="/addtours" element={<TourEdit />} />
             <Route path="/categories" element={<Categories />} />
-
+            <Route path="/vehicles" element={<Vehicles />} />
+            <Route path="/AddVehicles" element={<AddVehicles />} />
             <Route path="/bookings" element={<Booking />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/payments" element={<Payments />} />

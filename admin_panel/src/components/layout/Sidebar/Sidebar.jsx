@@ -51,6 +51,7 @@ const menuItems = [
             { title: 'All Tours', path: '/tours' },
             { title: 'Add New Tour', path: '/addtours' },
             { title: 'Categories', path: '/categories' },
+            { title: 'Vehicles', path: '/vehicles' },
         ],
     },
     {

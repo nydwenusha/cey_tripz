@@ -1,0 +1,583 @@
+.add-vehicles-page {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 20px;
+
+    .page-title {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      color: #666;
+      max-width: 600px;
+    }
+
+    .back-button {
+      border-radius: 10px;
+      padding: 10px 20px;
+      text-transform: none;
+      font-weight: 600;
+      border: 2px solid #e0e0e0;
+      color: #667eea;
+      transition: all 0.3s ease;
+      min-width: 160px;
+
+      &:hover {
+        border-color: #667eea;
+        background-color: rgba(102, 126, 234, 0.04);
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  .form-container {
+    border-radius: 16px;
+    padding: 32px;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e0e0;
+
+    .form-stepper {
+      margin-bottom: 40px;
+
+      .MuiStepLabel-root {
+        .MuiStepLabel-label {
+          font-weight: 500;
+
+          &.Mui-active {
+            color: #667eea;
+            font-weight: 600;
+          }
+
+          &.Mui-completed {
+            color: #4caf50;
+          }
+        }
+      }
+
+      .MuiStepIcon-root {
+        &.Mui-active {
+          color: #667eea;
+        }
+
+        &.Mui-completed {
+          color: #4caf50;
+        }
+      }
+    }
+
+    .step-content {
+      padding: 20px 0;
+      min-height: 400px;
+
+      .form-step {
+        animation: fadeIn 0.3s ease;
+
+        // Fix for Material-UI TextField width issues
+        .MuiTextField-root {
+          width: 100% !important;
+          min-width: 100% !important;
+
+          .MuiInputBase-root {
+            width: 100% !important;
+            min-width: 100% !important;
+          }
+
+          .MuiInputBase-input {
+            width: 100% !important;
+            min-width: 100% !important;
+          }
+        }
+
+        // Fix for Material-UI Select width issues
+        .MuiFormControl-root {
+          width: 100% !important;
+          min-width: 100% !important;
+
+          .MuiSelect-select {
+            width: 100% !important;
+            min-width: 100% !important;
+          }
+
+          .MuiOutlinedInput-root {
+            width: 100% !important;
+            min-width: 100% !important;
+          }
+        }
+
+        // Specific width fixes for different field types
+        .MuiGrid-container {
+          .MuiGrid-item {
+            // Full width fields
+            &:has(.MuiTextField-root[data-fullwidth="true"]),
+            &:has(.MuiFormControl-root[data-fullwidth="true"]) {
+              grid-column: 1 / -1;
+            }
+
+            // Regular width fields
+            .MuiTextField-root,
+            .MuiFormControl-root {
+              .MuiOutlinedInput-root {
+                min-height: 56px; // Consistent height
+
+                .MuiOutlinedInput-input {
+                  min-width: 200px; // Minimum readable width
+                  &::placeholder {
+                    opacity: 0.6;
+                    color: #666;
+                  }
+                }
+
+                // Fix for empty select showing small width
+                .MuiSelect-select:not([data-value]) {
+                  min-width: 200px !important;
+                  &::after {
+                    content: attr(placeholder);
+                    color: #666;
+                    opacity: 0.6;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .MuiFormControl-root {
+          margin-bottom: 20px;
+
+          .MuiInputLabel-root {
+            &.Mui-focused {
+              color: #667eea;
+            }
+
+            // Prevent label from affecting width
+            &.MuiInputLabel-shrink {
+              transform: translate(14px, -9px) scale(0.75);
+            }
+          }
+
+          .MuiOutlinedInput-root {
+            border-radius: 10px;
+            width: 100% !important;
+            min-width: 100% !important;
+
+            &.Mui-focused {
+              .MuiOutlinedInput-notchedOutline {
+                border-color: #667eea;
+                border-width: 2px;
+              }
+            }
+
+            // Fix notched outline width
+            .MuiOutlinedInput-notchedOutline {
+              legend {
+                width: auto !important;
+              }
+            }
+          }
+        }
+
+        .tags-section {
+          margin-top: 24px;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 12px;
+          border: 1px solid #e0e0e0;
+          width: 100%;
+
+          .MuiChip-root {
+            border-radius: 8px;
+            font-weight: 500;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            border: 1px solid #667eea30;
+            color: #667eea;
+            min-width: 60px;
+          }
+
+          // Tag input field width fix
+          .MuiTextField-root {
+            .MuiInputBase-root {
+              min-width: 300px !important;
+            }
+          }
+        }
+
+        // File Upload Section
+        .upload-section {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 24px;
+          flex-wrap: wrap;
+
+          .upload-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            text-transform: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            min-width: 180px;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+              background: linear-gradient(135deg, #5a6fd8 0%, #6b4290 100%);
+            }
+          }
+        }
+
+        // Image Previews
+        .image-previews {
+          width: 100%;
+
+          .image-preview-card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+            position: relative;
+            width: 100%;
+            min-width: 200px;
+
+            &:hover {
+              border-color: #667eea;
+              transform: translateY(-4px);
+              box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+            }
+
+            .image-preview-container {
+              position: relative;
+              height: 150px;
+              overflow: hidden;
+              width: 100%;
+
+              .preview-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.3s ease;
+                min-width: 100%;
+              }
+
+              &:hover .preview-image {
+                transform: scale(1.05);
+              }
+
+              .upload-progress {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.7);
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+
+                .progress-bar {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  height: 100%;
+                  background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+                  transition: width 0.3s ease;
+                  min-width: 0;
+                }
+
+                .progress-text {
+                  position: relative;
+                  z-index: 1;
+                  color: white;
+                  font-weight: 600;
+                }
+              }
+
+              .remove-image-btn {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: rgba(255, 255, 255, 0.9);
+                color: #f44336;
+                width: 28px;
+                height: 28px;
+
+                &:hover {
+                  background: white;
+                  transform: scale(1.1);
+                }
+              }
+            }
+
+            .image-info {
+              padding: 12px;
+              background: #f8f9fa;
+              border-top: 1px solid #e0e0e0;
+              width: 100%;
+              min-width: 100%;
+              box-sizing: border-box;
+
+              .MuiTypography-caption {
+                display: block;
+                text-align: center;
+                font-weight: 500;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                width: 100%;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .form-actions {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #e0e0e0;
+      width: 100%;
+
+      .action-button {
+        border-radius: 10px;
+        padding: 12px 28px;
+        text-transform: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        min-width: 120px;
+
+        &.submit,
+        &.next {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+          border: none;
+
+          &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6b4290 100%);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+          }
+        }
+
+        &.back,
+        &.cancel {
+          background: white;
+          color: #667eea;
+          border: 2px solid #667eea;
+
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+          }
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+      }
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // Additional fixes for Material-UI components
+  .MuiTextField-root {
+    & .MuiOutlinedInput-root {
+      & .MuiOutlinedInput-input {
+        min-width: 200px !important;
+        width: 100% !important;
+      }
+    }
+
+    // Fix for empty fields
+    & .MuiInputBase-input:placeholder-shown {
+      min-width: 200px !important;
+    }
+  }
+
+  .MuiSelect-select {
+    min-width: 200px !important;
+
+    &:empty::before {
+      content: attr(placeholder);
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .MuiInputLabel-root {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 24px);
+  }
+
+  // Ensure all form controls have consistent width
+  .MuiFormControl-root,
+  .MuiTextField-root {
+    & > * {
+      width: 100% !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+
+      .back-button {
+        width: 100%;
+        min-width: auto;
+      }
+    }
+
+    .form-container {
+      padding: 20px;
+      margin: 0;
+
+      .form-stepper {
+        .MuiStepLabel-label {
+          font-size: 0.8rem;
+        }
+      }
+
+      .step-content {
+        .form-step {
+          .MuiGrid-container {
+            .MuiGrid-item {
+              width: 100% !important;
+              min-width: 100% !important;
+
+              .MuiTextField-root,
+              .MuiFormControl-root {
+                .MuiOutlinedInput-root {
+                  .MuiOutlinedInput-input {
+                    min-width: 150px !important; // Smaller but still readable on mobile
+                  }
+                }
+              }
+            }
+          }
+
+          .image-previews {
+            .image-preview-card {
+              .image-preview-container {
+                height: 120px;
+              }
+            }
+          }
+        }
+      }
+
+      .form-actions {
+        .MuiBox-root {
+          flex-direction: column;
+          gap: 12px;
+
+          > div {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          }
+        }
+
+        .action-button {
+          width: 100%;
+          margin: 0 !important;
+          min-width: auto;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .form-container {
+      padding: 16px;
+
+      .form-stepper {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .MuiStep-root {
+          margin-bottom: 8px;
+          width: 100%;
+        }
+      }
+
+      .step-content {
+        min-height: 300px;
+
+        .form-step {
+          .MuiGrid-container {
+            .MuiGrid-item {
+              .MuiTextField-root,
+              .MuiFormControl-root {
+                .MuiOutlinedInput-root {
+                  .MuiOutlinedInput-input {
+                    min-width: 120px !important; // Minimum readable width for mobile
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Global form width fixes
+.MuiFormControl-fullWidth {
+  width: 100% !important;
+}
+
+.MuiInputBase-fullWidth {
+  width: 100% !important;
+}
+
+// Fix for Material-UI select width issue when empty
+.MuiSelect-nativeInput {
+  width: 100% !important;
+}
+
+// Ensure consistent width for all form elements
+form {
+  .MuiFormControl-root,
+  .MuiTextField-root {
+    display: block !important;
+    width: 100% !important;
+
+    & > div {
+      width: 100% !important;
+    }
+  }
+}
