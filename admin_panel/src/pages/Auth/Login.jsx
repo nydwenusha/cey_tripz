@@ -16,7 +16,8 @@ import {
   VisibilityOff,
   Email,
   Lock,
-  Login as LoginIcon
+  Login as LoginIcon,
+  FlightTakeoff
 } from '@mui/icons-material';
 import './Login.scss';
 
@@ -33,13 +34,17 @@ const Login = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
+    
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email';
     }
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
     setErrors(newErrors);
@@ -92,23 +97,28 @@ const Login = () => {
     }
   };
 
-
   return (
     <div className="login-page">
+      {/* Sri Lanka travel background */}
+      <div className="srilanka-background"></div>
+      
       <div className="login-container">
-        <Paper className="login-card" elevation={8}>
-
+        <Paper className="login-card" elevation={6}>
+          
           <Box className="login-header">
             <Box className="logo">
-              <Box className="logo-icon">
-                <LoginIcon />
+              <Box className="">
+                <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
               </Box>
-              <Typography variant="h5" className="logo-text">
+              <Typography variant="h6" className="logo-text">
                 CeyTripz
               </Typography>
             </Box>
-            <Typography variant="h5" className="login-title">
-              Welcome Back
+            <Typography variant="h6" className="login-title">
+              Welcome Back !!
+            </Typography>
+            <Typography variant="body2" className="login-subtitle">
+              Sign in to continue
             </Typography>
           </Box>
 
@@ -123,24 +133,25 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit} className="login-form">
-
             <TextField
               fullWidth
-              label="Email Address"
+              label="Email"
               name="email"
               type="email"
               value={formData.email}
               onChange={handleChange}
               error={!!errors.email}
               helperText={errors.email}
-              margin="normal"
+              margin="dense"
+              size="small"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Email />
+                    <Email className="input-icon" />
                   </InputAdornment>
                 ),
               }}
+              className="custom-input"
             />
 
             <TextField
@@ -152,11 +163,12 @@ const Login = () => {
               onChange={handleChange}
               error={!!errors.password}
               helperText={errors.password}
-              margin="normal"
+              margin="dense"
+              size="small"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Lock />
+                    <Lock className="input-icon" />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -164,15 +176,17 @@ const Login = () => {
                     <IconButton
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
+                      size="small"
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
+              className="custom-input"
             />
 
-            <Box className="form-options">
+            {/* <Box className="form-options">
               <FormControlLabel
                 control={
                   <Checkbox
@@ -186,7 +200,7 @@ const Login = () => {
               <Button size="small" className="forgot-link">
                 Forgot password?
               </Button>
-            </Box>
+            </Box> */}
 
             <Button
               type="submit"
@@ -194,7 +208,7 @@ const Login = () => {
               variant="contained"
               className="login-button"
               disabled={loading}
-              startIcon={loading ? null : <LoginIcon />}
+              size="medium"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>

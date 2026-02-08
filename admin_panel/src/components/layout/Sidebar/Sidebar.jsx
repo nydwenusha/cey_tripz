@@ -41,7 +41,7 @@ const menuItems = [
     {
         title: 'Dashboard',
         icon: <DashboardIcon />,
-        path: '/',
+        path: '/dashboard',
     },
     {
         title: 'Tour Management',
