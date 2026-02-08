@@ -33,6 +33,9 @@ import Sidebar from './components/layout/Sidebar/Sidebar.jsx';
 import Categories from './pages/Tours/Categories.jsx';
 import Vehicles from './pages/Tours/Vehicles.jsx';
 import AddVehicles from './pages/Tours/AddVehicles.jsx';
+import BlogPostManagement from './pages/Content/BlogPostManagement.jsx';
+import AddBlogPage from './pages/Content/AddBlogPage.jsx';
+import dotenv from 'dotenv';
 
 // Main Layout Component
 const MainLayout = ({ themeMode, toggleTheme }) => {
@@ -52,7 +55,8 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
 
 
         <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tours" element={<ToursList />} />
             <Route path="/addtours" element={<TourEdit />} />
             <Route path="/addtours" element={<TourEdit />} />
@@ -63,6 +67,8 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
             <Route path="/customers" element={<Customers />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/content/*" element={<Content />} />
+            <Route path="/blogs" element={<BlogPostManagement />} />
+            <Route path="/AddBlogs" element={<AddBlogPage />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings/*" element={<Settings />} />

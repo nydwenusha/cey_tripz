@@ -1,0 +1,216 @@
+// Login.scss - Compact Version
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  
+  .login-container {
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .login-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px 32px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+      
+      .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        
+        .logo-icon {
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+        }
+        
+        .logo-text {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #2c3e50;
+        }
+      }
+      
+      .login-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+    }
+    
+    .login-alert {
+      margin-bottom: 24px;
+      border-radius: 8px;
+    }
+    
+    .login-form {
+      .MuiTextField-root {
+        margin-bottom: 20px;
+        
+        .MuiOutlinedInput-root {
+          border-radius: 10px;
+          height: 48px;
+          
+          .MuiInputAdornment-root {
+            color: #6b7280;
+          }
+        }
+        
+        .MuiFormHelperText-root {
+          margin-left: 0;
+          margin-top: 4px;
+        }
+      }
+      
+      .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 24px 0;
+        
+        .MuiFormControlLabel-root {
+          margin: 0;
+          
+          .MuiFormControlLabel-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+          }
+        }
+        
+        .forgot-link {
+          font-size: 0.875rem;
+          color: #667eea;
+          text-transform: none;
+          padding: 4px 8px;
+          min-width: auto;
+          
+          &:hover {
+            background: rgba(102, 126, 234, 0.05);
+          }
+        }
+      }
+      
+      .login-button {
+        height: 48px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: none;
+        margin-bottom: 24px;
+        
+        &:hover {
+          background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        &:disabled {
+          opacity: 0.7;
+        }
+      }
+      
+      .signup-text {
+        text-align: center;
+        color: #6b7280;
+        font-size: 0.875rem;
+        
+        .signup-link {
+          font-size: 0.875rem;
+          color: #667eea;
+          text-transform: none;
+          padding: 0;
+          min-width: auto;
+          font-weight: 600;
+          
+          &:hover {
+            background: transparent;
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .login-page {
+    .login-card {
+      background: #1f2937;
+      
+      .login-header {
+        .logo-text {
+          color: #f9fafb;
+        }
+        
+        .login-title {
+          color: #f9fafb;
+        }
+      }
+      
+      .login-form {
+        .MuiTextField-root {
+          .MuiOutlinedInput-root {
+            background: #111827;
+            
+            .MuiInputBase-input {
+              color: #f9fafb;
+            }
+          }
+          
+          .MuiInputLabel-root {
+            color: #9ca3af;
+          }
+        }
+        
+        .form-options {
+          .MuiFormControlLabel-root .MuiFormControlLabel-label {
+            color: #d1d5db;
+          }
+        }
+        
+        .signup-text {
+          color: #9ca3af;
+        }
+      }
+    }
+  }
+}
+
+// Mobile responsive
+@media (max-width: 600px) {
+  .login-page {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 40px;
+    
+    .login-card {
+      padding: 32px 24px;
+    }
+  }
+}
+
+@media (max-height: 700px) {
+  .login-page {
+    align-items: flex-start;
+    padding-top: 40px;
+    min-height: auto;
+  }
+}

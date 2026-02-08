@@ -43,10 +43,21 @@ import {
   CheckCircle,
   Cancel,
   Pending,
-  Refresh
+  Refresh,
+  Save,
+  Print,
+  Email,
+  TrendingUp,
+  TrendingDown,
+  AccountBalanceWallet,
+  CheckCircleOutline,
+  Schedule,
+  ErrorOutline,
+  Autorenew
 } from '@mui/icons-material';
 import './Payments.scss';
 import MainLayout from '../../MainLayout';
+import PageHeader from '../../components/layout/PageHeader/PageHeader';
 
 const Payments = () => {
   // Initial data
@@ -177,12 +188,17 @@ const Payments = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterMethod, setFilterMethod] = useState('all');
   const [openDialog, setOpenDialog] = useState(false);
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     total: 8567.30,
     completed: 6542.55,
     pending: 1120.00,
     failed: 125.75,
-    refunded: 560.25
+    refunded: 560.25,
+    totalTrend: 12.5,
+    completedTrend: 8.2,
+    pendingTrend: -3.5,
+    failedTrend: 2.1,
+    refundedTrend: -1.8
   });
 
   // Filter payments based on search and filters
@@ -283,60 +299,157 @@ const Payments = () => {
     }
   };
 
+  // Stats icon
+  const getStatIcon = (type) => {
+    switch (type) {
+      case 'total':
+        return <AccountBalanceWallet fontSize="large" />;
+      case 'completed':
+        return <CheckCircleOutline fontSize="large" />;
+      case 'pending':
+        return <Schedule fontSize="large" />;
+      case 'failed':
+        return <ErrorOutline fontSize="large" />;
+      case 'refunded':
+        return <Autorenew fontSize="large" />;
+      default:
+        return <AccountBalanceWallet fontSize="large" />;
+    }
+  };
+
   const handleExport = () => {
     console.log('Exporting payments data...');
   };
 
+  const handlePrintAll = () => {
+    console.log('Printing all payments...');
+  };
+
+  const handleEmailAll = () => {
+    console.log('Emailing all payments...');
+  };
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
+
+  // Stats grid data
+  const statCards = [
+    {
+      type: 'total',
+      icon: <AccountBalanceWallet fontSize="large" />,
+      value: stats.total,
+      label: 'Total Revenue',
+      trend: stats.totalTrend,
+      progress: 85
+    },
+    {
+      type: 'completed',
+      icon: <CheckCircleOutline fontSize="large" />,
+      value: stats.completed,
+      label: 'Completed',
+      trend: stats.completedTrend,
+      progress: null
+    },
+    {
+      type: 'pending',
+      icon: <Schedule fontSize="large" />,
+      value: stats.pending,
+      label: 'Pending',
+      trend: stats.pendingTrend,
+      progress: null
+    },
+    {
+      type: 'failed',
+      icon: <ErrorOutline fontSize="large" />,
+      value: stats.failed,
+      label: 'Failed',
+      trend: stats.failedTrend,
+      progress: null
+    },
+    {
+      type: 'refunded',
+      icon: <Autorenew fontSize="large" />,
+      value: stats.refunded,
+      label: 'Refunded',
+      trend: stats.refundedTrend,
+      progress: null
+    }
+  ];
+
   return (
     <MainLayout>
       <div className="payments-container">
+        <PageHeader
+          title="Payment Management"
+          subtitle="View and manage all your payments in one place"
+          primaryAction={{
+            label: 'Save',
+            onClick: () => console.log('Save clicked'),
+            icon: <Save />
+          }}
+          secondaryActions={[
+            {
+              label: 'Print All',
+              onClick: handlePrintAll,
+              icon: <Print />
+            },
+            {
+              label: 'Email All',
+              onClick: handleEmailAll,
+              icon: <Email />
+            }
+          ]}
+          variant="gradient"
+        />
+
         {/* Stats Cards */}
-        <Grid container spacing={3} className="stats-grid">
-          <Grid item xs={12} sm={6} md={2.4}>
-            <Paper className="stat-card total">
-              <AttachMoney className="stat-icon" />
-              <Typography variant="h6">Total</Typography>
-              <Typography variant="h5">${stats.total.toFixed(2)}</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
-            <Paper className="stat-card completed">
-              <CheckCircle className="stat-icon" />
-              <Typography variant="h6">Completed</Typography>
-              <Typography variant="h5">${stats.completed.toFixed(2)}</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
-            <Paper className="stat-card pending">
-              <Pending className="stat-icon" />
-              <Typography variant="h6">Pending</Typography>
-              <Typography variant="h5">${stats.pending.toFixed(2)}</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
-            <Paper className="stat-card failed">
-              <Cancel className="stat-icon" />
-              <Typography variant="h6">Failed</Typography>
-              <Typography variant="h5">${stats.failed.toFixed(2)}</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
-            <Paper className="stat-card refunded">
-              <Refresh className="stat-icon" />
-              <Typography variant="h6">Refunded</Typography>
-              <Typography variant="h5">${stats.refunded.toFixed(2)}</Typography>
-            </Paper>
-          </Grid>
-        </Grid>
+        <div className="stats-grid">
+          {statCards.map((stat) => (
+            <div key={stat.type} className={`stat-card ${stat.type}`}>
+              <div className="card-header">
+                <div className="stat-icon">
+                  {stat.icon}
+                </div>
+                <div className={`stat-trend ${stat.trend >= 0 ? 'positive' : 'negative'}`}>
+                  {stat.trend >= 0 ? <TrendingUp fontSize="small" /> : <TrendingDown fontSize="small" />}
+                  {Math.abs(stat.trend)}%
+                </div>
+              </div>
+              <div className="card-content">
+                <div className="stat-value">
+                  <span className="currency">$</span>
+                  {stat.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </div>
+                <div className="stat-label">{stat.label}</div>
+              </div>
+              {stat.progress && (
+                <div className="stat-progress">
+                  <div className="progress-label">
+                    <span>Monthly Target</span>
+                    <span>{stat.progress}%</span>
+                  </div>
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill" 
+                      style={{ width: `${stat.progress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
         {/* Main Table */}
         <Paper className="payments-paper">
           {/* Header */}
           <div className="table-header">
-            <Typography variant="h5" className="table-title">
-              <Receipt className="title-icon" />
-              Payment Management
-            </Typography>
             <div className="header-actions">
               <TextField
                 variant="outlined"

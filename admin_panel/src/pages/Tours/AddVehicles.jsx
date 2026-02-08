@@ -37,10 +37,14 @@ import {
     People as PeopleIcon,
     Settings as SettingsIcon,
     CheckCircle as CheckIcon,
-    Close as CloseIcon
+    Close as CloseIcon,
+    Save,
+    Print,
+    Email
 } from '@mui/icons-material';
 import MainLayout from '../../MainLayout'; // Import MainLayout
 import './AddVehicles.scss';
+import PageHeader from '../../components/layout/PageHeader/PageHeader';
 
 // Constants
 const vehicleTypes = [
@@ -329,7 +333,7 @@ const AddVehicles = () => {
                                         value={formData.type}
                                         onChange={(e) => handleInputChange('type', e.target.value)}
                                         label="Vehicle Type"
-                                        
+
                                     >
                                         <MenuItem value="" disabled>Select Type</MenuItem>
                                         {vehicleTypes.map((type) => (
@@ -779,24 +783,29 @@ const AddVehicles = () => {
             <Container maxWidth="lg" className="add-vehicles-page">
                 <Box sx={{ py: 4 }}>
                     {/* Header */}
-                    <Box className="page-header">
-                        <Box>
-                            <Typography variant="h4" className="page-title">
-                                Add New Vehicle
-                            </Typography>
-                            <Typography variant="body1" color="textSecondary" className="page-subtitle">
-                                Fill in the vehicle details step by step
-                            </Typography>
-                        </Box>
-                        <Button
-                            variant="outlined"
-                            startIcon={<ArrowBackIcon />}
-                            onClick={() => navigate('/vehicles')}
-                            className="back-button"
-                        >
-                            Back to Vehicles
-                        </Button>
-                    </Box>
+                    <PageHeader
+                        title="Add New Vehicle"
+                        subtitle="Fill in the vehicle details step by step"
+                        primaryAction={{
+                            label: 'Save',
+                            onClick: () => navigate('/AddVehicles'),
+                            icon: <Save />
+                        }}
+                        secondaryActions={[
+                            {
+                                label: 'Print All',
+                                onClick: () => handlePrintAll(),
+                                icon: <Print />
+                            },
+                            {
+                                label: 'Email All',
+                                onClick: () => handleEmailAll(),
+                                icon: <Email />
+                            }
+                        ]}
+                        variant="gradient"
+                    />
+                  
 
                     {/* Form Container */}
                     <Paper elevation={0} className="form-container">

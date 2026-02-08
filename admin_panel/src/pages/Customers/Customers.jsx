@@ -29,10 +29,13 @@ import {
   Visibility,
   Email,
   Phone,
-  Person
+  Person,
+  Save,
+  Print
 } from '@mui/icons-material';
 import './Customers.scss';
 import MainLayout from '../../MainLayout';
+import PageHeader from '../../components/layout/PageHeader/PageHeader';
 
 const Customers = () => {
   // Initial data
@@ -172,13 +175,33 @@ const Customers = () => {
   return (
     <MainLayout>
       <div className="customers-container">
+        <PageHeader
+          title="Customers Management"
+          subtitle="Manage customer details in one place. View contact info, booking history and more."
+          primaryAction={{
+            label: 'Save',
+            onClick: () => navigate('/AddVehicles'),
+            icon: <Save />
+          }}
+          secondaryActions={[
+            {
+              label: 'Print All',
+              onClick: () => handlePrintAll(),
+              icon: <Print />
+            },
+            {
+              label: 'Email All',
+              onClick: () => handleEmailAll(),
+              icon: <Email />
+            }
+          ]}
+          variant="gradient"
+        />
         <Paper className="customers-paper">
           {/* Header */}
+
           <div className="table-header">
-            <Typography variant="h5" className="table-title">
-              <Person className="title-icon" />
-              Customers Management
-            </Typography>
+           
             <div className="header-actions">
               <TextField
                 variant="outlined"
@@ -195,11 +218,7 @@ const Customers = () => {
                 }}
                 className="search-field"
               />
-              <Tooltip title="Filter">
-                <IconButton>
-                  <FilterList />
-                </IconButton>
-              </Tooltip>
+              
             </div>
           </div>
 

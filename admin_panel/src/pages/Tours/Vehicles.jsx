@@ -47,11 +47,16 @@ import {
     LocalGasStation as FuelIcon,
     People as PeopleIcon,
     Settings as SettingsIcon,
-    CalendarToday as CalendarIcon
+    CalendarToday as CalendarIcon,
+    Download,
+    Print,
+    Email
+   
 } from '@mui/icons-material';
 import './Vehicles.scss';
 import MainLayout from './../../MainLayout';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import PageHeader from '../../components/layout/PageHeader/PageHeader';
 
 // Import multiple vehicle images for each car
 const vehicleImageGalleries = {
@@ -399,25 +404,29 @@ const Vehicles = () => {
         <MainLayout>
             <Box className="vehicles-management">
                 {/* Header */}
-                <Box className="header-section">
-                    <Box>
-                        <Typography variant="h4" className="page-title">
-                            Vehicle Management
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary" className="page-subtitle">
-                            Manage your fleet of vehicles with multiple images, view analytics and handle bookings
-                        </Typography>
-                    </Box>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<CarIcon />}
-                        onClick={() => navigate("/AddVehicles")}
-                        className="add-vehicle-btn"
-                    >
-                        Add New Vehicle
-                    </Button>
-                </Box>
+                <PageHeader
+                    title="Vehicle Management"
+                    subtitle=" Manage your fleet of vehicles with multiple images, view analytics and handle bookings"
+                    primaryAction={{
+                        label: 'Add Vehicle',
+                        onClick: () => navigate('/AddVehicles'),
+                        icon: <CarIcon />
+                    }}
+                    secondaryActions={[
+                        {
+                            label: 'Print All',
+                            onClick: () => handlePrintAll(),
+                            icon: <Print />
+                        },
+                        {
+                            label: 'Email All',
+                            onClick: () => handleEmailAll(),
+                            icon: <Email />
+                        }
+                    ]}
+                    variant="gradient"
+                />
+              
 
                 {/* Stats Cards */}
                 <Grid container spacing={3} className="stats-section">
