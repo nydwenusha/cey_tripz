@@ -25,7 +25,7 @@ import Settings from './pages/Settings/Settings';
 import Login from './pages/Auth/Login';
 
 // Auth Context
-import { AuthProvider, useAuth } from './hooks/useAuth';
+import { AuthProvider } from './services/auth/AuthContext.jsx';
 
 // Styles
 import './styles/global.scss';
@@ -36,6 +36,7 @@ import AddVehicles from './pages/Tours/AddVehicles.jsx';
 import BlogPostManagement from './pages/Content/BlogPostManagement.jsx';
 import AddBlogPage from './pages/Content/AddBlogPage.jsx';
 import dotenv from 'dotenv';
+import Signup from './pages/Auth/Signup.jsx';
 
 // Main Layout Component
 const MainLayout = ({ themeMode, toggleTheme }) => {
@@ -51,11 +52,9 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
     };
 
     return (
-
-
-
         <Routes>
             <Route path="/" element={<Login />} />
+
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tours" element={<ToursList />} />
             <Route path="/addtours" element={<TourEdit />} />
@@ -72,10 +71,7 @@ const MainLayout = ({ themeMode, toggleTheme }) => {
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings/*" element={<Settings />} />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
-
-
     );
 };
 
@@ -98,6 +94,7 @@ function App() {
                     <Router>
                         <Routes>
                             <Route path="/login" element={<Login />} />
+                            <Route path="/signup" element={<Signup />} />
                             <Route path="/*" element={
                                 <MainLayout themeMode={themeMode} toggleTheme={toggleTheme} />
                             } />
