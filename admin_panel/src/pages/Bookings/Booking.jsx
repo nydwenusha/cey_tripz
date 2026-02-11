@@ -78,117 +78,184 @@ const Booking = () => {
     severity: 'success'
   });
 
-  // Updated vehicle booking data to match first image
+  // Updated vehicle categories based on the image
+  const vehicleCategories = [
+    // Mini Car
+    { id: 1, name: 'Suzuki Alto', category: 'Mini Car' },
+
+    // Exclusive / Sedan Car
+    { id: 2, name: 'Toyota Prius', category: 'Sedan Car' },
+    { id: 3, name: 'Honda Shuttle', category: 'Sedan Car' },
+    { id: 4, name: 'Toyota Axio', category: 'Sedan Car' },
+
+    // Hatchback Car
+    { id: 5, name: 'Suzuki Wagon R (FX)', category: 'Hatchback Car' },
+    { id: 6, name: 'Suzuki Wagon R (FZ)', category: 'Hatchback Car' },
+    { id: 7, name: 'Suzuki Wagon R (Stingray)', category: 'Hatchback Car' },
+
+    // Mini Van
+    { id: 8, name: 'Suzuki Every', category: 'Mini Van' },
+
+    // Seater Van (Flat Roof)
+    { id: 9, name: 'Toyota KDH', category: 'Seater Van' },
+
+    // Seater Van (High Roof)
+    { id: 10, name: 'Toyota Hiace', category: 'Seater Van' }
+  ];
+
+  // Updated vehicle booking data to match the actual fleet
   const bookingsData = [
     {
       id: 1,
       customer: 'John Doe',
       email: 'john@example.com',
+      phone: '+94 77 123 4567',
       pickupLocation: 'Colombo Airport',
       dropLocation: 'Sigiriya',
-      vehicleType: 'SUV',
+      vehicleType: 'Toyota Prius',
+      vehicleCategory: 'Sedan Car',
       pickupDate: '2024-01-15',
       returnDate: '2024-01-17',
       passengers: 2,
       status: 'confirmed',
       amount: '$450',
-      phone: '+1 234-567-8901',
       notes: 'Need child seat'
     },
     {
       id: 2,
       customer: 'Jane Smith',
       email: 'jane@example.com',
+      phone: '+94 77 234 5678',
       pickupLocation: 'Bentota',
       dropLocation: 'Colombo',
-      vehicleType: 'Sedan',
+      vehicleType: 'Suzuki Wagon R (FX)',
+      vehicleCategory: 'Hatchback Car',
       pickupDate: '2024-01-20',
       returnDate: '2024-01-22',
       passengers: 4,
       status: 'pending',
       amount: '$320',
-      phone: '+1 234-567-8902',
       notes: 'Extra luggage'
     },
     {
       id: 3,
       customer: 'Robert Johnson',
       email: 'robert@example.com',
+      phone: '+94 77 345 6789',
       pickupLocation: 'Kandy',
       dropLocation: 'Nuwara Eliya',
-      vehicleType: 'Van',
+      vehicleType: 'Toyota Hiace',
+      vehicleCategory: 'Seater Van',
       pickupDate: '2024-02-05',
       returnDate: '2024-02-07',
-      passengers: 7,
+      passengers: 12,
       status: 'confirmed',
       amount: '$580',
-      phone: '+1 234-567-8903',
-      notes: ''
+      notes: 'Airport transfer'
     },
     {
       id: 4,
       customer: 'Sarah Williams',
       email: 'sarah@example.com',
+      phone: '+94 77 456 7890',
       pickupLocation: 'Galle',
       dropLocation: 'Mirissa',
-      vehicleType: 'SUV',
+      vehicleType: 'Suzuki Wagon R (Stingray)',
+      vehicleCategory: 'Hatchback Car',
       pickupDate: '2024-01-28',
       returnDate: '2024-01-30',
       passengers: 3,
       status: 'cancelled',
       amount: '$380',
-      phone: '+1 234-567-8904',
       notes: 'Need beach access'
     },
     {
       id: 5,
       customer: 'Michael Chen',
       email: 'michael@example.com',
+      phone: '+94 77 567 8901',
       pickupLocation: 'Colombo',
       dropLocation: 'Ella',
-      vehicleType: 'Premium SUV',
+      vehicleType: 'Toyota Axio',
+      vehicleCategory: 'Sedan Car',
       pickupDate: '2024-02-10',
       returnDate: '2024-02-15',
       passengers: 2,
       status: 'confirmed',
       amount: '$890',
-      phone: '+1 234-567-8905',
       notes: 'Long distance trip'
     },
     {
       id: 6,
       customer: 'Emma Davis',
       email: 'emma@example.com',
+      phone: '+94 77 678 9012',
       pickupLocation: 'Negombo',
       dropLocation: 'Dambulla',
-      vehicleType: 'Sedan',
+      vehicleType: 'Suzuki Every',
+      vehicleCategory: 'Mini Van',
       pickupDate: '2024-01-25',
       returnDate: '2024-01-26',
-      passengers: 2,
+      passengers: 6,
       status: 'pending',
       amount: '$250',
-      phone: '+1 234-567-8906',
       notes: 'One way trip'
     },
     {
       id: 7,
       customer: 'David Wilson',
       email: 'david@example.com',
+      phone: '+94 77 789 0123',
       pickupLocation: 'Colombo Airport',
       dropLocation: 'Bentota',
-      vehicleType: 'Van',
+      vehicleType: 'Toyota KDH',
+      vehicleCategory: 'Seater Van',
       pickupDate: '2024-02-01',
       returnDate: '2024-02-05',
-      passengers: 6,
+      passengers: 8,
       status: 'confirmed',
       amount: '$650',
-      phone: '+1 234-567-8907',
       notes: 'Family vacation'
     },
+    {
+      id: 8,
+      customer: 'Lisa Anderson',
+      email: 'lisa@example.com',
+      phone: '+94 77 890 1234',
+      pickupLocation: 'Kandy',
+      dropLocation: 'Colombo',
+      vehicleType: 'Suzuki Alto',
+      vehicleCategory: 'Mini Car',
+      pickupDate: '2024-02-08',
+      returnDate: '2024-02-10',
+      passengers: 2,
+      status: 'confirmed',
+      amount: '$280',
+      notes: 'Economy car requested'
+    },
+    {
+      id: 9,
+      customer: 'James Brown',
+      email: 'james@example.com',
+      phone: '+94 77 901 2345',
+      pickupLocation: 'Galle',
+      dropLocation: 'Yala',
+      vehicleType: 'Honda Shuttle',
+      vehicleCategory: 'Sedan Car',
+      pickupDate: '2024-02-12',
+      returnDate: '2024-02-15',
+      passengers: 5,
+      status: 'pending',
+      amount: '$520',
+      notes: 'Safari trip'
+    }
   ];
 
-  // Vehicle types for filter
-  const vehicleTypes = ['all', 'Sedan', 'SUV', 'Van', 'Premium SUV', 'Bus', 'Mini Van'];
+  // Extract unique vehicle names for filter
+  const vehicleNames = ['all', ...new Set(vehicleCategories.map(v => v.name))];
+
+  // Extract unique vehicle categories for filter
+  const vehicleCategoriesList = ['all', ...new Set(vehicleCategories.map(v => v.category))];
 
   const handleMenuClick = (event, booking) => {
     setAnchorEl(event.currentTarget);
@@ -295,9 +362,11 @@ const Booking = () => {
     const matchesSearch =
       booking.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.pickupLocation.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.dropLocation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.vehicleType.toLowerCase().includes(searchTerm.toLowerCase());
+      booking.vehicleType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.vehicleCategory.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
     const matchesVehicle = vehicleFilter === 'all' || booking.vehicleType === vehicleFilter;
@@ -347,12 +416,12 @@ const Booking = () => {
 
         <Box className="booking-controls">
           <TextField
-            placeholder="Search by customer, location, vehicle..."
+            placeholder="Search by customer, email, phone, location, vehicle..."
             variant="outlined"
             size="small"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ width: 350 }}
+            sx={{ width: 400 }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -363,16 +432,16 @@ const Booking = () => {
           />
 
           <Box className="filter-buttons">
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Vehicle Type</InputLabel>
+            <FormControl size="small" sx={{ minWidth: 200 }}>
+              <InputLabel>Vehicle Model</InputLabel>
               <Select
                 value={vehicleFilter}
-                label="Vehicle Type"
+                label="Vehicle Model"
                 onChange={(e) => setVehicleFilter(e.target.value)}
               >
-                {vehicleTypes.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type === 'all' ? 'All Vehicles' : type}
+                {vehicleNames.map((vehicle) => (
+                  <MenuItem key={vehicle} value={vehicle}>
+                    {vehicle === 'all' ? 'All Vehicles' : vehicle}
                   </MenuItem>
                 ))}
               </Select>
@@ -403,7 +472,8 @@ const Booking = () => {
                 <TableCell className="table-header-cell">Customer</TableCell>
                 <TableCell className="table-header-cell">Pickup Location</TableCell>
                 <TableCell className="table-header-cell">Drop Location</TableCell>
-                <TableCell className="table-header-cell">Vehicle</TableCell>
+                <TableCell className="table-header-cell">Vehicle Model</TableCell>
+                <TableCell className="table-header-cell">Category</TableCell>
                 <TableCell className="table-header-cell">Pickup Date</TableCell>
                 <TableCell className="table-header-cell">Return Date</TableCell>
                 <TableCell className="table-header-cell">Passengers</TableCell>
@@ -424,8 +494,11 @@ const Booking = () => {
                         <Typography variant="body2" fontWeight="500">
                           {booking.customer}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                           {booking.email}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                          📞 {booking.phone}
                         </Typography>
                       </Box>
                     </Box>
@@ -452,6 +525,15 @@ const Booking = () => {
                         sx={{ fontWeight: 500 }}
                       />
                     </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={booking.vehicleCategory}
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                      sx={{ fontWeight: 500, fontSize: '0.75rem' }}
+                    />
                   </TableCell>
                   <TableCell>
                     <Box className="date-cell">
@@ -620,8 +702,12 @@ const Booking = () => {
                     CUSTOMER INFORMATION
                   </Typography>
                   <Typography variant="h6">{selectedBooking.customer}</Typography>
-                  <Typography variant="body2" color="text.secondary">{selectedBooking.email}</Typography>
-                  <Typography variant="body2" color="text.secondary">{selectedBooking.phone}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {selectedBooking.email}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                    📞 {selectedBooking.phone}
+                  </Typography>
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -659,6 +745,10 @@ const Booking = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <CarIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
                     <Typography variant="body1">{selectedBooking.vehicleType}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <CarIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
+                    <Typography variant="body2">Category: {selectedBooking.vehicleCategory}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <PeopleIcon fontSize="small" sx={{ mr: 1, opacity: 0.7 }} />
