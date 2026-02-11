@@ -266,7 +266,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
   };
 
   return (
-    <MainLayout>
+  
       <Box className="tour-edit">
         {/* Page Header */}
         <PageHeader
@@ -749,7 +749,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
           </Alert>
         </Snackbar>
       </Box>
-    </MainLayout>
+
   );
 };
 

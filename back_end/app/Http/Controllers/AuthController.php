@@ -53,9 +53,13 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        Log::info('First Step Completed!!!');
+
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
+        Log::info('Second Step Completed!!!');
 
         $credentials = $request->only('email', 'password');
 
@@ -65,6 +69,8 @@ class AuthController extends Controller
                 'message' => 'Invalid credentials',
             ], 401);
         }
+
+        Log::info('Third Step Completed!!!');
 
         return response()->json([
             'status' => 'success',

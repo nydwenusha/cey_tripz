@@ -302,7 +302,7 @@ const TourList = ({ tours: initialTours = [], onEdit, onDelete, onAddNew }) => {
   };
 
   return (
-    <MainLayout>
+  
       <Box className="tour-list">
         {/* Header with Search and Actions */}
         <PageHeader
@@ -670,7 +670,7 @@ const TourList = ({ tours: initialTours = [], onEdit, onDelete, onAddNew }) => {
           </Alert>
         </Snackbar>
       </Box>
-    </MainLayout>
+  
   );
 };
 

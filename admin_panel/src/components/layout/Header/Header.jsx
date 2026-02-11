@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
     AppBar,
     Toolbar,
@@ -27,7 +27,7 @@ import {
     Brightness7,
 } from '@mui/icons-material';
 import './Header.scss';
-import { useAuth } from '../../../hooks/useAuth';
+import {AuthContext, useAuth} from '../../../services/auth/AuthContext.jsx';
 
 const Header = ({
     onMenuClick,
@@ -35,7 +35,7 @@ const Header = ({
     themeMode = 'light',
     sidebarOpen = true  // Add this prop
 }) => {
-    const { user, logout } = useAuth();
+    const { user } = useContext(AuthContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const [notificationsAnchor, setNotificationsAnchor] = useState(null);
 

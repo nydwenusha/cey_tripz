@@ -779,7 +779,7 @@ const AddVehicles = () => {
 
     // Wrap the content with MainLayout
     return (
-        <MainLayout>
+  
             <Container maxWidth="lg" className="add-vehicles-page">
                 <Box sx={{ py: 4 }}>
                     {/* Header */}
@@ -872,7 +872,7 @@ const AddVehicles = () => {
                     </Paper>
                 </Box>
             </Container>
-        </MainLayout>
+  
     );
 };
 

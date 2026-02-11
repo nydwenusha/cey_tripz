@@ -9,7 +9,7 @@ import MainLayout from '../../MainLayout';
 
 const Content = () => {
   return (
-    <MainLayout>
+   
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" gutterBottom>
           Content Management
@@ -26,7 +26,7 @@ const Content = () => {
           </Box>
         </Paper>
       </Container>
-    </MainLayout>
+    
   );
 };
 

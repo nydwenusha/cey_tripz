@@ -86,7 +86,7 @@ const Categories = () => {
     };
 
     return (
-        <MainLayout>
+      
             <Box className="categories-container">
                 {/* Header with Add Button */}
                 <PageHeader
@@ -302,7 +302,7 @@ const Categories = () => {
                     </MenuItem>
                 </Menu>
             </Box>
-        </MainLayout>
+   
     );
 };
 

@@ -734,7 +734,7 @@ const Reviews = () => {
   ];
 
   return (
-    <MainLayout>
+  
       <div className="reviews-container">
         {/* Header */}
         <PageHeader
@@ -1860,7 +1860,7 @@ const Reviews = () => {
           </Box>
         </Modal>
       </div>
-    </MainLayout>
+
   );
 };
 

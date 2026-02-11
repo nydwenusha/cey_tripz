@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   TextField,
   Button,
@@ -20,6 +20,8 @@ import {
   FlightTakeoff
 } from '@mui/icons-material';
 import './Login.scss';
+import { AuthContext } from '../../services/auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -31,10 +33,11 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
-
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -53,7 +56,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       return;
     }
@@ -61,16 +63,29 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      setAlert({
-        show: true,
-        type: 'success',
-        message: 'Login successful!'
+      const result = await login(formData);
+      if (!result.success) {
+        const messages = result.message || {};
+        setErrors({
+          name: messages.name || '',
+          email: messages.email || '',
+          phone_number: messages.phone_number || '',
+          password: messages.password || '',
+        });
+      }
+
+      console.log('Login successful:', result);
+      console.log('Token in localStorage:', localStorage.getItem('token'));
+      setFormData({
+        name: '',
+        email: '',
+        phone_number: '',
+        password: '',
+        role: 'admin',
+        status: 'active'
       });
-
-      setFormData({ email: '', password: '' });
-      setErrors({});
+      navigate('/dashboard');
 
     } catch (error) {
       setAlert({
@@ -78,6 +93,7 @@ const Login = () => {
         type: 'error',
         message: 'Login failed. Please try again.'
       });
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -101,10 +117,10 @@ const Login = () => {
     <div className="login-page">
       {/* Sri Lanka travel background */}
       <div className="srilanka-background"></div>
-      
+
       <div className="login-container">
         <Paper className="login-card" elevation={6}>
-          
+
           <Box className="login-header">
             <Box className="logo">
               <Box className="">

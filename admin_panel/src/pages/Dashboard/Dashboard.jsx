@@ -75,7 +75,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <MainLayout>
+
             <Box className="dashboard">
                 <Typography variant="h4" gutterBottom className="dashboard-title">
                     Dashboard Overview
@@ -289,7 +289,7 @@ const Dashboard = () => {
                     </Grid>
                 </Grid>
             </Box>
-        </MainLayout>
+  
     );
 };
 

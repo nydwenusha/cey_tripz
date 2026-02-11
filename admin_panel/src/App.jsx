@@ -7,10 +7,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 // Theme
 import theme, { darkTheme } from './theme';
 
-// Layout Components
-
-import Header from './components/layout/Header/Header';
-
 // Pages
 import Dashboard from './pages/Dashboard/Dashboard';
 import ToursList from './pages/Tours/ToursList';
@@ -23,57 +19,22 @@ import Reviews from './pages/Reviews/Reviews';
 import Reports from './pages/Reports/Reports';
 import Settings from './pages/Settings/Settings';
 import Login from './pages/Auth/Login';
+import Signup from './pages/Auth/Signup';
+import Categories from './pages/Tours/Categories.jsx';
+import Vehicles from './pages/Tours/Vehicles.jsx';
+import AddVehicles from './pages/Tours/AddVehicles.jsx';
+import BlogPostManagement from './pages/Content/BlogPostManagement.jsx';
+import AddBlogPage from './pages/Content/AddBlogPage.jsx';
+
+// Layout
+import MainLayout from './MainLayout.jsx';
 
 // Auth Context
 import { AuthProvider } from './services/auth/AuthContext.jsx';
 
 // Styles
 import './styles/global.scss';
-import Sidebar from './components/layout/Sidebar/Sidebar.jsx';
-import Categories from './pages/Tours/Categories.jsx';
-import Vehicles from './pages/Tours/Vehicles.jsx';
-import AddVehicles from './pages/Tours/AddVehicles.jsx';
-import BlogPostManagement from './pages/Content/BlogPostManagement.jsx';
-import AddBlogPage from './pages/Content/AddBlogPage.jsx';
-import dotenv from 'dotenv';
-import Signup from './pages/Auth/Signup.jsx';
-
-// Main Layout Component
-const MainLayout = ({ themeMode, toggleTheme }) => {
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-
-    const handleDrawerToggle = () => {
-        setMobileOpen(!mobileOpen);
-    };
-
-    const handleSidebarToggle = () => {
-        setSidebarOpen(!sidebarOpen);
-    };
-
-    return (
-        <Routes>
-            <Route path="/" element={<Login />} />
-
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/tours" element={<ToursList />} />
-            <Route path="/addtours" element={<TourEdit />} />
-            <Route path="/addtours" element={<TourEdit />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/vehicles" element={<Vehicles />} />
-            <Route path="/AddVehicles" element={<AddVehicles />} />
-            <Route path="/bookings" element={<Booking />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/content/*" element={<Content />} />
-            <Route path="/blogs" element={<BlogPostManagement />} />
-            <Route path="/AddBlogs" element={<AddBlogPage />} />
-            <Route path="/reviews" element={<Reviews />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings/*" element={<Settings />} />
-        </Routes>
-    );
-};
+import ProtectedRoute from './services/ProtectedRoute.jsx';
 
 function App() {
     const [themeMode, setThemeMode] = useState('light');
@@ -87,22 +48,44 @@ function App() {
     };
 
     return (
-        <ThemeProvider theme={currentTheme}>
-            <CssBaseline />
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <AuthProvider>
+        <AuthProvider>
+            <ThemeProvider theme={currentTheme}>
+                <CssBaseline />
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <Router>
                         <Routes>
+                            {/* Public Routes */}
                             <Route path="/login" element={<Login />} />
                             <Route path="/signup" element={<Signup />} />
-                            <Route path="/*" element={
-                                <MainLayout themeMode={themeMode} toggleTheme={toggleTheme} />
-                            } />
+                            
+                            {/* Protected Routes with Layout */}
+                            <Route element={
+                                <ProtectedRoute>
+                                    <MainLayout />
+                                </ProtectedRoute>
+                            }>
+                                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                                <Route path="/dashboard" element={<Dashboard />} />
+                                <Route path="/tours" element={<ToursList />} />
+                                <Route path="/addtours" element={<TourEdit />} />
+                                <Route path="/categories" element={<Categories />} />
+                                <Route path="/vehicles" element={<Vehicles />} />
+                                <Route path="/AddVehicles" element={<AddVehicles />} />
+                                <Route path="/bookings" element={<Booking />} />
+                                <Route path="/customers" element={<Customers />} />
+                                <Route path="/payments" element={<Payments />} />
+                                <Route path="/content/*" element={<Content />} />
+                                <Route path="/blogs" element={<BlogPostManagement />} />
+                                <Route path="/AddBlogs" element={<AddBlogPage />} />
+                                <Route path="/reviews" element={<Reviews />} />
+                                <Route path="/reports" element={<Reports />} />
+                                <Route path="/settings/*" element={<Settings />} />
+                            </Route>
                         </Routes>
                     </Router>
-                </AuthProvider>
-            </LocalizationProvider>
-        </ThemeProvider>
+                </LocalizationProvider>
+            </ThemeProvider>
+        </AuthProvider>
     );
 }
 

@@ -383,7 +383,7 @@ const Payments = () => {
   ];
 
   return (
-    <MainLayout>
+
       <div className="payments-container">
         <PageHeader
           title="Payment Management"
@@ -741,7 +741,7 @@ const Payments = () => {
           </DialogActions>
         </Dialog>
       </div>
-    </MainLayout>
+   
   );
 };
 

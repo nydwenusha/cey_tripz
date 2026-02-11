@@ -173,7 +173,7 @@ const Customers = () => {
   };
 
   return (
-    <MainLayout>
+
       <div className="customers-container">
         <PageHeader
           title="Customers Management"
@@ -363,7 +363,7 @@ const Customers = () => {
           </MenuItem>
         </Menu>
       </div>
-    </MainLayout>
+   
   );
 };
 

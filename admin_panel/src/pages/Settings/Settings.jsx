@@ -12,7 +12,7 @@ import MainLayout from '../../MainLayout';
 
 const Settings = () => {
   return (
-    <MainLayout>
+
       <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" gutterBottom>
           Settings
@@ -54,7 +54,7 @@ const Settings = () => {
           </Box>
         </Paper>
       </Container>
-    </MainLayout>
+   
   );
 };
 

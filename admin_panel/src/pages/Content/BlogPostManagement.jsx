@@ -398,7 +398,7 @@ const BlogPostManagement = () => {
     };
 
     return (
-        <MainLayout>
+
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <Box className="blog-management">
                     {/* Header */}
@@ -1069,7 +1069,7 @@ const BlogPostManagement = () => {
                     </Snackbar>
                 </Box>
             </LocalizationProvider>
-        </MainLayout>
+       
     );
 };
 

@@ -401,7 +401,7 @@ const Vehicles = () => {
     };
 
     return (
-        <MainLayout>
+    
             <Box className="vehicles-management">
                 {/* Header */}
                 <PageHeader
@@ -899,7 +899,7 @@ const Vehicles = () => {
                     </CardContent>
                 </Card>
             </Box>
-        </MainLayout>
+      
     );
 };
 

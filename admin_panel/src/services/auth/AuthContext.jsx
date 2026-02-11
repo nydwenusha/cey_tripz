@@ -1,16 +1,22 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 
 import api from "../api/api";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   const checkAuth = async () => {
     const token = localStorage.getItem("token");
@@ -23,14 +29,15 @@ export const AuthProvider = ({ children }) => {
       }
     }
     setLoading(false);
-  };
+  }
 
-  const login = async (email, password) => {
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const login = async (data) => {
     try {
-      const response = await api.post("/login", {
-        email,
-        password,
-      });
+      const response = await api.post("/login", data);
       localStorage.setItem("token", response.data.token);
       setUser(response.data.user);
       return { success: true };
