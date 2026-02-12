@@ -185,7 +185,7 @@ const Header = ({
                                 fontSize: '0.875rem',
                             }}
                         >
-                            {user?.name?.charAt(0) || 'A'}
+                            {user?.name?.charAt(0)}
                         </Avatar>
                         <Box sx={{
                             display: {
@@ -194,10 +194,10 @@ const Header = ({
                             }
                         }}>
                             <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                                {user?.name || 'Admin User'}
+                                {user?.name || ''}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                                {user?.role || 'Administrator'}
+                                {user?.role || ''}
                             </Typography>
                         </Box>
                     </Box>

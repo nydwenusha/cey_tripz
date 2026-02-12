@@ -9,7 +9,16 @@ use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
 {
-    public function index(Request $request){
+
+    public function index(){
+        $bookings = Booking::all();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Bookings retrieved successfully',
+            'bookings' => $bookings,
+        ], 200);
+    }
+    public function store(Request $request){
         $validator = Validator::make($request->all(), [
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|string|email|max:255',
@@ -52,4 +61,5 @@ class BookingController extends Controller
             'booking' => $booking,
         ], 201);
     }
+
 }

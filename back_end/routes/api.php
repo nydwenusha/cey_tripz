@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/booking', [BookingController::class, 'index']);
+Route::post('/booking', [BookingController::class, 'store']);
+Route::get('/GetBookings', [BookingController::class, 'index']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
