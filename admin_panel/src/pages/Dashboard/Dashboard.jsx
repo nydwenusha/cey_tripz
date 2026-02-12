@@ -77,9 +77,6 @@ const Dashboard = () => {
     return (
 
             <Box className="dashboard">
-                <Typography variant="h4" gutterBottom className="dashboard-title">
-                    Dashboard Overview
-                </Typography>
 
                 {/* Stats Cards - Full Width Grid */}
                 <Grid container spacing={3} className="stats-grid" sx={{ 

@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Validator;
 class BookingController extends Controller
 {
 
-    public function index(){
+    public function index()
+    {
         $bookings = Booking::all();
         return response()->json([
             'status' => 'success',
@@ -18,7 +19,8 @@ class BookingController extends Controller
             'bookings' => $bookings,
         ], 200);
     }
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|string|email|max:255',
@@ -33,7 +35,7 @@ class BookingController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             Log::info($validator->errors());
             return response()->json($validator->errors(), 422);
         }
@@ -62,4 +64,50 @@ class BookingController extends Controller
         ], 201);
     }
 
+    public function getTotalBookings()
+    {
+        $totalBookings = Booking::count();
+        Log::info('Total bookings: ' . $totalBookings);
+        return response()->json(['status' => 'success', 'message' => 'Total bookings retrieved successfully', 'total_bookings' => $totalBookings,], 200);
+    }
+
+    public function getTodayBookings(){
+        $today = date('Y-m-d');
+        $today_bookings = Booking::whereDate('created_at', $today)->count();
+        Log::info('Today bookings: ' . $today_bookings);
+        return response()->json(['status' => 'success', 'message' => 'Today bookings retrieved successfully', 'today_bookings' => $today_bookings,], 200);
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|integer|exists:bookings,id',
+            'status' => 'required|string|in:pending,confirmed,cancelled'
+        ]);
+
+        if ($validator->fails()) {
+            Log::info($validator->errors());
+            return response()->json($validator->errors(), 422);
+        }
+
+
+
+        $item = Booking::find($request->id);
+
+        if (!$item) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        $item->status = $request->status;
+        $item->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Booking status updated successfully',
+            'booking' => $item,
+        ], 200);
+    }
 }

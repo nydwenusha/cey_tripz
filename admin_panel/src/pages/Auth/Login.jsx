@@ -122,16 +122,14 @@ const Login = () => {
         <Paper className="login-card" elevation={6}>
 
           <Box className="login-header">
-            <Box className="logo">
-              <Box className="">
-                <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
-              </Box>
+            <img src="/favicon.png" width="50px" alt="CeyTripz Logo" className="logo-image" />
+            {/* <Box className="logo">
               <Typography variant="h6" className="logo-text">
                 CeyTripz
               </Typography>
-            </Box>
+            </Box> */}
             <Typography variant="h6" className="login-title">
-              Welcome Back !!
+              Welcome to CeyTripz!!
             </Typography>
             <Typography variant="body2" className="login-subtitle">
               Sign in to continue
@@ -225,8 +223,9 @@ const Login = () => {
               className="login-button"
               disabled={loading}
               size="medium"
+              sx={{color:'white !important'}}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Signing In...' : 'Sign In'}
             </Button>
 
             <Typography variant="body2" className="signup-text">

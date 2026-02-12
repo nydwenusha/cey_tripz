@@ -36,7 +36,7 @@ import {
 } from '@mui/icons-material';
 import './Sidebar.scss';
 import { AuthContext, AuthProvider } from '../../../services/auth/AuthContext';
-import {useAuth}  from '../../../services/auth/AuthContext.jsx';
+import { useAuth } from '../../../services/auth/AuthContext.jsx';
 
 const menuItems = [
     {
@@ -204,130 +204,123 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
     };
 
     return (
-     
-            <Drawer
-                variant={variant}
-                open={open}
-                onClose={onClose}
-                sx={{
+
+        <Drawer
+            variant={variant}
+            open={open}
+            onClose={onClose}
+            sx={{
+                width: open ? 280 : 72,
+                flexShrink: 0,
+                '& .MuiDrawer-paper': {
                     width: open ? 280 : 72,
-                    flexShrink: 0,
-                    '& .MuiDrawer-paper': {
-                        width: open ? 280 : 72,
-                        boxSizing: 'border-box',
-                        borderRight: '1px solid',
-                        borderColor: 'divider',
-                        transition: theme.transitions.create('width', {
-                            easing: theme.transitions.easing.sharp,
-                            duration: theme.transitions.duration.enteringScreen,
-                        }),
-                        overflowX: 'hidden',
-                    },
-                    zIndex: 2000,
+                    boxSizing: 'border-box',
+                    borderRight: '1px solid',
+                    borderColor: 'divider',
+                    transition: theme.transitions.create('width', {
+                        easing: theme.transitions.easing.sharp,
+                        duration: theme.transitions.duration.enteringScreen,
+                    }),
+                    overflowX: 'hidden',
+                },
+                zIndex: 2000,
+            }}
+        >
+            {/* Header with toggle button */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    p: 2,
+                    minHeight: 64,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    position: 'relative',
                 }}
             >
-                {/* Header with toggle button */}
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        p: 2,
-                        minHeight: 64,
-                        borderBottom: '1px solid',
-                        borderColor: 'divider',
-                        position: 'relative',
-                    }}
-                >
-                    {open ? (
-                        <>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main' }} />
-                                <Box>
-                                    <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                                        CeyTripz
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Management Dashboard
-                                    </Typography>
-                                </Box>
-                            </Box>
-                            <IconButton
-                                onClick={onToggle}
-                                size="small"
-                                sx={{
-                                    color: 'text.secondary',
-                                    '&:hover': {
-                                        backgroundColor: 'action.hover',
-                                    },
-                                }}
-                            >
-                                <ChevronLeft />
-                            </IconButton>
-                        </>
-                    ) : (
-                        <>
-                            <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main', mx: 'auto' }} />
-                            <IconButton
-                                onClick={onToggle}
-                                size="small"
-                                sx={{
-                                    position: 'absolute',
-                                    right: -12,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    backgroundColor: 'background.paper',
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    '&:hover': {
-                                        backgroundColor: 'action.hover',
-                                    },
-                                    width: 24,
-                                    height: 24,
-                                    display: variant === 'permanent' ? 'flex' : 'none',
-                                    zIndex: 2000,
-                                }}
-                            >
-                                <ChevronRight fontSize="small" />
-                            </IconButton>
-                        </>
-                    )}
-                </Box>
-
-                {/* Menu items */}
-                <List sx={{ flexGrow: 1, py: 1, overflow: 'auto' }}>
-                    {menuItems.map((item) => renderMenuItem(item))}
-                </List>
-
-                <Divider />
-
-                {/* User profile */}
-                <Box sx={{ p: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar
+                {open ? (
+                    <> <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}> <img src="/favicon.png" width="50px" alt="CeyTripz Logo" className="logo-image" /> <Box> <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}> CeyTripz </Typography> <Typography variant="caption" color="text.secondary">
+                        Management Dashboard
+                    </Typography>
+                    </Box>
+                    </Box>
+                        <IconButton
+                            onClick={onToggle}
+                            size="small"
                             sx={{
-                                width: 40,
-                                height: 40,
-                                bgcolor: 'primary.main',
-                                fontSize: '1rem',
+                                color: 'text.secondary',
+                                '&:hover': {
+                                    backgroundColor: 'action.hover',
+                                },
                             }}
                         >
-                            {user?.name?.charAt(0) || 'A'}
-                        </Avatar>
-                        {open && (
-                            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                                <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-                                    {user?.name || 'Admin User'}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary" noWrap>
-                                    {user?.role || 'Administrator'}
-                                </Typography>
-                            </Box>
-                        )}
-                    </Box>
+                            <ChevronLeft />
+                        </IconButton>
+                    </>
+                ) : (
+                    <>
+                        <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main', mx: 'auto' }} />
+                        <IconButton
+                            onClick={onToggle}
+                            size="small"
+                            sx={{
+                                position: 'absolute',
+                                right: -12,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                backgroundColor: 'background.paper',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                '&:hover': {
+                                    backgroundColor: 'action.hover',
+                                },
+                                width: 24,
+                                height: 24,
+                                display: variant === 'permanent' ? 'flex' : 'none',
+                                zIndex: 2000,
+                            }}
+                        >
+                            <ChevronRight fontSize="small" />
+                        </IconButton>
+                    </>
+                )}
+            </Box>
+
+            {/* Menu items */}
+            <List sx={{ flexGrow: 1, py: 1, overflow: 'auto' }}>
+                {menuItems.map((item) => renderMenuItem(item))}
+            </List>
+
+            <Divider />
+
+            {/* User profile */}
+            <Box sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            bgcolor: 'primary.main',
+                            fontSize: '1rem',
+                        }}
+                    >
+                        {user?.name?.charAt(0) || 'A'}
+                    </Avatar>
+                    {open && (
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                            <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+                                {user?.name || 'Admin User'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                                {user?.role || 'Administrator'}
+                            </Typography>
+                        </Box>
+                    )}
                 </Box>
-            </Drawer>
-        
+            </Box>
+        </Drawer>
+
     );
 };
 

@@ -151,19 +151,31 @@ const Booking = () => {
   //   }
   // ];
   const [bookings, setBookings] = useState([]);
-  useEffect(()=>{
-    api.get('/GetBookings').then(response=>{
+  useEffect(() => {
+    api.get('/GetBookings').then(response => {
       console.log('Bookings data:', response.data);
       setBookings(response.data.bookings || []); // Assuming response has a 'bookings' array
-    }).catch(error=>{
+    }).catch(error => {
       console.error('Error fetching bookings:', error);
     })
 
-   
+
   }, [])
 
   // Vehicle types for filter dropdown
   const vehicleTypes = vehicleCategories.map(cat => cat.name);
+
+  const updateStatus = async (id, newStatus) => {
+    try {
+      await api.put(`/updateStatus`, {
+        id: id, 
+        status: newStatus
+      });
+      console.log(`Booking ${id} status updated to ${newStatus}`);
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  }
 
   return (
     <>
@@ -289,14 +301,14 @@ const Booking = () => {
                       </Tooltip>
                       {booking.status === 'pending' && (
                         <Tooltip title="Confirm booking">
-                          <IconButton size="small" color="success">
+                          <IconButton size="small" color="success" onClick={() => updateStatus(booking.id, 'confirmed')}>
                             <CheckIcon />
                           </IconButton>
                         </Tooltip>
                       )}
                       {booking.status !== 'cancelled' && booking.status !== 'completed' && (
                         <Tooltip title="Cancel booking">
-                          <IconButton size="small" color="warning">
+                          <IconButton size="small" color="warning" onClick={()=>updateStatus(booking.id, 'cancelled')}>
                             <CloseIcon />
                           </IconButton>
                         </Tooltip>

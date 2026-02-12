@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     AppBar,
     Toolbar,
@@ -27,7 +27,8 @@ import {
     Brightness7,
 } from '@mui/icons-material';
 import './Header.scss';
-import {AuthContext, useAuth} from '../../../services/auth/AuthContext.jsx';
+import { AuthContext, useAuth } from '../../../services/auth/AuthContext.jsx';
+import api from '../../../services/api/api.js';
 
 const Header = ({
     onMenuClick,
@@ -35,9 +36,29 @@ const Header = ({
     themeMode = 'light',
     sidebarOpen = true  // Add this prop
 }) => {
+
+    const [totalBookings, setTotalBookings] = useState();
+    const [todayBookings, setTodayBookings] = useState();
+
+    useEffect(() => {
+        api.get('/TotalBookings').then(response => {
+            setTotalBookings(response.data.total_bookings);
+        }).catch(error => {
+            console.error('Error fetching total bookings:', error);
+        });
+
+
+
+        api.get('/TodayBookings').then(response => {
+            setTodayBookings(response.data.today_bookings);
+        }).catch(error => { console.error('Error fetching today bookings:', error); });
+    }, []);
+
     const { user } = useContext(AuthContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const [notificationsAnchor, setNotificationsAnchor] = useState(null);
+
+
 
     // Calculate dynamic width based on sidebar state
     const sidebarWidth = sidebarOpen ? 280 : 72;
@@ -59,8 +80,12 @@ const Header = ({
     };
 
     const handleLogout = () => {
-        logout();
-        handleClose();
+        api.post('/logout').then(() => {
+            console.log('Logout successful');
+            window.location.href = '/login'; // Redirect to login page after logout
+        }).catch(error => {
+            console.error('Error during logout:', error);
+        });
     };
 
     const notifications = [
@@ -72,11 +97,15 @@ const Header = ({
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
+
+
+
+
     return (
         <AppBar
             position="fixed"
             sx={{
-                width: { xs:`100%`, sm: `100%`, md: `calc(100% - ${sidebarWidth}px)` },
+                width: { xs: `100%`, sm: `100%`, md: `calc(100% - ${sidebarWidth}px)` },
                 ml: { sm: `${sidebarWidth}px` },
                 backgroundColor: 'background.paper',
                 color: 'text.primary',
@@ -129,7 +158,7 @@ const Header = ({
                         },
                         gap: 1
                     }}>
-                        <Chip label="Today: 42 Bookings" size="small" color="primary" variant="outlined" />
+                        <Chip label={`Today: ${todayBookings || 0} Bookings`} size="small" color="primary" variant="outlined" />
                         <Chip label="Revenue: $12,450" size="small" color="success" variant="outlined" />
                     </Box>
                 </Box>

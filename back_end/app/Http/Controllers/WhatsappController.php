@@ -2,28 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Twilio\Rest\Client;
 
 class WhatsappController extends Controller
 {
-    public function sendMessage($booking): JsonResponse   
+    public function sendMessage($booking): JsonResponse
     {
         try {
             $sid = env('TWILIO_SID');
             $token = env('TWILIO_AUTH_TOKEN');
             $from = env('TWILIO_WHATSAPP_FROM');
             $to = env('TWILIO_WHATSAPP_TO');
-            $body = "New Booking Alert!\nCustomer: {$booking->customer_name}\nEmail: {$booking->customer_email}\nPhone: {$booking->customer_phone}\nPickup: {$booking->pickup_location} on {$booking->pickup_date}\nDrop: {$booking->drop_location} on {$booking->return_date}\nVehicle: {$booking->vehicle_type}\nPassengers: {$booking->passengers}\nAmount: \${$booking->amount}\nNotes: {$booking->notes}";
+
             $client = new Client($sid, $token);
 
             $message = $client->messages->create(
                 'whatsapp:' . $to,
                 [
                     'from' => 'whatsapp:' . $from,
-                    'body' => $body
+                    'contentSid' => 'HXda0e728c2196c8c0aeb93038df43ed41',
+                    'contentVariables' => json_encode([
+                        "1" => $booking->customer_name,
+                        "2" => $booking->customer_phone,
+                        "3" => $booking->pickup_date,
+                        "4" => $booking->return_date,
+                        "5" => $booking->vehicle_type,
+                    ]),
                 ]
             );
 
@@ -34,10 +40,11 @@ class WhatsappController extends Controller
             ], 200);
         } catch (\Exception $e) {
             Log::error('WhatsApp Message Error: ' . $e->getMessage());
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to send message: ' . $e->getMessage(),
             ], 500);
-        };
+        }
     }
 }

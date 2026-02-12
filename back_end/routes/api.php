@@ -11,5 +11,8 @@ Route::get('/GetBookings', [BookingController::class, 'index']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/profile', [AuthController::class, 'profile']);    
+    Route::get('/profile', [AuthController::class, 'profile']);
+    Route::put('/updateStatus', [BookingController::class, 'updateStatus']);
+    Route::get('/TotalBookings', [BookingController::class, 'getTotalBookings']);
+    Route::get('/TodayBookings', [BookingController::class, 'getTodayBookings']);
 });
