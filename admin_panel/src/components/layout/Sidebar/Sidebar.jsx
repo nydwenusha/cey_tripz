@@ -33,10 +33,14 @@ import {
     ChevronRight,
     Menu as MenuIcon,
     FlightTakeoff,
+    Article as BlogIcon, // Use Article icon for blog (or use Description, LibraryBooks, etc.)
+    Description,
+    LibraryBooks,
+    PostAdd,
+    Category,
 } from '@mui/icons-material';
 import './Sidebar.scss';
-import { AuthContext, AuthProvider } from '../../../services/auth/AuthContext';
-import { useAuth } from '../../../services/auth/AuthContext.jsx';
+import { AuthContext } from '../../../services/auth/AuthContext';
 
 const menuItems = [
     {
@@ -77,6 +81,8 @@ const menuItems = [
         subItems: [
             { title: 'Destinations', path: '/content/destinations' },
             { title: 'Blog Posts', path: '/blogs' },
+            { title: 'Add New Post', path: '/blogs/add' },
+            { title: 'Blog Categories', path: '/blogs/categories' },
             { title: 'Offers', path: '/content/offers' },
         ],
     },
@@ -204,7 +210,6 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
     };
 
     return (
-
         <Drawer
             variant={variant}
             open={open}
@@ -232,19 +237,29 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    p: 2,
-                    minHeight: 64,
+                    px: 2,
+                    py: 0,
+                    minHeight: { xs: 56, sm: 64 },
+                    boxSizing: 'border-box',
                     borderBottom: '1px solid',
                     borderColor: 'divider',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                     position: 'relative',
                 }}
             >
                 {open ? (
-                    <> <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}> <img src="/favicon.png" width="50px" alt="CeyTripz Logo" className="logo-image" /> <Box> <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}> CeyTripz </Typography> <Typography variant="caption" color="text.secondary">
-                        Management Dashboard
-                    </Typography>
-                    </Box>
-                    </Box>
+                    <> 
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}> 
+                            <img src="/favicon.png" width="50px" alt="CeyTripz Logo" className="logo-image" /> 
+                            <Box> 
+                                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}> 
+                                    CeyTripz 
+                                </Typography> 
+                                <Typography variant="caption" color="text.secondary">
+                                    Management Dashboard
+                                </Typography>
+                            </Box>
+                        </Box>
                         <IconButton
                             onClick={onToggle}
                             size="small"
@@ -260,7 +275,7 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                     </>
                 ) : (
                     <>
-                        <FlightTakeoff sx={{ fontSize: 32, color: 'primary.main', mx: 'auto' }} />
+                        <img src="/favicon.png" width="40px" alt="CeyTripz Logo" className="logo-image" />
                         <IconButton
                             onClick={onToggle}
                             size="small"
@@ -320,7 +335,6 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                 </Box>
             </Box>
         </Drawer>
-
     );
 };
 

@@ -10,6 +10,7 @@ import SriLankaMap from "../common/SriLankaMap";
 import "leaflet/dist/leaflet.css";
 import Layout from "../../Layout";
 import ShareExperience from "../common/ShareExperience";
+import Blog from "../common/Blog";
 
 
 function Home() {
@@ -22,6 +23,7 @@ function Home() {
       <SriLankaMap />
       <PopularPlacesGallery />
       <ShareExperience />
+      <Blog />
       {/* <Teatmonials /> */}
     </Layout>
   );

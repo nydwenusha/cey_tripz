@@ -1,11 +1,16 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://unmagnanimous-tristian-disagreeably.ngrok-free.dev/api",
+  baseURL: "http://localhost:8000/api",
+  
   headers: {
     "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "69420"
+    "accept":"application/json",
+    "Authorization": `Bearer ${localStorage.getItem('token')}` // JWT token from localStorage
   },
+  withCredentials: false,
+  
+ 
 });
 
 api.interceptors.request.use(

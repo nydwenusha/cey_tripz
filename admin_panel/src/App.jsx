@@ -24,7 +24,7 @@ import Categories from './pages/Tours/Categories.jsx';
 import Vehicles from './pages/Tours/Vehicles.jsx';
 import AddVehicles from './pages/Tours/AddVehicles.jsx';
 import BlogPostManagement from './pages/Content/BlogPostManagement.jsx';
-import AddBlogPage from './pages/Content/AddBlogPage.jsx';
+import AddBlogPost from './pages/Content/AddBlogPost.jsx';
 
 // Layout
 import MainLayout from './MainLayout.jsx';
@@ -76,7 +76,7 @@ function App() {
                                 <Route path="/payments" element={<Payments />} />
                                 <Route path="/content/*" element={<Content />} />
                                 <Route path="/blogs" element={<BlogPostManagement />} />
-                                <Route path="/AddBlogs" element={<AddBlogPage />} />
+                                <Route path="/blogs/add" element={<AddBlogPost />} />
                                 <Route path="/reviews" element={<Reviews />} />
                                 <Route path="/reports" element={<Reports />} />
                                 <Route path="/settings/*" element={<Settings />} />

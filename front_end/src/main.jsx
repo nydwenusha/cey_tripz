@@ -12,6 +12,7 @@ import "./assets/index.scss";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import TravelerStoryDetail from "./assets/pages/TravelerStoryDetail";
 import AllStoriesPage from "./assets/pages/AllStoriesPage";
+import BlogPost from "./assets/pages/BlogPost";
 
 
 function NotFound() {
@@ -32,7 +33,9 @@ const router = createBrowserRouter([
   { path: "/contact", element: <Contact /> },
   { path: "/booking", element: <Booking /> },
   { path: "/story/:id", element: <TravelerStoryDetail /> },
-  {path:"/stories", element: <AllStoriesPage />}
+  {path:"/stories", element: <AllStoriesPage />},
+    { path: "/blog/:id", element: <BlogPost /> },
+
 ]);
 
 createRoot(document.getElementById("root")).render(
