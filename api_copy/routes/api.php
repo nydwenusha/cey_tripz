@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlockPostCategoryController;
+use App\Http\Controllers\BlogPostCategoryController;
 use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -23,6 +25,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/GetBookings', [BookingController::class, 'index']);
 Route::post('/booking', [BookingController::class, 'store']);
+Route::get('/blogPostCategories', [BlogPostCategoryController::class, 'index']);
+Route::post('/addBlogPostCategory', [BlogPostCategoryController::class, 'store']);
 
 // Protected routes (authentication required)
 Route::middleware('auth:api')->group(function () {

@@ -76,7 +76,6 @@ const Login = () => {
       }
 
       console.log('Login successful:', result);
-      console.log('Token in localStorage:', localStorage.getItem('token'));
       setFormData({
         name: '',
         email: '',

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -29,6 +29,7 @@ import {
   InputAdornment,
   Popover,
   TextField as MuiTextField,
+  CircularProgress,
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -61,9 +62,11 @@ import {
   Redo as RedoIcon,
   FormatColorText as ColorIcon,
   FormatSize as SizeIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 import './AddBlogPost.scss';
 import PageHeader from '../../components/layout/PageHeader/PageHeader';
+import api from '../../services/api/api';
 
 const AddBlogPost = () => {
   const navigate = useNavigate();
@@ -73,7 +76,19 @@ const AddBlogPost = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const fileInputRef = useRef(null);
   const contentEditorRef = useRef(null);
-  
+
+  // Category dialog state
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [categoryError, setCategoryError] = useState('');
+
+  // Tag dialog state
+  const [tagDialogOpen, setTagDialogOpen] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
+  const [addingTag, setAddingTag] = useState(false);
+  const [tagError, setTagError] = useState('');
+
   // Link popover state
   const [linkPopover, setLinkPopover] = useState(null);
   const [linkUrl, setLinkUrl] = useState('');
@@ -87,6 +102,7 @@ const AddBlogPost = () => {
     tags: [],
     featuredImage: null,
     featuredImagePreview: '',
+    author: '',
     visibility: 'public',
     allowComments: true,
     publishDate: '',
@@ -95,15 +111,24 @@ const AddBlogPost = () => {
     seoKeywords: '',
   });
 
-  const categories = [
-    { id: 1, name: 'Destinations', color: '#ff9800' },
-    { id: 2, name: 'Travel Tips', color: '#4caf50' },
-    { id: 3, name: 'Sustainability', color: '#2196f3' },
-    { id: 4, name: 'Food & Drink', color: '#f44336' },
-    { id: 5, name: 'Photography', color: '#9c27b0' },
-    { id: 6, name: 'Adventure', color: '#ff5722' },
-    { id: 7, name: 'Culture', color: '#3f51b5' },
-  ];
+  const [categories, setCategories] = useState([]);
+
+  const [allTags, setAllTags] = useState([
+    'Sri Lanka', 'Beach', 'Adventure', 'Culture', 'Wildlife',
+    'Budget Travel', 'Luxury', 'Family', 'Solo Travel', 'Honeymoon',
+    'Backpacking', 'Food', 'Photography', 'Trekking', 'Wildlife Safari'
+  ]);
+
+  useEffect(() => {
+    // Fetch categories from API
+    api.get('/blogPostCategories')
+      .then((res) => {
+        setCategories(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   const popularTags = [
     'Sri Lanka', 'Beach', 'Adventure', 'Culture', 'Wildlife',
@@ -112,10 +137,85 @@ const AddBlogPost = () => {
 
   const [tagInput, setTagInput] = useState('');
 
+  // Handle category addition
+  const handleAddCategory = async () => {
+    await api.post('/addBlogPostCategory', {
+      category: newCategoryName.trim(),
+    })
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+  };
+
+  const handleCloseCategoryDialog = () => {
+    setCategoryDialogOpen(false);
+    setNewCategoryName('');
+    setCategoryError('');
+  };
+
+  // Handle tag addition
+  const handleAddTag = async () => {
+    if (!newTagName.trim()) {
+      setTagError('Tag name is required');
+      return;
+    }
+
+    // Check if tag already exists
+    const tagExists = allTags.some(
+      tag => tag.toLowerCase() === newTagName.trim().toLowerCase()
+    );
+
+    if (tagExists) {
+      setTagError('Tag already exists');
+      return;
+    }
+
+    setAddingTag(true);
+    setTagError('');
+
+    try {
+      // API call to add tag
+      const response = await api.post('/blogTags', {
+        name: newTagName.trim(),
+      });
+
+      // Add new tag to the list
+      const newTag = response.data.name || newTagName.trim();
+
+      setAllTags([...allTags, newTag]);
+      // Also add to form data tags
+      if (!formData.tags.includes(newTag)) {
+        setFormData({
+          ...formData,
+          tags: [...formData.tags, newTag],
+        });
+      }
+      setTagDialogOpen(false);
+      setNewTagName('');
+
+      // Show success message
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      console.error('Error adding tag:', err);
+      setTagError('Failed to add tag. Please try again.');
+    } finally {
+      setAddingTag(false);
+    }
+  };
+
+  const handleCloseTagDialog = () => {
+    setTagDialogOpen(false);
+    setNewTagName('');
+    setTagError('');
+  };
+
   // Rich text editor functions
   const execCommand = useCallback((command, value = null) => {
     document.execCommand(command, false, value);
-    // Update content state after command
     const content = contentEditorRef.current?.innerHTML || '';
     setFormData(prev => ({ ...prev, content }));
     contentEditorRef.current?.focus();
@@ -137,7 +237,7 @@ const AddBlogPost = () => {
   const handleInsertLink = (event) => {
     const selection = window.getSelection();
     const selectedText = selection.toString();
-    
+
     if (selectedText) {
       setLinkText(selectedText);
       setLinkPopover(event.currentTarget);
@@ -163,14 +263,13 @@ const AddBlogPost = () => {
       link.target = '_blank';
       link.style.color = '#667eea';
       link.style.textDecoration = 'underline';
-      
+
       range.deleteContents();
       range.insertNode(link);
-      
-      // Update content
+
       const content = contentEditorRef.current?.innerHTML || '';
       setFormData(prev => ({ ...prev, content }));
-      
+
       setLinkPopover(null);
       setLinkUrl('');
       setLinkText('');
@@ -287,7 +386,7 @@ const AddBlogPost = () => {
   const handleSubmit = async (publish = false) => {
     setLoading(true);
     setError('');
-    
+
     if (!formData.title.trim()) {
       setError('Please enter a title');
       setLoading(false);
@@ -353,7 +452,7 @@ const AddBlogPost = () => {
   return (
     <Box className="add-blog-page">
       {loading && <LinearProgress className="loading-bar" />}
-      
+
       {/* Header with Theme Styling */}
       <Container maxWidth="xl" className="header-container" sx={{ mt: 3 }}>
         <PageHeader
@@ -385,301 +484,413 @@ const AddBlogPost = () => {
       </Container>
 
       {/* Main Content */}
-      <Container maxWidth="xl" className="main-container">
-        <Grid container spacing={3}>
-          {/* Left Column */}
-          <Grid item xs={12} lg={8}>
-            {/* Title Section */}
-            <Paper className="form-card title-card" elevation={0}>
-              <Box className="card-header">
-                <Box className="header-badge">
-                  <TitleIcon className="card-icon" />
-                  <Typography variant="h6">Post Title</Typography>
+      <form className="blog-form" onSubmit={handleSubmit}>
+        <Container maxWidth="xl" className="main-container">
+          <Grid container spacing={3}>
+            {/* Left Column */}
+            <Grid item xs={12} lg={8}>
+              {/* Title Section */}
+              <Paper className="form-card title-card" elevation={0}>
+                <Box className="card-header">
+                  <Box className="header-badge">
+                    <TitleIcon className="card-icon" />
+                    <Typography variant="h6">Post Title</Typography>
+                  </Box>
+                  <Box className="header-chip">
+                    <Chip
+                      label="Required"
+                      size="small"
+                      className="required-chip"
+                    />
+                  </Box>
                 </Box>
-                <Box className="header-chip">
-                  <Chip 
-                    label="Required" 
-                    size="small" 
-                    className="required-chip"
-                  />
+                <TextField
+                  fullWidth
+                  placeholder="Enter an engaging title..."
+                  value={formData.title}
+                  onChange={handleInputChange('title')}
+                  variant="outlined"
+                  className="title-field"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Typography variant="caption" className={`char-count ${formData.title.length > 90 ? 'warning' : ''}`}>
+                          {formData.title.length}/100
+                        </Typography>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Box className="title-tips">
+                  <Typography variant="caption" className="tips-title">
+                    💡 Title Tips:
+                  </Typography>
+                  <Box className="tips-list">
+                    <Typography variant="caption">• Use numbers for list posts (e.g., "10 Best Beaches")</Typography>
+                    <Typography variant="caption">• Include keywords for SEO</Typography>
+                    <Typography variant="caption">• Keep it under 60 characters for better search results</Typography>
+                  </Box>
                 </Box>
-              </Box>
-              <TextField
-                fullWidth
-                placeholder="Enter an engaging title..."
-                value={formData.title}
-                onChange={handleInputChange('title')}
-                variant="outlined"
-                className="title-field"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Typography variant="caption" className={`char-count ${formData.title.length > 90 ? 'warning' : ''}`}>
-                        {formData.title.length}/100
-                      </Typography>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <Box className="title-tips">
-                <Typography variant="caption" className="tips-title">
-                  💡 Title Tips:
-                </Typography>
-                <Box className="tips-list">
-                  <Typography variant="caption">• Use numbers for list posts (e.g., "10 Best Beaches")</Typography>
-                  <Typography variant="caption">• Include keywords for SEO</Typography>
-                  <Typography variant="caption">• Keep it under 60 characters for better search results</Typography>
-                </Box>
-              </Box>
-            </Paper>
+              </Paper>
 
-            {/* Featured Image */}
-            <Paper className="form-card" elevation={0}>
-              <Box className="card-header">
-                <ImageIcon className="card-icon" />
-                <Typography variant="h6">Featured Image</Typography>
-              </Box>
-              {formData.featuredImagePreview ? (
-                <Box className="image-preview-box">
-                  <img src={formData.featuredImagePreview} alt="Preview" className="preview-img" />
-                  <IconButton className="remove-img-btn" onClick={removeImage}>
-                    <DeleteIcon />
+              {/* Featured Image */}
+              <Paper className="form-card" elevation={0}>
+                <Box className="card-header">
+                  <ImageIcon className="card-icon" />
+                  <Typography variant="h6">Featured Image</Typography>
+                </Box>
+                {formData.featuredImagePreview ? (
+                  <Box className="image-preview-box">
+                    <img src={formData.featuredImagePreview} alt="Preview" className="preview-img" />
+                    <IconButton className="remove-img-btn" onClick={removeImage}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Box className="upload-box" onClick={() => fileInputRef.current.click()}>
+                    <AddPhotoIcon className="upload-icon" />
+                    <Typography variant="body1">Click to upload featured image</Typography>
+                    <Typography variant="caption">Recommended: 1200x800px (Max 5MB)</Typography>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      style={{ display: 'none' }}
+                    />
+                  </Box>
+                )}
+              </Paper>
+
+              {/* Excerpt */}
+              <Paper className="form-card" elevation={0}>
+                <Box className="card-header">
+                  <DescriptionIcon className="card-icon" />
+                  <Typography variant="h6">Excerpt</Typography>
+                </Box>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  placeholder="Write a short summary of your post..."
+                  value={formData.excerpt}
+                  onChange={handleInputChange('excerpt')}
+                  variant="outlined"
+                  helperText={`${formData.excerpt.length}/200 characters - This will appear in blog listings and search results`}
+                />
+              </Paper>
+
+              {/* Content Editor */}
+              <Paper className="form-card" elevation={0}>
+                <Box className="card-header">
+                  <DescriptionIcon className="card-icon" />
+                  <Typography variant="h6">Content</Typography>
+                </Box>
+                <Box className="editor-toolbar">
+                  {textEditorTools.map((tool, index) => (
+                    tool.divider ? (
+                      <Divider key={index} orientation="vertical" flexItem className="toolbar-divider" />
+                    ) : (
+                      <IconButton
+                        key={index}
+                        size="small"
+                        className="toolbar-btn"
+                        onClick={tool.action}
+                        title={tool.title}
+                      >
+                        {tool.icon}
+                      </IconButton>
+                    )
+                  ))}
+                </Box>
+                <div
+                  ref={contentEditorRef}
+                  className="content-editor"
+                  contentEditable
+                  dir="ltr"
+                  onInput={handleContentChange}
+                  onKeyDown={handleKeyDown}
+                  onPaste={handlePaste}
+                  suppressContentEditableWarning
+                />
+                <Typography variant="caption" color="text.secondary" className="editor-hint">
+                  💡 Tip: Use Ctrl+B for bold, Ctrl+I for italic, Ctrl+U for underline
+                </Typography>
+              </Paper>
+            </Grid>
+
+            {/* Right Column */}
+            <Grid item xs={12} lg={4}>
+              {/* Category with Add Button */}
+              <Paper className="sidebar-card" elevation={0}>
+                <Box className="card-header">
+                  <CategoryIcon className="card-icon" />
+                  <Typography variant="h6">Category</Typography>
+                </Box>
+                <Box className="category-select-wrapper">
+                  <FormControl fullWidth>
+                    <Select
+                      value={formData.category}
+                      onChange={handleInputChange('category')}
+                      displayEmpty
+                      className="category-select"
+                    >
+                      <MenuItem value="" disabled>Select a category</MenuItem>
+                      {categories.map(cat => (
+                        <MenuItem key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <IconButton
+                    className="add-category-btn"
+                    onClick={() => setCategoryDialogOpen(true)}
+                    title="Add New Category"
+                  >
+                    <AddIcon />
                   </IconButton>
                 </Box>
-              ) : (
-                <Box className="upload-box" onClick={() => fileInputRef.current.click()}>
-                  <AddPhotoIcon className="upload-icon" />
-                  <Typography variant="body1">Click to upload featured image</Typography>
-                  <Typography variant="caption">Recommended: 1200x800px (Max 5MB)</Typography>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    style={{ display: 'none' }}
-                  />
+              </Paper>
+
+              {/* Tags with Add Button */}
+              <Paper className="sidebar-card" elevation={0}>
+                <Box className="card-header">
+                  <TagIcon className="card-icon" />
+                  <Typography variant="h6">Tags</Typography>
                 </Box>
-              )}
-            </Paper>
+                <Box className="tag-input-wrapper">
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Add tags..."
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                  />
 
-            {/* Excerpt */}
-            <Paper className="form-card" elevation={0}>
-              <Box className="card-header">
-                <DescriptionIcon className="card-icon" />
-                <Typography variant="h6">Excerpt</Typography>
-              </Box>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                placeholder="Write a short summary of your post..."
-                value={formData.excerpt}
-                onChange={handleInputChange('excerpt')}
-                variant="outlined"
-                helperText={`${formData.excerpt.length}/200 characters - This will appear in blog listings and search results`}
-              />
-            </Paper>
-
-            {/* Content Editor */}
-            <Paper className="form-card" elevation={0}>
-              <Box className="card-header">
-                <DescriptionIcon className="card-icon" />
-                <Typography variant="h6">Content</Typography>
-              </Box>
-              <Box className="editor-toolbar">
-                {textEditorTools.map((tool, index) => (
-                  tool.divider ? (
-                    <Divider key={index} orientation="vertical" flexItem className="toolbar-divider" />
-                  ) : (
-                    <IconButton 
-                      key={index} 
-                      size="small" 
-                      className="toolbar-btn"
-                      onClick={tool.action}
-                      title={tool.title}
-                    >
-                      {tool.icon}
-                    </IconButton>
-                  )
-                ))}
-              </Box>
-              <div 
-                ref={contentEditorRef}
-                className="content-editor"
-                contentEditable
-                dir="ltr"
-                onInput={handleContentChange}
-                onKeyDown={handleKeyDown}
-                onPaste={handlePaste}
-                suppressContentEditableWarning
-              />
-              <Typography variant="caption" color="text.secondary" className="editor-hint">
-                💡 Tip: Use Ctrl+B for bold, Ctrl+I for italic, Ctrl+U for underline
-              </Typography>
-            </Paper>
-          </Grid>
-
-          {/* Right Column */}
-          <Grid item xs={12} lg={4}>
-            {/* Category */}
-            <Paper className="sidebar-card" elevation={0}>
-              <Box className="card-header">
-                <CategoryIcon className="card-icon" />
-                <Typography variant="h6">Category</Typography>
-              </Box>
-              <FormControl fullWidth>
-                <Select
-                  value={formData.category}
-                  onChange={handleInputChange('category')}
-                  displayEmpty
-                  className="category-select"
-                >
-                  <MenuItem value="" disabled>Select a category</MenuItem>
-                  {categories.map(cat => (
-                    <MenuItem key={cat.id} value={cat.name}>
-                      <Box className="category-option">
-                        <Box className="category-dot" sx={{ backgroundColor: cat.color }} />
-                        {cat.name}
-                      </Box>
-                    </MenuItem>
+                  <IconButton
+                    className="add-tag-btn"
+                    onClick={() => setTagDialogOpen(true)}
+                    title="Add New Tag"
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </Box>
+                <Box className="tags-wrapper">
+                  {formData.tags.map(tag => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      onDelete={() => removeTag(tag)}
+                      size="small"
+                      className="tag-chip"
+                    />
                   ))}
-                </Select>
-              </FormControl>
-            </Paper>
+                </Box>
+                <Typography variant="caption" className="popular-label">
+                  Popular tags:
+                </Typography>
+                <Box className="popular-wrapper">
+                  {popularTags.map(tag => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      size="small"
+                      onClick={() => handleAddPopularTag(tag)}
+                      className="popular-tag"
+                    />
+                  ))}
+                </Box>
+              </Paper>
 
-            {/* Tags */}
-            <Paper className="sidebar-card" elevation={0}>
-              <Box className="card-header">
-                <TagIcon className="card-icon" />
-                <Typography variant="h6">Tags</Typography>
-              </Box>
-              <Box className="tag-input-wrapper">
+              {/* Settings */}
+              <Paper className="sidebar-card" elevation={0}>
+                <Box className="card-header">
+                  <SettingsIcon className="card-icon" />
+                  <Typography variant="h6">Post Settings</Typography>
+                </Box>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.allowComments}
+                      onChange={(e) => setFormData({ ...formData, allowComments: e.target.checked })}
+                    />
+                  }
+                  label="Allow Comments"
+                  className="settings-item"
+                />
+
+                <FormControl component="fieldset" className="settings-item">
+                  <FormLabel component="legend">Visibility</FormLabel>
+                  <RadioGroup
+                    value={formData.visibility}
+                    onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
+                    row
+                  >
+                    <FormControlLabel value="public" control={<Radio />} label={
+                      <Box className="visibility-label">
+                        <PublicIcon fontSize="small" /> Public
+                      </Box>
+                    } />
+                    <FormControlLabel value="private" control={<Radio />} label={
+                      <Box className="visibility-label">
+                        <LockIcon fontSize="small" /> Private
+                      </Box>
+                    } />
+                  </RadioGroup>
+                </FormControl>
+
+                <TextField
+                  fullWidth
+                  type="datetime-local"
+                  label="Schedule Publish"
+                  value={formData.publishDate}
+                  onChange={handleInputChange('publishDate')}
+                  InputLabelProps={{ shrink: true }}
+                  className="schedule-field"
+                />
+              </Paper>
+
+              {/* SEO */}
+              <Paper className="sidebar-card" elevation={0}>
+                <Box className="card-header">
+                  <SettingsIcon className="card-icon" />
+                  <Typography variant="h6">SEO Settings</Typography>
+                </Box>
                 <TextField
                   fullWidth
                   size="small"
-                  placeholder="Add tags..."
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                  label="SEO Title"
+                  placeholder="Leave blank to use post title"
+                  value={formData.seoTitle}
+                  onChange={handleInputChange('seoTitle')}
+                  className="seo-field"
                 />
-                <Button onClick={addTag} variant="contained" size="small">
-                  Add
-                </Button>
-              </Box>
-              <Box className="tags-wrapper">
-                {formData.tags.map(tag => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    onDelete={() => removeTag(tag)}
-                    size="small"
-                    className="tag-chip"
-                  />
-                ))}
-              </Box>
-              <Typography variant="caption" className="popular-label">
-                Popular tags:
-              </Typography>
-              <Box className="popular-wrapper">
-                {popularTags.map(tag => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    onClick={() => handleAddPopularTag(tag)}
-                    className="popular-tag"
-                  />
-                ))}
-              </Box>
-            </Paper>
-
-            {/* Settings */}
-            <Paper className="sidebar-card" elevation={0}>
-              <Box className="card-header">
-                <SettingsIcon className="card-icon" />
-                <Typography variant="h6">Post Settings</Typography>
-              </Box>
-              
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.allowComments}
-                    onChange={(e) => setFormData({ ...formData, allowComments: e.target.checked })}
-                  />
-                }
-                label="Allow Comments"
-                className="settings-item"
-              />
-
-              <FormControl component="fieldset" className="settings-item">
-                <FormLabel component="legend">Visibility</FormLabel>
-                <RadioGroup
-                  value={formData.visibility}
-                  onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
-                  row
-                >
-                  <FormControlLabel value="public" control={<Radio />} label={
-                    <Box className="visibility-label">
-                      <PublicIcon fontSize="small" /> Public
-                    </Box>
-                  } />
-                  <FormControlLabel value="private" control={<Radio />} label={
-                    <Box className="visibility-label">
-                      <LockIcon fontSize="small" /> Private
-                    </Box>
-                  } />
-                </RadioGroup>
-              </FormControl>
-
-              <TextField
-                fullWidth
-                type="datetime-local"
-                label="Schedule Publish"
-                value={formData.publishDate}
-                onChange={handleInputChange('publishDate')}
-                InputLabelProps={{ shrink: true }}
-                className="schedule-field"
-              />
-            </Paper>
-
-            {/* SEO */}
-            <Paper className="sidebar-card" elevation={0}>
-              <Box className="card-header">
-                <SettingsIcon className="card-icon" />
-                <Typography variant="h6">SEO Settings</Typography>
-              </Box>
-              <TextField
-                fullWidth
-                size="small"
-                label="SEO Title"
-                placeholder="Leave blank to use post title"
-                value={formData.seoTitle}
-                onChange={handleInputChange('seoTitle')}
-                className="seo-field"
-              />
-              <TextField
-                fullWidth
-                size="small"
-                label="Meta Description"
-                multiline
-                rows={2}
-                placeholder="Write a meta description for search engines"
-                value={formData.seoDescription}
-                onChange={handleInputChange('seoDescription')}
-                className="seo-field"
-              />
-              <TextField
-                fullWidth
-                size="small"
-                label="Meta Keywords"
-                placeholder="Enter keywords separated by commas"
-                value={formData.seoKeywords}
-                onChange={handleInputChange('seoKeywords')}
-              />
-            </Paper>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Meta Description"
+                  multiline
+                  rows={2}
+                  placeholder="Write a meta description for search engines"
+                  value={formData.seoDescription}
+                  onChange={handleInputChange('seoDescription')}
+                  className="seo-field"
+                />
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Meta Keywords"
+                  placeholder="Enter keywords separated by commas"
+                  value={formData.seoKeywords}
+                  onChange={handleInputChange('seoKeywords')}
+                />
+              </Paper>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
+        </Container>
+      </form>
+
+      {/* Add Category Dialog */}
+      <Dialog
+        open={categoryDialogOpen}
+        onClose={handleCloseCategoryDialog}
+        maxWidth="sm"
+        fullWidth
+        className="category-dialog"
+      >
+        <DialogTitle className="category-dialog-title">
+          <Box className="dialog-title-content">
+            <CategoryIcon className="dialog-icon" />
+            <Typography variant="h6">Add New Category</Typography>
+          </Box>
+          <IconButton onClick={handleCloseCategoryDialog}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Box className="category-form">
+            <TextField
+              fullWidth
+              label="Category Name"
+              placeholder="Enter category name"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              margin="normal"
+              variant="outlined"
+              error={!!categoryError}
+              helperText={categoryError}
+              autoFocus
+            />
+          </Box>
+         
+        </DialogContent>
+        <DialogActions className="category-dialog-actions">
+          <Button onClick={handleCloseCategoryDialog} className="cancel-btn">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddCategory}
+            variant="contained"
+            className="add-category-btn"
+            disabled={addingCategory || !newCategoryName.trim()}
+            startIcon={addingCategory ? <CircularProgress size={20} /> : <AddIcon />}
+          >
+            {addingCategory ? 'Adding...' : 'Add Category'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Tag Dialog */}
+      <Dialog
+        open={tagDialogOpen}
+        onClose={handleCloseTagDialog}
+        maxWidth="sm"
+        fullWidth
+        className="tag-dialog"
+      >
+        <DialogTitle className="tag-dialog-title">
+          <Box className="dialog-title-content">
+            <TagIcon className="dialog-icon" />
+            <Typography variant="h6">Add New Tag</Typography>
+          </Box>
+          <IconButton onClick={handleCloseTagDialog}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Box className="tag-form">
+            <TextField
+              fullWidth
+              label="Tag Name"
+              placeholder="Enter tag name"
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              margin="normal"
+              variant="outlined"
+              error={!!tagError}
+              helperText={tagError}
+              autoFocus
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions className="tag-dialog-actions">
+          <Button onClick={handleCloseTagDialog} className="cancel-btn">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddTag}
+            variant="contained"
+            className="add-tag-btn"
+            disabled={addingTag || !newTagName.trim()}
+            startIcon={addingTag ? <CircularProgress size={20} /> : <AddIcon />}
+          >
+            {addingTag ? 'Adding...' : 'Add Tag'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Link Popover */}
       <Popover
@@ -716,9 +927,9 @@ const AddBlogPost = () => {
             <Button size="small" onClick={() => setLinkPopover(null)}>
               Cancel
             </Button>
-            <Button 
-              size="small" 
-              variant="contained" 
+            <Button
+              size="small"
+              variant="contained"
               onClick={handleSaveLink}
               disabled={!linkUrl || !linkText}
             >
@@ -753,7 +964,7 @@ const AddBlogPost = () => {
             {formData.excerpt}
           </Typography>
           <Divider />
-          <div 
+          <div
             className="preview-content-text"
             dangerouslySetInnerHTML={{ __html: formData.content || 'No content yet...' }}
           />
