@@ -102,13 +102,13 @@ const AddBlogPost = () => {
     tags: [],
     featuredImage: null,
     featuredImagePreview: '',
-    author: '',
-    visibility: 'public',
-    allowComments: true,
-    publishDate: '',
-    seoTitle: '',
-    seoDescription: '',
-    seoKeywords: '',
+    // author: '',
+    // visibility: 'public',
+    // allowComments: true,
+    // publishDate: '',
+    // seoTitle: '',
+    // seoDescription: '',
+    // seoKeywords: '',
   });
 
   const [categories, setCategories] = useState([]);
@@ -301,6 +301,8 @@ const AddBlogPost = () => {
     setFormData(prev => ({ ...prev, content }));
   };
 
+
+
   const handleKeyDown = (e) => {
     if (e.ctrlKey && e.key === 'b') {
       e.preventDefault();
@@ -383,39 +385,45 @@ const AddBlogPost = () => {
     }
   };
 
-  const handleSubmit = async (publish = false) => {
-    setLoading(true);
-    setError('');
-
-    if (!formData.title.trim()) {
-      setError('Please enter a title');
-      setLoading(false);
-      return;
-    }
-    if (!formData.excerpt.trim()) {
-      setError('Please enter an excerpt');
-      setLoading(false);
-      return;
-    }
-    if (!formData.content.trim()) {
-      setError('Please enter content');
-      setLoading(false);
-      return;
-    }
-    if (!formData.category) {
-      setError('Please select a category');
-      setLoading(false);
-      return;
-    }
-
+  const handleSubmit = async () => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      setLoading(true);
+
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('excerpt', formData.excerpt);
+      data.append('content', formData.content);
+      data.append('category', formData.category);
+      data.append('seoTitle', formData.seoTitle || '');
+      data.append('seoDescription', formData.seoDescription || '');
+      data.append('seoKeywords', formData.seoKeywords || '');
+      data.append('visibility', formData.visibility || 'public');
+      data.append('allowComments', formData.allowComments ? 1 : 0);
+      data.append('publishDate', formData.publishDate || '');
+
+      formData.tags.forEach((tag, index) => {
+        data.append(`tags[${index}]`, tag);
+      });
+
+      if (formData.featuredImage) {
+        data.append('featuredImage', formData.featuredImage);
+      }
+
+      const response = await api.post('/addBlogPost', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       setSuccess(true);
       setTimeout(() => {
+        setSuccess(false);
         navigate('/blogs');
-      }, 1500);
+      }, 2000);
+
     } catch (err) {
-      setError('Failed to save post. Please try again.');
+      console.error('Error saving post:', err.response?.data || err.message);
+      setError(err.response?.data?.message || 'Failed to save post');
     } finally {
       setLoading(false);
     }
@@ -453,38 +461,40 @@ const AddBlogPost = () => {
     <Box className="add-blog-page">
       {loading && <LinearProgress className="loading-bar" />}
 
-      {/* Header with Theme Styling */}
-      <Container maxWidth="xl" className="header-container" sx={{ mt: 3 }}>
-        <PageHeader
-          title="Create New Post"
-          subtitle="Share your travel stories and inspire others"
-          showBackButton
-          onBackClick={() => navigate('/blogs')}
-          secondaryActions={[
-            {
-              label: 'Save Draft',
-              onClick: handleSaveDraft,
-              icon: <SaveIcon />,
-              variant: 'outlined',
-            },
-            {
-              label: 'Preview',
-              onClick: () => setPreviewOpen(true),
-              icon: <PreviewIcon />,
-              variant: 'outlined',
-            },
-          ]}
-          primaryAction={{
-            label: 'Publish',
-            onClick: handlePublish,
-            icon: <PublishIcon />,
-          }}
-          variant="gradient"
-        />
-      </Container>
-
-      {/* Main Content */}
       <form className="blog-form" onSubmit={handleSubmit}>
+
+        {/* Header with Theme Styling */}
+        <Container maxWidth="xl" className="header-container" sx={{ mt: 3 }}>
+          <PageHeader
+            title="Create New Post"
+            subtitle="Share your travel stories and inspire others"
+            showBackButton
+            onBackClick={() => navigate('/blogs')}
+            secondaryActions={[
+              {
+                label: 'Save Draft',
+                onClick: handleSaveDraft,
+                icon: <SaveIcon />,
+                variant: 'outlined',
+              },
+              {
+                label: 'Preview',
+                onClick: () => setPreviewOpen(true),
+                icon: <PreviewIcon />,
+                variant: 'outlined',
+              },
+            ]}
+            primaryAction={{
+              label: 'Publish',
+              onClick: handleSubmit,
+              icon: <PublishIcon />,
+            }}
+            variant="gradient"
+          />
+        </Container>
+
+        {/* Main Content */}
+
         <Container maxWidth="xl" className="main-container">
           <Grid container spacing={3}>
             {/* Left Column */}
@@ -791,208 +801,210 @@ const AddBlogPost = () => {
             </Grid>
           </Grid>
         </Container>
-      </form>
 
-      {/* Add Category Dialog */}
-      <Dialog
-        open={categoryDialogOpen}
-        onClose={handleCloseCategoryDialog}
-        maxWidth="sm"
-        fullWidth
-        className="category-dialog"
-      >
-        <DialogTitle className="category-dialog-title">
-          <Box className="dialog-title-content">
-            <CategoryIcon className="dialog-icon" />
-            <Typography variant="h6">Add New Category</Typography>
-          </Box>
-          <IconButton onClick={handleCloseCategoryDialog}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <Box className="category-form">
-            <TextField
-              fullWidth
-              label="Category Name"
-              placeholder="Enter category name"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              error={!!categoryError}
-              helperText={categoryError}
-              autoFocus
-            />
-          </Box>
-         
-        </DialogContent>
-        <DialogActions className="category-dialog-actions">
-          <Button onClick={handleCloseCategoryDialog} className="cancel-btn">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAddCategory}
-            variant="contained"
-            className="add-category-btn"
-            disabled={addingCategory || !newCategoryName.trim()}
-            startIcon={addingCategory ? <CircularProgress size={20} /> : <AddIcon />}
-          >
-            {addingCategory ? 'Adding...' : 'Add Category'}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
-      {/* Add Tag Dialog */}
-      <Dialog
-        open={tagDialogOpen}
-        onClose={handleCloseTagDialog}
-        maxWidth="sm"
-        fullWidth
-        className="tag-dialog"
-      >
-        <DialogTitle className="tag-dialog-title">
-          <Box className="dialog-title-content">
-            <TagIcon className="dialog-icon" />
-            <Typography variant="h6">Add New Tag</Typography>
-          </Box>
-          <IconButton onClick={handleCloseTagDialog}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <Box className="tag-form">
-            <TextField
-              fullWidth
-              label="Tag Name"
-              placeholder="Enter tag name"
-              value={newTagName}
-              onChange={(e) => setNewTagName(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              error={!!tagError}
-              helperText={tagError}
-              autoFocus
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions className="tag-dialog-actions">
-          <Button onClick={handleCloseTagDialog} className="cancel-btn">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAddTag}
-            variant="contained"
-            className="add-tag-btn"
-            disabled={addingTag || !newTagName.trim()}
-            startIcon={addingTag ? <CircularProgress size={20} /> : <AddIcon />}
-          >
-            {addingTag ? 'Adding...' : 'Add Tag'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        {/* Add Category Dialog */}
+        <Dialog
+          open={categoryDialogOpen}
+          onClose={handleCloseCategoryDialog}
+          maxWidth="sm"
+          fullWidth
+          className="category-dialog"
+        >
+          <DialogTitle className="category-dialog-title">
+            <Box className="dialog-title-content">
+              <CategoryIcon className="dialog-icon" />
+              <Typography variant="h6">Add New Category</Typography>
+            </Box>
+            <IconButton onClick={handleCloseCategoryDialog}>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <Box className="category-form">
+              <TextField
+                fullWidth
+                label="Category Name"
+                placeholder="Enter category name"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                margin="normal"
+                variant="outlined"
+                error={!!categoryError}
+                helperText={categoryError}
+                autoFocus
+              />
+            </Box>
 
-      {/* Link Popover */}
-      <Popover
-        open={Boolean(linkPopover)}
-        anchorEl={linkPopover}
-        onClose={() => setLinkPopover(null)}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        className="link-popover"
-      >
-        <Box className="link-popover-content">
-          <Typography variant="subtitle2" className="popover-title">
-            Insert Link
-          </Typography>
-          <MuiTextField
-            size="small"
-            placeholder="Link URL"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            fullWidth
-            margin="dense"
-          />
-          <MuiTextField
-            size="small"
-            placeholder="Link Text"
-            value={linkText}
-            onChange={(e) => setLinkText(e.target.value)}
-            fullWidth
-            margin="dense"
-          />
-          <Box className="popover-actions">
-            <Button size="small" onClick={() => setLinkPopover(null)}>
+          </DialogContent>
+          <DialogActions className="category-dialog-actions">
+            <Button onClick={handleCloseCategoryDialog} className="cancel-btn">
               Cancel
             </Button>
             <Button
-              size="small"
+              onClick={handleAddCategory}
               variant="contained"
-              onClick={handleSaveLink}
-              disabled={!linkUrl || !linkText}
+              className="add-category-btn"
+              disabled={addingCategory || !newCategoryName.trim()}
+              startIcon={addingCategory ? <CircularProgress size={20} /> : <AddIcon />}
             >
-              Insert
+              {addingCategory ? 'Adding...' : 'Add Category'}
             </Button>
-          </Box>
-        </Box>
-      </Popover>
+          </DialogActions>
+        </Dialog>
 
-      {/* Preview Dialog */}
-      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle className="preview-header">
-          <Typography variant="h6">Post Preview</Typography>
-          <IconButton onClick={() => setPreviewOpen(false)}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers className="preview-body">
-          {formData.featuredImagePreview && (
-            <img src={formData.featuredImagePreview} alt="Preview" className="preview-img-full" />
-          )}
-          <Typography variant="h4" className="preview-title">
-            {formData.title || 'Untitled Post'}
-          </Typography>
-          <Box className="preview-meta">
-            <Chip label={formData.category || 'Uncategorized'} size="small" className="preview-category" />
-            <Typography variant="caption">
-              {formData.tags.map(tag => `#${tag}`).join(' • ')}
+        {/* Add Tag Dialog */}
+        <Dialog
+          open={tagDialogOpen}
+          onClose={handleCloseTagDialog}
+          maxWidth="sm"
+          fullWidth
+          className="tag-dialog"
+        >
+          <DialogTitle className="tag-dialog-title">
+            <Box className="dialog-title-content">
+              <TagIcon className="dialog-icon" />
+              <Typography variant="h6">Add New Tag</Typography>
+            </Box>
+            <IconButton onClick={handleCloseTagDialog}>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <Box className="tag-form">
+              <TextField
+                fullWidth
+                label="Tag Name"
+                placeholder="Enter tag name"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                margin="normal"
+                variant="outlined"
+                error={!!tagError}
+                helperText={tagError}
+                autoFocus
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions className="tag-dialog-actions">
+            <Button onClick={handleCloseTagDialog} className="cancel-btn">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddTag}
+              variant="contained"
+              className="add-tag-btn"
+              disabled={addingTag || !newTagName.trim()}
+              startIcon={addingTag ? <CircularProgress size={20} /> : <AddIcon />}
+            >
+              {addingTag ? 'Adding...' : 'Add Tag'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Link Popover */}
+        <Popover
+          open={Boolean(linkPopover)}
+          anchorEl={linkPopover}
+          onClose={() => setLinkPopover(null)}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          className="link-popover"
+        >
+          <Box className="link-popover-content">
+            <Typography variant="subtitle2" className="popover-title">
+              Insert Link
             </Typography>
+            <MuiTextField
+              size="small"
+              placeholder="Link URL"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              fullWidth
+              margin="dense"
+            />
+            <MuiTextField
+              size="small"
+              placeholder="Link Text"
+              value={linkText}
+              onChange={(e) => setLinkText(e.target.value)}
+              fullWidth
+              margin="dense"
+            />
+            <Box className="popover-actions">
+              <Button size="small" onClick={() => setLinkPopover(null)}>
+                Cancel
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={handleSaveLink}
+                disabled={!linkUrl || !linkText}
+              >
+                Insert
+              </Button>
+            </Box>
           </Box>
-          <Typography variant="subtitle1" className="preview-excerpt">
-            {formData.excerpt}
-          </Typography>
-          <Divider />
-          <div
-            className="preview-content-text"
-            dangerouslySetInnerHTML={{ __html: formData.content || 'No content yet...' }}
-          />
-        </DialogContent>
-        <DialogActions className="preview-actions">
-          <Button onClick={() => setPreviewOpen(false)}>Close</Button>
-          <Button variant="contained" onClick={handlePublish}>Publish Now</Button>
-        </DialogActions>
-      </Dialog>
+        </Popover>
 
-      {/* Snackbars */}
-      <Snackbar
-        open={success}
-        autoHideDuration={6000}
-        onClose={() => setSuccess(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert severity="success">Post saved successfully! Redirecting...</Alert>
-      </Snackbar>
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError('')}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert severity="error">{error}</Alert>
-      </Snackbar>
+        {/* Preview Dialog */}
+        <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle className="preview-header">
+            <Typography variant="h6">Post Preview</Typography>
+            <IconButton onClick={() => setPreviewOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers className="preview-body">
+            {formData.featuredImagePreview && (
+              <img src={formData.featuredImagePreview} alt="Preview" className="preview-img-full" />
+            )}
+            <Typography variant="h4" className="preview-title">
+              {formData.title || 'Untitled Post'}
+            </Typography>
+            <Box className="preview-meta">
+              <Chip label={formData.category || 'Uncategorized'} size="small" className="preview-category" />
+              <Typography variant="caption">
+                {formData.tags.map(tag => `#${tag}`).join(' • ')}
+              </Typography>
+            </Box>
+            <Typography variant="subtitle1" className="preview-excerpt">
+              {formData.excerpt}
+            </Typography>
+            <Divider />
+            <div
+              className="preview-content-text"
+              dangerouslySetInnerHTML={{ __html: formData.content || 'No content yet...' }}
+            />
+          </DialogContent>
+          <DialogActions className="preview-actions">
+            <Button onClick={() => setPreviewOpen(false)}>Close</Button>
+            <Button variant="contained" onClick={handlePublish}>Publish Now</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Snackbars */}
+        <Snackbar
+          open={success}
+          autoHideDuration={6000}
+          onClose={() => setSuccess(false)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert severity="success">Post saved successfully! Redirecting...</Alert>
+        </Snackbar>
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
+          onClose={() => setError('')}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert severity="error">{error}</Alert>
+        </Snackbar>
+      </form >
     </Box>
+
   );
 };
 

@@ -34,7 +34,7 @@ const router = createBrowserRouter([
   { path: "/booking", element: <Booking /> },
   { path: "/story/:id", element: <TravelerStoryDetail /> },
   {path:"/stories", element: <AllStoriesPage />},
-    { path: "/blog/:id", element: <BlogPost /> },
+  { path: "/blog/:id", element: <BlogPost /> },
 
 ]);
 
