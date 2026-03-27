@@ -30,8 +30,8 @@ function NavbarComp() {
       ref={navRef}
     >
       <Container>
-        <Navbar.Brand as={Link} to="/" className="brand-logo" style={{display: 'flex', alignItems: 'center', gap: '0px'}}>
-          <img src="/favicon.png" alt="Logo" style={{width: '64px', height: '64px'}} />
+        <Navbar.Brand as={Link} to="/" className="brand-logo" style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
+          <img src="/favicon.png" alt="Logo" style={{ width: '64px', height: '64px' }} />
           <span className="brand-primary">Cey</span>
           <span className="brand-secondary">Tripz</span>
         </Navbar.Brand>
@@ -72,12 +72,12 @@ function NavbarComp() {
               transition={{ duration: 0.3, delay: 0.5 }}
               className="ms-3"
             >
-              <Button 
+              <Button
                 variant="black"
                 className="nav-book-btn"
                 onClick={handleBookNow}
               >
-                 <i class="fa-solid fa-car"></i> Book Now
+                <i class="fa-solid fa-car"></i> Book Now
               </Button>
             </motion.div>
           </Nav>

@@ -20,7 +20,7 @@ const BlogPost = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://via.placeholder.com/1200x600?text=No+Image';
     if (imagePath.startsWith('http')) return imagePath;
-    return `${import.meta.env.VITE_BLOG_IMAGE_URL || 'http://localhost:8000/storage'}/${imagePath}`;
+    return `https://api.ceytripz.com/storage/${imagePath}`;
   };
 
   // Fetch single blog post

@@ -68,8 +68,6 @@ const MainLayout = ({ children }) => {
                         sm: 0,
                         xs: 0,
                     },
-                    ml: 0,
-
                     minHeight: '100vh',
                     backgroundColor: 'background.default', // Changed from 'red'
                     transition: theme.transitions.create(['margin', 'width'], {

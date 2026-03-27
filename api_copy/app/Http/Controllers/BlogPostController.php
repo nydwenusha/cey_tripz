@@ -9,27 +9,23 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-
 
 class BlogPostController extends Controller
 {
-
-
     public function index()
     {
         $blogPosts = BlogPost::all();
 
         if ($blogPosts->isEmpty()) {
-            return response()->json([
-                'message' => 'No blog posts found.'
-            ], 404);
-        } else {
-            return response()->json([
-                'message' => 'Blog posts retrieved successfully.',
-                'blogPosts' => $blogPosts
-            ], 200);
+            return response()->json(['message' => 'No blog posts found.'], 404);
         }
+
+        return response()->json([
+            'message' => 'Blog posts retrieved successfully.',
+            'blogPosts' => $blogPosts
+        ], 200);
     }
 
     public function show($id)
@@ -45,12 +41,14 @@ class BlogPostController extends Controller
             'status' => 'success'
         ]);
     }
+
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
+                'excerpt' => 'required|string|max:255',
                 'category' => 'required|string',
                 'featuredImage' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'tags' => 'nullable|array',
@@ -68,7 +66,6 @@ class BlogPostController extends Controller
             ], 422);
         }
 
-
         $category = BlogPostCategory::where('name', $validated['category'])->first();
 
         if (!$category) {
@@ -78,23 +75,26 @@ class BlogPostController extends Controller
             ], 422);
         }
 
-        // Handle featured image
+        // Handle featured image upload to API server public storage
         $featuredImagePath = null;
         if ($request->hasFile('featuredImage')) {
-            $featuredImagePath = $request->file('featuredImage')->store('blog_images', 'public');
+            $file = $request->file('featuredImage');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('storage/blog_images'), $fileName); // move to public/blog_images
+            $featuredImagePath = 'blog_images/' . $fileName; // relative path for DB
         }
 
-        $authorName = Auth::check()
-            ? User::find(Auth::id())->name
-            : 'Unknown Author';
+        $authorName = Auth::check() ? User::find(Auth::id())->name : 'Unknown Author';
 
         // Create blog post
         $blogPost = BlogPost::create([
             'title' => $validated['title'],
             'content' => $validated['content'],
             'category' => $category->name,
+            'excerpt' => $validated['excerpt'],
             'category_id' => $category->id,
             'image' => $featuredImagePath,
+            'image_url' => $featuredImagePath ? asset('storage/' . $featuredImagePath) : null,
             'author' => $authorName,
             'date' => now()->toDateString(),
             'user_id' => Auth::id(),
@@ -119,27 +119,20 @@ class BlogPostController extends Controller
         $post = BlogPost::find($id);
 
         if (!$post) {
-            return response()->json([
-                'message' => 'Blog post not found.'
-            ], 404);
+            return response()->json(['message' => 'Blog post not found.'], 404);
         }
 
-        // Optional: Check if current user is the author
-        if (Auth::id() !== $post->user_id) { // assuming you store user_id in posts
-            return response()->json([
-                'message' => 'You are not authorized to delete this post.'
-            ], 403);
+        if (Auth::id() !== $post->user_id) {
+            return response()->json(['message' => 'You are not authorized to delete this post.'], 403);
         }
 
-        // Delete featured image from storage if exists
-        if ($post->image && file_exists(storage_path('app/public/' . $post->image))) {
-            unlink(storage_path('app/public/' . $post->image));
+        // Delete image from public storage
+        if ($post->image && Storage::disk('public')->exists($post->image)) {
+            Storage::disk('public')->delete($post->image);
         }
 
         $post->delete();
 
-        return response()->json([
-            'message' => 'Blog post deleted successfully.'
-        ], 200);
+        return response()->json(['message' => 'Blog post deleted successfully.'], 200);
     }
 }

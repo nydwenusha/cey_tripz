@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -35,6 +35,7 @@ import { AuthProvider } from './services/auth/AuthContext.jsx';
 // Styles
 import './styles/global.scss';
 import ProtectedRoute from './services/ProtectedRoute.jsx';
+import PublicRoute from './services/PublicRoute.jsx';
 
 function App() {
     const [themeMode, setThemeMode] = useState('light');
@@ -52,37 +53,49 @@ function App() {
             <ThemeProvider theme={currentTheme}>
                 <CssBaseline />
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <Router>
-                        <Routes>
-                            {/* Public Routes */}
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/signup" element={<Signup />} />
+                    <Routes>
+                        {/* Public Routes */}
+                        <Route
+                            path="/login"
+                            element={
+                                <PublicRoute>
+                                    <Login />
+                                </PublicRoute>
+                            }
+                        />
+                        <Route
+                            path="/signup"
+                            element={
+                                <PublicRoute>
+                                    <Signup />
+                                </PublicRoute>
+                            }
+                        />
 
-                            {/* Protected Routes with Layout */}
-                            <Route element={
-                                <ProtectedRoute>
-                                    <MainLayout />
-                                </ProtectedRoute>
-                            }>
-                                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                                <Route path="/dashboard" element={<Dashboard />} />
-                                <Route path="/tours" element={<ToursList />} />
-                                <Route path="/addtours" element={<TourEdit />} />
-                                <Route path="/categories" element={<Categories />} />
-                                <Route path="/vehicles" element={<Vehicles />} />
-                                <Route path="/AddVehicles" element={<AddVehicles />} />
-                                <Route path="/bookings" element={<Booking />} />
-                                <Route path="/customers" element={<Customers />} />
-                                <Route path="/payments" element={<Payments />} />
-                                <Route path="/content/*" element={<Content />} />
-                                <Route path="/blogs" element={<BlogPostManagement />} />
-                                <Route path="/blogs/add" element={<AddBlogPost />} />
-                                <Route path="/reviews" element={<Reviews />} />
-                                <Route path="/reports" element={<Reports />} />
-                                <Route path="/settings/*" element={<Settings />} />
-                            </Route>
-                        </Routes>
-                    </Router>
+                        {/* Protected Routes with Layout */}
+                        <Route element={
+                            <ProtectedRoute>
+                                <MainLayout />
+                            </ProtectedRoute>
+                        }>
+                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/tours" element={<ToursList />} />
+                            <Route path="/addtours" element={<TourEdit />} />
+                            <Route path="/categories" element={<Categories />} />
+                            <Route path="/vehicles" element={<Vehicles />} />
+                            <Route path="/AddVehicles" element={<AddVehicles />} />
+                            <Route path="/bookings" element={<Booking />} />
+                            <Route path="/customers" element={<Customers />} />
+                            <Route path="/payments" element={<Payments />} />
+                            <Route path="/content/*" element={<Content />} />
+                            <Route path="/blogs" element={<BlogPostManagement />} />
+                            <Route path="/blogs/add" element={<AddBlogPost />} />
+                            <Route path="/reviews" element={<Reviews />} />
+                            <Route path="/reports" element={<Reports />} />
+                            <Route path="/settings/*" element={<Settings />} />
+                        </Route>
+                    </Routes>
                 </LocalizationProvider>
             </ThemeProvider>
         </AuthProvider>

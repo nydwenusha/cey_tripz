@@ -1,18 +1,15 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
-  
+  baseURL: "https://api.ceytripz.com/api",
   headers: {
     "Content-Type": "application/json",
-    "accept":"application/json",
-    "Authorization": `Bearer ${localStorage.getItem('token')}` // JWT token from localStorage
+    "accept": "application/json",
   },
   withCredentials: false,
-  
- 
 });
 
+// Attach token dynamically before each request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -21,11 +18,10 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error)
 );
 
+// Handle 401 globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -33,9 +29,8 @@ api.interceptors.response.use(
       localStorage.removeItem("token");
       window.location.href = "/login";
     }
-
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;

@@ -21,15 +21,14 @@ Route::options('/{any}', function () {
     return response()->json([], 200);
 })->where('any', '.*');
 
-// Public routes (no authentication required)
+// Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::post('/booking', [BookingController::class, 'store']);
 Route::get('/blogPosts', [BlogPostController::class, 'index']);
 Route::get('/blogPosts/{id}', [BlogPostController::class, 'show']);
 
-// Protected routes (authentication required)
+// Protected routes
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);

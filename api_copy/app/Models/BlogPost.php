@@ -17,6 +17,7 @@ class BlogPost extends Model
         'location',
         'read_time',
         'likes',
+        'excerpt',
         'content',
         'user_id',
     ];

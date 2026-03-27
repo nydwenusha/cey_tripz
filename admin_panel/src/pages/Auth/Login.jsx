@@ -73,6 +73,7 @@ const Login = () => {
           phone_number: messages.phone_number || '',
           password: messages.password || '',
         });
+        return;
       }
 
       console.log('Login successful:', result);

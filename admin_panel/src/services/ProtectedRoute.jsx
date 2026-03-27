@@ -1,12 +1,17 @@
-import { useState,useEffect } from "react";
-import { Navigate } from "react-router-dom";
-import api from "./api/api";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "./auth/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return null;
+  }
 
   const token = localStorage.getItem("token");
-  if (!token) {
-    return <Navigate to="/login" />;
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
 
   }
 

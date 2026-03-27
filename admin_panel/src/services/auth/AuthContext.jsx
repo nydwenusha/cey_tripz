@@ -1,40 +1,40 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-
 import api from "../api/api";
-import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Important for refresh
 
-
-  const checkAuth = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const response = await api.get("/profile");
-        setUser(response.data.user);
-      } catch (error) {
-        localStorage.removeItem("token");
-      }
-    }
-    setLoading(false);
-  }
-
+  // Check token on app start
   useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const response = await api.get("/profile"); // token added via axios interceptor
+          setUser(response.data.user);
+        } catch (error) {
+          localStorage.removeItem("token");
+          setUser(null);
+        }
+      }
+      setLoading(false); // unblock ProtectedRoute
+    };
+
     checkAuth();
   }, []);
 
+  // Login function
   const login = async (data) => {
     try {
       const response = await api.post("/login", data);
@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Register function
   const register = async (data) => {
     try {
       const response = await api.post("/register", data);
@@ -58,14 +59,15 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data || "Registration failed",
+        message: error.response?.data?.message || "Registration failed",
       };
     }
   };
 
+  // Logout function
   const logout = async () => {
     try {
-      await api.post("/logout");
+      await api.post("/logout"); // optional
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -74,7 +76,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
