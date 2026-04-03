@@ -1,0 +1,586 @@
+// TourEdit.scss
+.tour-edit {
+  padding: 20px;
+  margin: 0 auto;
+
+  
+
+  .form-stepper {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    .MuiStepLabel-label {
+      font-weight: 500;
+    }
+  }
+
+  .form-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .section-title {
+      color: #1976d2;
+      font-weight: 600;
+      margin: 0 0 16px 0;
+      font-size: 1.1rem;
+    }
+
+    .tags-section {
+      margin: 16px 0;
+
+      .tags-input-paper {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+        max-width: 500px;
+
+        .tags-input-container {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .MuiTextField-root {
+            flex: 1;
+
+            .MuiInputBase-root {
+              &:before, &:after {
+                display: none;
+              }
+            }
+          }
+
+          .MuiIconButton-root {
+            color: #1976d2;
+            padding: 6px;
+            width: 40px;
+            height: 40px;
+
+            &:hover {
+              background: rgba(25, 118, 210, 0.1);
+            }
+          }
+        }
+      }
+
+      .tags-display {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        .tag-chip {
+          background: #e3f2fd;
+          color: #1976d2;
+          font-weight: 500;
+          height: 28px;
+
+          .MuiChip-label {
+            padding: 0 8px;
+          }
+
+          &:hover {
+            background: #bbdefb;
+          }
+        }
+      }
+    }
+
+    .inclusions-paper,
+    .exclusions-paper {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      padding: 16px;
+      height: 100%;
+
+      .list-input-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+
+        .MuiTextField-root {
+          flex: 1;
+          max-width: 300px;
+
+          .MuiInputBase-root {
+            width: 100%;
+
+            &:before, &:after {
+              display: none;
+            }
+          }
+        }
+
+        .MuiIconButton-root {
+          color: #1976d2;
+          padding: 6px;
+          width: 40px;
+          height: 40px;
+
+          &:hover {
+            background: rgba(25, 118, 210, 0.1);
+          }
+        }
+      }
+
+      .list-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+
+        .list-chip {
+          background: white;
+          border: 1px solid #dee2e6;
+          height: 24px;
+          max-width: 200px;
+
+          .MuiChip-label {
+            padding: 0 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          &:hover {
+            background: #f8f9fa;
+          }
+        }
+      }
+    }
+
+    .exclusions-paper {
+      background: #fff8e1;
+      border-color: #ffe082;
+    }
+
+    .highlights-paper {
+      background: #f1f8e9;
+      border: 1px solid #c5e1a5;
+      border-radius: 6px;
+      padding: 16px;
+
+      .highlights-input-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+
+        .MuiTextField-root {
+          flex: 1;
+          max-width: 500px;
+
+          .MuiInputBase-root {
+            width: 100%;
+
+            &:before, &:after {
+              display: none;
+            }
+          }
+        }
+
+        .MuiIconButton-root {
+          color: #2e7d32;
+          width: 40px;
+          height: 40px;
+
+          &:hover {
+            background: rgba(46, 125, 50, 0.1);
+          }
+        }
+      }
+
+      .highlights-list {
+        .highlight-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 12px;
+          background: white;
+          border-radius: 4px;
+          margin-bottom: 8px;
+          border-left: 3px solid #4caf50;
+          max-width: 600px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .MuiTypography-body2 {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 500px;
+          }
+
+          .remove-highlight {
+            color: #f44336;
+            padding: 4px;
+            width: 32px;
+            height: 32px;
+
+            &:hover {
+              background: rgba(244, 67, 54, 0.1);
+            }
+          }
+        }
+      }
+    }
+
+    .featured-section {
+      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+      border: 1px solid #ffd54f;
+      border-radius: 6px;
+      padding: 16px;
+      margin: 16px 0;
+      max-width: 500px;
+
+      .featured-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .featured-icon {
+          color: #ff9800;
+          font-size: 28px;
+        }
+
+        .featured-text {
+          flex: 1;
+
+          .MuiTypography-subtitle1 {
+            font-weight: 600;
+            color: #ff9800;
+            margin-bottom: 4px;
+          }
+
+          .MuiTypography-caption {
+            color: #ff9800;
+            opacity: 0.8;
+          }
+        }
+      }
+    }
+
+    .stepper-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+
+      .back-button {
+        color: #666;
+        text-transform: none;
+        width: 120px;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.04);
+        }
+      }
+
+      .next-button,
+      .submit-button {
+        background: #1976d2;
+        color: white;
+        font-weight: 500;
+        text-transform: none;
+        padding: 8px 24px;
+        width: 140px;
+
+        &:hover {
+          background: #1565c0;
+        }
+      }
+    }
+  }
+
+  // Material UI overrides with fixed widths
+  .MuiCardContent-root {
+    padding: 24px !important;
+  }
+
+  .MuiGrid-container {
+    margin-top: -12px;
+  }
+
+  .MuiGrid-item {
+    padding-top: 12px;
+  }
+
+  .MuiTextField-root {
+    width: 100%;
+    
+    .MuiInputLabel-root {
+      &.Mui-focused {
+        color: #1976d2;
+      }
+    }
+
+    .MuiOutlinedInput-root {
+      width: 100%;
+      
+      &.Mui-focused {
+        .MuiOutlinedInput-notchedOutline {
+          border-color: #1976d2;
+        }
+      }
+      
+      input, textarea {
+        width: 100%;
+      }
+    }
+    
+    // Fixed widths for specific fields
+    &.name-field {
+      max-width: 600px;
+    }
+    
+    &.destination-field {
+      max-width: 400px;
+    }
+    
+    &.price-field {
+      max-width: 250px;
+    }
+    
+    &.duration-field {
+      max-width: 250px;
+    }
+    
+    &.participants-field {
+      max-width: 200px;
+    }
+    
+    &.description-field {
+      max-width: 800px;
+    }
+    
+    &.meeting-point-field {
+      max-width: 500px;
+    }
+    
+    &.requirements-field {
+      max-width: 800px;
+    }
+  }
+
+  .MuiFormControl-root {
+    width: 100%;
+    
+    // Fixed widths for select fields
+    &.status-field {
+      max-width: 250px;
+    }
+    
+    &.category-field {
+      max-width: 400px;
+    }
+    
+    &.difficulty-field {
+      max-width: 250px;
+    }
+    
+    &.policy-field {
+      max-width: 400px;
+    }
+  }
+
+  .MuiSelect-select {
+    padding-top: 12.5px;
+    padding-bottom: 12.5px;
+    width: 100%;
+  }
+
+  // Snackbar
+  .MuiSnackbar-root {
+    .MuiAlert-root {
+      border-radius: 6px;
+      font-weight: 500;
+      max-width: 400px;
+      width: 100%;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .tour-edit {
+    padding: 12px;
+
+    .edit-header {
+      margin-bottom: 16px;
+
+      .header-content {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 16px;
+
+        .page-title {
+          font-size: 1.25rem;
+          text-align: center;
+        }
+
+        .header-actions {
+          width: 100%;
+          flex-direction: column;
+
+          button {
+            width: 100%;
+            max-width: 300px;
+          }
+        }
+      }
+    }
+
+    .form-stepper {
+      padding: 12px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+
+      .MuiStepper-root {
+        min-width: 400px;
+      }
+    }
+
+    .form-card {
+      .MuiCardContent-root {
+        padding: 16px !important;
+      }
+
+      .tags-section {
+        .tags-display {
+          justify-content: center;
+        }
+        
+        .tags-input-paper {
+          max-width: 100%;
+        }
+      }
+
+      .inclusions-paper,
+      .exclusions-paper {
+        margin-bottom: 16px;
+        
+        .list-input-container {
+          .MuiTextField-root {
+            max-width: 100%;
+          }
+        }
+      }
+      
+      .highlights-paper {
+        .highlights-input-container {
+          .MuiTextField-root {
+            max-width: 100%;
+          }
+        }
+        
+        .highlight-item {
+          max-width: 100%;
+          
+          .MuiTypography-body2 {
+            max-width: calc(100% - 40px);
+          }
+        }
+      }
+      
+      .featured-section {
+        max-width: 100%;
+      }
+
+      .stepper-actions {
+        flex-direction: column;
+        gap: 12px;
+
+        button {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .tour-edit {
+    .form-stepper {
+      .MuiStepper-root {
+        min-width: 320px;
+      }
+    }
+
+    .featured-section {
+      .featured-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+
+        .featured-icon {
+          align-self: center;
+        }
+      }
+    }
+    
+    // Remove fixed widths on mobile for better responsiveness
+    .MuiTextField-root {
+      &.name-field,
+      &.destination-field,
+      &.price-field,
+      &.duration-field,
+      &.participants-field,
+      &.description-field,
+      &.meeting-point-field,
+      &.requirements-field {
+        max-width: 100%;
+      }
+    }
+    
+    .MuiFormControl-root {
+      &.status-field,
+      &.category-field,
+      &.difficulty-field,
+      &.policy-field {
+        max-width: 100%;
+      }
+    }
+  }
+}
+
+// Helper classes for consistent spacing
+.fixed-width-sm {
+  max-width: 200px;
+}
+
+.fixed-width-md {
+  max-width: 300px;
+}
+
+.fixed-width-lg {
+  max-width: 400px;
+}
+
+.fixed-width-xl {
+  max-width: 500px;
+}
+
+.fixed-width-2xl {
+  max-width: 600px;
+}
+
+.fixed-width-3xl {
+  max-width: 800px;
+}
+
+.full-width {
+  width: 100%;
+}

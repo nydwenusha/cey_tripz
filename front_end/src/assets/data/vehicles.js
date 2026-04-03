@@ -3,6 +3,12 @@ import wagonCard1 from "../image/wagon3.jpg";
 import wagonCard2 from "../image/WagonRFZ.png";
 import altoCard from "../image/alto11.avif";
 import altoCard2 from "../image/alto2.avif";
+import KDH1 from "../image/KDH1.jpeg"; 
+import KDH2 from "../image/KDH2.jpeg"; 
+import KDH3 from "../image/KDH3.jpeg"; 
+import KDH4 from "../image/KDH4.jpeg"; 
+import KDHIMG from "../image/KDHIMG.png"; 
+
 
 import wagonr1 from "../image/w1.jpeg";
 import wagonr2 from "../image/w2.jpeg";
@@ -27,7 +33,7 @@ import wagonr32 from "../image/WWW2.jpeg";
 export const vehicles = [
 	{
 		id: 1,
-		name: "Suzuki Wagon R FZ",
+		name: "Suzuki Wagon R Stingray",
 		category: "Hatchback Car",
 		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard,
@@ -52,7 +58,7 @@ export const vehicles = [
 
 	{
 		id: 3,
-		name: "Suzuki Wagon R FZ",
+		name: "Suzuki Wagon R Stingray",
 		category: "Hatchback Car",
 		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard1,
@@ -77,7 +83,7 @@ export const vehicles = [
 
 	{
 		id: 5,
-		name: "Suzuki Wagon R FX",
+		name: "Suzuki Wagon R FZ",
 		category: "Hatchback Car",
 		shortDesc: "Compact, fuel-efficient and perfect for city trips and solo travel.",
 		cardImg: wagonCard2,
@@ -87,6 +93,17 @@ export const vehicles = [
 			"This SUV provides excellent off-road performance and style. Perfect for hill country and long scenic routes.",
 		specs: ["5 Seats", "AC", "4x4", "Automatic", "Bluetooth"],
 	},
+	{
+		id: 6,
+		name: "Toyota Hiace KDH",
+		category: "Seater Van  ( Flat Roof Van )",
+		cardImg: KDHIMG,
+		price: "Rs. 25,000/day",
+		images: [KDH1, KDH2, KDH3, KDH4],
+		description:
+			"A spacious and comfortable minivan, ideal for group travel and family outings.",
+		specs: ["12 Seats", "AC", "Automatic", "Large Storage", "WiFi"],
+	}
 ];
 
 export function getVehicleById(id) {

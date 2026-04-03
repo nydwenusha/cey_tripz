@@ -7,20 +7,12 @@ import Vehicles from "./assets/pages/Vehicles";
 import About from "./assets/pages/About";
 import Contact from "./assets/pages/Contact";
 import Booking from "./assets/pages/Booking";
-// import Navigation from "./assets/common/Navigation";
-// import Footer from "./assets/common/Footer";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./assets/index.scss";
-
-// function Layout() {                       
-//   return (
-//     <>
-//       <Navigation />
-//       <Outlet />
-//       <Footer />
-//     </>
-//   );
-// }
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import TravelerStoryDetail from "./assets/pages/TravelerStoryDetail";
+import AllStoriesPage from "./assets/pages/AllStoriesPage";
+import BlogPost from "./assets/pages/BlogPost";
 
 
 function NotFound() {
@@ -40,7 +32,9 @@ const router = createBrowserRouter([
   { path: "/vehicles/:id", element: <VehicleDetails /> },
   { path: "/contact", element: <Contact /> },
   { path: "/booking", element: <Booking /> },
-
+  { path: "/story/:id", element: <TravelerStoryDetail /> },
+  {path:"/stories", element: <AllStoriesPage />},
+  { path: "/blog/:id", element: <BlogPost /> },
 
 ]);
 

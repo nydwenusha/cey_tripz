@@ -1,0 +1,75 @@
+// Colors
+$primary-color: #1a4d8c;
+$primary-light: #2a6bb0;
+$primary-dark: #0d3a73;
+
+$secondary-color: #ff7e5f;
+$secondary-light: #ff9e87;
+$secondary-dark: #c85c3a;
+
+$success-color: #28a745;
+$warning-color: #ffc107;
+$error-color: #dc3545;
+$info-color: #17a2b8;
+
+// Text Colors
+$text-primary: #212529;
+$text-secondary: #6c757d;
+$text-disabled: #adb5bd;
+
+// Background Colors
+$bg-default: #f8f9fa;
+$bg-paper: #ffffff;
+
+// Dark Mode Colors
+$bg-dark-default: #121212;
+$bg-dark-paper: #1e1e1e;
+$text-dark-primary: #ffffff;
+$text-dark-secondary: #b0bec5;
+$border-dark-color: #424242;
+
+// Border & Divider Colors
+$border-color: #dee2e6;
+$divider-color: #e9ecef;
+
+// Shadows
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// Typography
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-md: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-xxl: 1.5rem;
+$font-size-xxxl: 2rem;
+
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Border Radius
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+
+// Breakpoints
+$breakpoint-xs: 0;
+$breakpoint-sm: 600px;
+$breakpoint-md: 900px;
+$breakpoint-lg: 1200px;
+$breakpoint-xl: 1536px;

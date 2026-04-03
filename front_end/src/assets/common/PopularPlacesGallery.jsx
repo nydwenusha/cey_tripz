@@ -1,6 +1,7 @@
 
 //Beauty Of Sri Lanka
 
+import { useEffect, useMemo, useState } from "react";
 import { Container } from "react-bootstrap";
 import { motion } from "framer-motion";
 import "../css/PopularPlacesGallery.scss";
@@ -63,6 +64,8 @@ const places = [
 ];
 
 function PopularPlacesGallery() {
+  const storageKey = "beauty-of-sri-lanka-reviews";
+
   return (
     <section className="gallery-section py-5">
       <Container>
@@ -103,6 +106,7 @@ function PopularPlacesGallery() {
             </motion.div>
           ))}
         </div>
+
       </Container>
     </section>
   );

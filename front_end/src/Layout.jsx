@@ -2,7 +2,9 @@ import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom';
 import Navigation from "./assets/common/Navigation";
 import Footer from "./assets/common/Footer";
+
 import WhatsAppPopup from "./assets/common/WhatsAppPopup";
+import ScrollToTopButton from "./assets/common/scroll";
 
 function Layout({children}) {
   const location = useLocation();
@@ -18,6 +20,7 @@ function Layout({children}) {
       <main style={{ flex: 1 }}>{children}</main>
       <Footer />
       <WhatsAppPopup />
+      <ScrollToTopButton />
     </div>
   );
 }

@@ -23,7 +23,7 @@ function About() {
 			<div className="about-page">
 				<Container className="about-content">
 					<div className="about-hero text-center">
-						<div className="eyebrow mb-2">About Us</div>
+						{/* <div className="eyebrow mb-2">About Us</div> */}
 						<h1 className="about-title">Ayubowan....!<br/>WELCOME TO SRI LANKA</h1>
 						<p className="hero-copy">
 							We are grateful that you have chosen <b>CEYTRIPZ</b> for your visit.<br/>

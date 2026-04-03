@@ -73,6 +73,10 @@ function SriLankaMap() {
           center={[7.8731, 80.7718]} // Center of Sri Lanka
           zoom={7.2}
           scrollWheelZoom={false}
+          dragging={false}
+          doubleClickZoom={false}
+          touchZoom={false}
+          keyboard={false}
           style={{ height: "600px", borderRadius: "16px" }}
         >
           <TileLayer
