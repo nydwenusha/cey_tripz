@@ -37,7 +37,11 @@ class BookingController extends Controller
 
         if ($validator->fails()) {
             Log::info($validator->errors());
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
         $booking = Booking::create([
@@ -87,7 +91,11 @@ class BookingController extends Controller
 
         if ($validator->fails()) {
             Log::info($validator->errors());
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
 
