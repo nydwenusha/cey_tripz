@@ -30,6 +30,7 @@ import {
   Select,
   FormControl,
   InputLabel,
+  CircularProgress,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -48,12 +49,32 @@ import {
   Check as CheckIcon,
   Close as CloseIcon,
   Archive as ArchiveIcon,
+  CalendarMonth as CalendarMonthIcon,
+  DirectionsCar as DirectionsCarIcon,
+  Payments as PaymentsIcon,
+  Route as RouteIcon,
 } from '@mui/icons-material';
 import './Booking.scss';
 import PageHeader from '../../components/layout/PageHeader/PageHeader';
 import api from '../../services/api/api';
 
 const Booking = () => {
+  const createInitialEditForm = (booking = {}) => ({
+    id: booking.id ?? null,
+    customer_name: booking.customer_name ?? '',
+    customer_email: booking.customer_email ?? '',
+    customer_phone: booking.customer_phone ?? '',
+    pickup_location: booking.pickup_location ?? '',
+    drop_location: booking.drop_location ?? '',
+    pickup_date: booking.pickup_date ?? '',
+    return_date: booking.return_date ?? '',
+    vehicle_type: booking.vehicle_type ?? '',
+    passengers: booking.passengers ?? '',
+    amount: booking.amount ?? '',
+    status: booking.status ?? 'pending',
+    notes: booking.notes ?? '',
+  });
+
   // Vehicle categories for UI display
   const vehicleCategories = [
     { id: 1, name: 'Suzuki Alto', category: 'Mini Car' },
@@ -105,6 +126,18 @@ const Booking = () => {
     return `$${parseFloat(amount).toFixed(2)}`;
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    };
+    return new Date(dateString).toLocaleString('en-US', options);
+  };
+
   // Sample static data for UI demonstration
   // const sampleBookings = [
   //   {
@@ -151,31 +184,393 @@ const Booking = () => {
   //   }
   // ];
   const [bookings, setBookings] = useState([]);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [statusActionLoading, setStatusActionLoading] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(null);
+  const [actionMenuAnchor, setActionMenuAnchor] = useState(null);
+  const [menuBooking, setMenuBooking] = useState(null);
+  const [deleteDialogState, setDeleteDialogState] = useState({
+    open: false,
+    booking: null,
+  });
+  const [statusDialogState, setStatusDialogState] = useState({
+    open: false,
+    booking: null,
+    targetStatus: null,
+  });
+  const [editFormData, setEditFormData] = useState(createInitialEditForm());
+  const [editFormErrors, setEditFormErrors] = useState({});
+  const [snackbarState, setSnackbarState] = useState({
+    open: false,
+    severity: 'success',
+    message: '',
+  });
+
   useEffect(() => {
-    api.get('/GetBookings').then(response => {
-      console.log('Bookings data:', response.data);
-      setBookings(response.data.bookings || []); // Assuming response has a 'bookings' array
-    }).catch(error => {
-      console.error('Error fetching bookings:', error);
-    })
+    const loadBookings = async () => {
+      try {
+        const response = await api.get('/GetBookings');
+        setBookings(response.data.bookings || []);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        showSnackbar(error.response?.data?.message || 'Failed to retrieve bookings.', 'error');
+      }
+    };
 
-
-  }, [])
+    loadBookings();
+  }, []);
 
   // Vehicle types for filter dropdown
   const vehicleTypes = vehicleCategories.map(cat => cat.name);
 
-  const updateStatus = async (id, newStatus) => {
+  const syncBookingState = (updatedBooking) => {
+    setBookings((prev) =>
+      prev.map((booking) =>
+        booking.id === updatedBooking.id ? updatedBooking : booking
+      )
+    );
+
+    if (selectedBooking?.id === updatedBooking.id) {
+      setSelectedBooking(updatedBooking);
+    }
+
+    if (editFormData.id === updatedBooking.id) {
+      setEditFormData((prev) => ({
+        ...prev,
+        status: updatedBooking.status,
+      }));
+    }
+  };
+
+  const updateStatus = async (booking, newStatus) => {
+    setStatusActionLoading(booking.id);
+
     try {
-      await api.put(`/updateStatus`, {
-        id: id, 
+      const response = await api.put(`/updateStatus`, {
+        id: booking.id,
         status: newStatus
       });
-      console.log(`Booking ${id} status updated to ${newStatus}`);
+
+      const updatedBooking = response.data.booking;
+      syncBookingState(updatedBooking);
+      showSnackbar(response.data.message || `Booking ${newStatus} successfully.`);
+      return true;
     } catch (error) {
       console.error('Error updating status:', error);
+      showSnackbar(error.response?.data?.message || 'Failed to update booking status.', 'error');
+      return false;
+    } finally {
+      setStatusActionLoading(null);
     }
-  }
+  };
+
+  const handleViewDetails = async (id) => {
+    setViewDialogOpen(true);
+    setDetailsLoading(true);
+
+    try {
+      const response = await api.get(`/GetBookings/${id}`);
+      setSelectedBooking(response.data.booking || null);
+    } catch (error) {
+      console.error('Error fetching booking details:', error);
+      setSelectedBooking(null);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const handleCloseViewDialog = () => {
+    setViewDialogOpen(false);
+    setSelectedBooking(null);
+    setDetailsLoading(false);
+  };
+
+  const handleOpenActionMenu = (event, booking) => {
+    setActionMenuAnchor(event.currentTarget);
+    setMenuBooking(booking);
+  };
+
+  const handleCloseActionMenu = () => {
+    if (deleteLoading) {
+      return;
+    }
+
+    setActionMenuAnchor(null);
+    setMenuBooking(null);
+  };
+
+  const handleOpenDeleteDialog = () => {
+    if (!menuBooking) {
+      return;
+    }
+
+    setDeleteDialogState({
+      open: true,
+      booking: menuBooking,
+    });
+    setActionMenuAnchor(null);
+    setMenuBooking(null);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    if (deleteLoading) {
+      return;
+    }
+
+    setDeleteDialogState({
+      open: false,
+      booking: null,
+    });
+  };
+
+  const openStatusDialog = (booking, targetStatus) => {
+    setStatusDialogState({
+      open: true,
+      booking,
+      targetStatus,
+    });
+  };
+
+  const closeStatusDialog = () => {
+    if (statusActionLoading) {
+      return;
+    }
+
+    setStatusDialogState({
+      open: false,
+      booking: null,
+      targetStatus: null,
+    });
+  };
+
+  const handleConfirmStatusAction = async () => {
+    if (!statusDialogState.booking || !statusDialogState.targetStatus) {
+      return;
+    }
+
+    const wasUpdated = await updateStatus(statusDialogState.booking, statusDialogState.targetStatus);
+
+    if (wasUpdated) {
+      setStatusDialogState({
+        open: false,
+        booking: null,
+        targetStatus: null,
+      });
+    }
+  };
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbarState({
+      open: true,
+      severity,
+      message,
+    });
+  };
+
+  const handleSnackbarClose = (_, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarState((prev) => ({
+      ...prev,
+      open: false,
+    }));
+  };
+
+  const handleEditFieldChange = (field) => (event) => {
+    const { value } = event.target;
+
+    setEditFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    setEditFormErrors((prev) => ({
+      ...prev,
+      [field]: '',
+    }));
+  };
+
+  const validateEditForm = () => {
+    const errors = {};
+
+    if (!editFormData.customer_name.trim()) {
+      errors.customer_name = 'Customer name is required.';
+    }
+
+    if (!editFormData.customer_email.trim()) {
+      errors.customer_email = 'Customer email is required.';
+    } else if (!/\S+@\S+\.\S+/.test(editFormData.customer_email)) {
+      errors.customer_email = 'Enter a valid email address.';
+    }
+
+    if (!editFormData.pickup_location.trim()) {
+      errors.pickup_location = 'Pickup location is required.';
+    }
+
+    if (!editFormData.drop_location.trim()) {
+      errors.drop_location = 'Drop location is required.';
+    }
+
+    if (!editFormData.pickup_date) {
+      errors.pickup_date = 'Pickup date is required.';
+    }
+
+    if (!editFormData.return_date) {
+      errors.return_date = 'Return date is required.';
+    } else if (editFormData.pickup_date && editFormData.return_date < editFormData.pickup_date) {
+      errors.return_date = 'Return date cannot be before pickup date.';
+    }
+
+    if (!editFormData.vehicle_type) {
+      errors.vehicle_type = 'Vehicle model is required.';
+    }
+
+    if (editFormData.passengers === '' || editFormData.passengers === null) {
+      errors.passengers = 'Passenger count is required.';
+    } else if (!Number.isInteger(Number(editFormData.passengers)) || Number(editFormData.passengers) < 1) {
+      errors.passengers = 'Passengers must be at least 1.';
+    }
+
+    if (editFormData.amount === '' || editFormData.amount === null) {
+      errors.amount = 'Amount is required.';
+    } else if (Number.isNaN(Number(editFormData.amount)) || Number(editFormData.amount) < 0) {
+      errors.amount = 'Amount must be 0 or greater.';
+    }
+
+    if (!editFormData.status) {
+      errors.status = 'Status is required.';
+    }
+
+    setEditFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleEditBooking = async (id) => {
+    setEditDialogOpen(true);
+    setEditLoading(true);
+    setEditFormErrors({});
+
+    try {
+      const response = await api.get(`/GetBookings/${id}`);
+      const booking = response.data.booking;
+
+      if (!booking) {
+        throw new Error('Booking not found');
+      }
+
+      setEditFormData(createInitialEditForm(booking));
+    } catch (error) {
+      console.error('Error fetching booking for edit:', error);
+      setEditDialogOpen(false);
+      setEditFormData(createInitialEditForm());
+      showSnackbar('Unable to load booking for editing.', 'error');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const resetEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditLoading(false);
+    setEditFormErrors({});
+    setEditFormData(createInitialEditForm());
+  };
+
+  const handleCloseEditDialog = () => {
+    if (saveLoading) {
+      return;
+    }
+
+    resetEditDialog();
+  };
+
+  const handleSaveBooking = async () => {
+    if (!validateEditForm()) {
+      return;
+    }
+
+    setSaveLoading(true);
+
+    try {
+      const payload = {
+        customer_name: editFormData.customer_name.trim(),
+        customer_email: editFormData.customer_email.trim(),
+        customer_phone: editFormData.customer_phone.trim() || null,
+        pickup_location: editFormData.pickup_location.trim(),
+        drop_location: editFormData.drop_location.trim(),
+        pickup_date: editFormData.pickup_date,
+        return_date: editFormData.return_date,
+        vehicle_type: editFormData.vehicle_type,
+        passengers: Number(editFormData.passengers),
+        amount: Number(editFormData.amount),
+        status: editFormData.status,
+        notes: editFormData.notes.trim() || null,
+      };
+
+      const response = await api.put(`/UpdateBooking/${editFormData.id}`, payload);
+      const updatedBooking = response.data.booking;
+      syncBookingState(updatedBooking);
+
+      resetEditDialog();
+      showSnackbar(response.data.message || 'Booking updated successfully.');
+    } catch (error) {
+      console.error('Error updating booking:', error);
+
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const fieldErrors = Object.entries(error.response.data.errors).reduce((acc, [field, messages]) => {
+          acc[field] = Array.isArray(messages) ? messages[0] : messages;
+          return acc;
+        }, {});
+
+        setEditFormErrors(fieldErrors);
+      }
+
+      showSnackbar(error.response?.data?.message || 'Failed to update booking.', 'error');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const handleDeleteBooking = async () => {
+    if (!deleteDialogState.booking) {
+      return;
+    }
+
+    const bookingId = deleteDialogState.booking.id;
+    setDeleteLoading(bookingId);
+
+    try {
+      const response = await api.delete(`/DeleteBooking/${bookingId}`);
+
+      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId));
+
+      if (selectedBooking?.id === bookingId) {
+        handleCloseViewDialog();
+      }
+
+      if (editFormData.id === bookingId) {
+        resetEditDialog();
+      }
+
+      setDeleteDialogState({
+        open: false,
+        booking: null,
+      });
+      showSnackbar(response.data.message || 'Booking deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      showSnackbar(error.response?.data?.message || 'Failed to delete booking.', 'error');
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
 
   return (
     <>
@@ -290,32 +685,63 @@ const Booking = () => {
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                       <Tooltip title="View details">
-                        <IconButton size="small" color="info">
+                        <IconButton size="small" color="info" onClick={() => handleViewDetails(booking.id)}>
                           <VisibilityIcon />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Edit booking">
-                        <IconButton size="small" color="primary">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEditBooking(booking.id)}
+                          disabled={statusActionLoading === booking.id || deleteLoading === booking.id}
+                        >
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
                       {booking.status === 'pending' && (
                         <Tooltip title="Confirm booking">
-                          <IconButton size="small" color="success" onClick={() => updateStatus(booking.id, 'confirmed')}>
-                            <CheckIcon />
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => openStatusDialog(booking, 'confirmed')}
+                            disabled={statusActionLoading === booking.id || deleteLoading === booking.id}
+                          >
+                            {statusActionLoading === booking.id && statusDialogState.targetStatus === 'confirmed' ? (
+                              <CircularProgress size={18} color="inherit" />
+                            ) : (
+                              <CheckIcon />
+                            )}
                           </IconButton>
                         </Tooltip>
                       )}
                       {booking.status !== 'cancelled' && booking.status !== 'completed' && (
                         <Tooltip title="Cancel booking">
-                          <IconButton size="small" color="warning" onClick={()=>updateStatus(booking.id, 'cancelled')}>
-                            <CloseIcon />
+                          <IconButton
+                            size="small"
+                            color="warning"
+                            onClick={() => openStatusDialog(booking, 'cancelled')}
+                            disabled={statusActionLoading === booking.id || deleteLoading === booking.id}
+                          >
+                            {statusActionLoading === booking.id && statusDialogState.targetStatus === 'cancelled' ? (
+                              <CircularProgress size={18} color="inherit" />
+                            ) : (
+                              <CloseIcon />
+                            )}
                           </IconButton>
                         </Tooltip>
                       )}
                       <Tooltip title="More options">
-                        <IconButton size="small">
-                          <MoreVertIcon />
+                        <IconButton
+                          size="small"
+                          onClick={(event) => handleOpenActionMenu(event, booking)}
+                          disabled={statusActionLoading === booking.id || deleteLoading === booking.id}
+                        >
+                          {deleteLoading === booking.id ? (
+                            <CircularProgress size={18} color="inherit" />
+                          ) : (
+                            <MoreVertIcon />
+                          )}
                         </IconButton>
                       </Tooltip>
                     </Box>
@@ -342,94 +768,322 @@ const Booking = () => {
 
       {/* Actions Menu UI */}
       <Menu
-        anchorEl={null}
-        open={false}
-        onClose={() => { }}
+        anchorEl={actionMenuAnchor}
+        open={Boolean(actionMenuAnchor)}
+        onClose={handleCloseActionMenu}
       >
-        <MenuItem>
-          <ListItemIcon><VisibilityIcon fontSize="small" /></ListItemIcon>
-          View Details
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
-          Edit
-        </MenuItem>
-        <Divider />
-        <MenuItem>
-          <ListItemIcon><CheckIcon fontSize="small" /></ListItemIcon>
-          Confirm
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon><CloseIcon fontSize="small" /></ListItemIcon>
-          Cancel
-        </MenuItem>
-        <Divider />
-        <MenuItem>
-          <ListItemIcon><EmailIcon fontSize="small" /></ListItemIcon>
-          Send Email
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon><PrintIcon fontSize="small" /></ListItemIcon>
-          Print Ticket
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon><CopyIcon fontSize="small" /></ListItemIcon>
-          Duplicate
-        </MenuItem>
-        <Divider />
-        <MenuItem>
-          <ListItemIcon><ArchiveIcon fontSize="small" /></ListItemIcon>
-          Archive
-        </MenuItem>
-        <MenuItem sx={{ color: 'error.main' }}>
+        <MenuItem sx={{ color: 'error.main' }} onClick={handleOpenDeleteDialog} disabled={!menuBooking || Boolean(deleteLoading)}>
           <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
-          Delete
         </MenuItem>
       </Menu>
 
       {/* Delete Confirmation Dialog UI */}
-      <Dialog open={false} onClose={() => { }}>
-        <DialogTitle>Delete Booking</DialogTitle>
+      <Dialog open={deleteDialogState.open} onClose={handleCloseDeleteDialog} maxWidth="xs" fullWidth>
+        <DialogTitle className="booking-dialog-title">Delete Booking</DialogTitle>
         <DialogContent>
           <Typography>
             Are you sure you want to delete this booking? This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => { }}>Cancel</Button>
-          <Button color="error" variant="contained">
-            Delete
+          <Button onClick={handleCloseDeleteDialog} disabled={Boolean(deleteLoading)}>
+            Cancel
+          </Button>
+          <Button color="error" variant="contained" onClick={handleDeleteBooking} disabled={Boolean(deleteLoading)}>
+            {deleteLoading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={statusDialogState.open} onClose={closeStatusDialog} maxWidth="xs" fullWidth>
+        <DialogTitle className="booking-dialog-title">
+          {statusDialogState.targetStatus === 'confirmed' ? 'Confirm Booking' : 'Cancel Booking'}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography sx={{ mb: 2 }}>
+            {statusDialogState.targetStatus === 'confirmed'
+              ? 'Are you sure you want to confirm this booking?'
+              : 'Are you sure you want to cancel this booking?'}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeStatusDialog} disabled={Boolean(statusActionLoading)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color={statusDialogState.targetStatus === 'confirmed' ? 'success' : 'warning'}
+            onClick={handleConfirmStatusAction}
+            disabled={Boolean(statusActionLoading)}
+          >
+            {statusActionLoading
+              ? (statusDialogState.targetStatus === 'confirmed' ? 'Confirming...' : 'Cancelling...')
+              : (statusDialogState.targetStatus === 'confirmed' ? 'Confirm Booking' : 'Cancel Booking')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* View/Edit Dialog UI */}
-      <Dialog open={false} onClose={() => { }} maxWidth="md" fullWidth>
-        <DialogTitle>Booking Details</DialogTitle>
+      <Dialog open={viewDialogOpen} onClose={handleCloseViewDialog} maxWidth="md" fullWidth>
+        <DialogTitle className="booking-dialog-title">
+          Booking Details
+        </DialogTitle>
         <DialogContent dividers>
-          <Typography>
-            View booking details here
-          </Typography>
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2">Booking ID: #12345</Typography>
-            <Typography variant="subtitle2">Customer: John Doe</Typography>
-            <Typography variant="subtitle2">Vehicle: Toyota Prius</Typography>
-          </Box>
+          {detailsLoading ? (
+            <Typography>Loading booking details...</Typography>
+          ) : selectedBooking ? (
+            <Box className="booking-details" sx={{ display: 'grid', gap: 3 }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                  gap: 2,
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2">Customer Details</Typography>
+                  <Typography variant="h6">{selectedBooking.customer_name}</Typography>
+                  <Typography variant="body2">{selectedBooking.customer_email}</Typography>
+                  <Typography variant="body2">{selectedBooking.customer_phone || 'N/A'}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2">Booking Summary</Typography>
+                  <Typography variant="body1">Booking ID: #{selectedBooking.id}</Typography>
+                  <Box sx={{ mt: 1 }}>{getStatusChip(selectedBooking.status)}</Box>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Created: {formatDateTime(selectedBooking.created_at)}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                  gap: 2,
+                }}
+              >
+                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                  <RouteIcon sx={{ mt: 0.25 }} />
+                  <Box>
+                    <Typography variant="subtitle2">Route</Typography>
+                    <Typography variant="body1">Pickup: {selectedBooking.pickup_location}</Typography>
+                    <Typography variant="body2">Drop: {selectedBooking.drop_location}</Typography>
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                  <CalendarMonthIcon sx={{ mt: 0.25 }} />
+                  <Box>
+                    <Typography variant="subtitle2">Travel Dates</Typography>
+                    <Typography variant="body1">Pickup: {formatDate(selectedBooking.pickup_date)}</Typography>
+                    <Typography variant="body2">Return: {formatDate(selectedBooking.return_date)}</Typography>
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                  <DirectionsCarIcon sx={{ mt: 0.25 }} />
+                  <Box>
+                    <Typography variant="subtitle2">Vehicle</Typography>
+                    <Typography variant="body1">{selectedBooking.vehicle_type}</Typography>
+                    <Typography variant="body2">
+                      Category: {getVehicleCategory(selectedBooking.vehicle_type)}
+                    </Typography>
+                    <Typography variant="body2">
+                      Passengers: {selectedBooking.passengers}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                  <PaymentsIcon sx={{ mt: 0.25 }} />
+                  <Box>
+                    <Typography variant="subtitle2">Payment</Typography>
+                    <Typography variant="body1">{formatCurrency(selectedBooking.amount)}</Typography>
+                    <Typography variant="body2">
+                      Last Updated: {formatDateTime(selectedBooking.updated_at)}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="subtitle2">Additional Notes</Typography>
+                <Typography variant="body2">
+                  {selectedBooking.notes?.trim() ? selectedBooking.notes : 'No additional notes provided.'}
+                </Typography>
+              </Box>
+            </Box>
+          ) : (
+            <Typography>Unable to load booking details.</Typography>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => { }}>Close</Button>
-          <Button variant="contained">Save Changes</Button>
+          <Button onClick={handleCloseViewDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} onClose={handleCloseEditDialog} maxWidth="md" fullWidth>
+        <DialogTitle className="booking-dialog-title">
+          Edit Booking
+        </DialogTitle>
+        <DialogContent dividers>
+          {editLoading ? (
+            <Typography>Loading booking for editing...</Typography>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                gap: 2,
+                pt: 1,
+              }}
+            >
+              <TextField
+                label="Customer Name"
+                value={editFormData.customer_name}
+                onChange={handleEditFieldChange('customer_name')}
+                error={Boolean(editFormErrors.customer_name)}
+                helperText={editFormErrors.customer_name}
+                fullWidth
+              />
+              <TextField
+                label="Customer Email"
+                type="email"
+                value={editFormData.customer_email}
+                onChange={handleEditFieldChange('customer_email')}
+                error={Boolean(editFormErrors.customer_email)}
+                helperText={editFormErrors.customer_email}
+                fullWidth
+              />
+              <TextField
+                label="Customer Phone"
+                value={editFormData.customer_phone}
+                onChange={handleEditFieldChange('customer_phone')}
+                error={Boolean(editFormErrors.customer_phone)}
+                helperText={editFormErrors.customer_phone}
+                fullWidth
+              />
+              <TextField
+                label="Vehicle Model"
+                select
+                value={editFormData.vehicle_type}
+                onChange={handleEditFieldChange('vehicle_type')}
+                error={Boolean(editFormErrors.vehicle_type)}
+                helperText={editFormErrors.vehicle_type}
+                fullWidth
+              >
+                {vehicleTypes.map((vehicle) => (
+                  <MenuItem key={vehicle} value={vehicle}>
+                    {vehicle}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="Pickup Location"
+                value={editFormData.pickup_location}
+                onChange={handleEditFieldChange('pickup_location')}
+                error={Boolean(editFormErrors.pickup_location)}
+                helperText={editFormErrors.pickup_location}
+                fullWidth
+              />
+              <TextField
+                label="Drop Location"
+                value={editFormData.drop_location}
+                onChange={handleEditFieldChange('drop_location')}
+                error={Boolean(editFormErrors.drop_location)}
+                helperText={editFormErrors.drop_location}
+                fullWidth
+              />
+              <TextField
+                label="Pickup Date"
+                type="date"
+                value={editFormData.pickup_date}
+                onChange={handleEditFieldChange('pickup_date')}
+                error={Boolean(editFormErrors.pickup_date)}
+                helperText={editFormErrors.pickup_date}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+              <TextField
+                label="Return Date"
+                type="date"
+                value={editFormData.return_date}
+                onChange={handleEditFieldChange('return_date')}
+                error={Boolean(editFormErrors.return_date)}
+                helperText={editFormErrors.return_date}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+              <TextField
+                label="Passengers"
+                type="number"
+                value={editFormData.passengers}
+                onChange={handleEditFieldChange('passengers')}
+                error={Boolean(editFormErrors.passengers)}
+                helperText={editFormErrors.passengers}
+                inputProps={{ min: 1 }}
+                fullWidth
+              />
+              <TextField
+                label="Amount"
+                type="number"
+                value={editFormData.amount}
+                onChange={handleEditFieldChange('amount')}
+                error={Boolean(editFormErrors.amount)}
+                helperText={editFormErrors.amount}
+                inputProps={{ min: 0, step: '0.01' }}
+                fullWidth
+              />
+              <TextField
+                label="Status"
+                select
+                value={editFormData.status}
+                onChange={handleEditFieldChange('status')}
+                error={Boolean(editFormErrors.status)}
+                helperText={editFormErrors.status}
+                fullWidth
+              >
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="confirmed">Confirmed</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
+              </TextField>
+              <Box />
+              <TextField
+                label="Additional Notes"
+                value={editFormData.notes}
+                onChange={handleEditFieldChange('notes')}
+                error={Boolean(editFormErrors.notes)}
+                helperText={editFormErrors.notes}
+                multiline
+                rows={4}
+                fullWidth
+                sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEditDialog} disabled={saveLoading}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleSaveBooking} disabled={editLoading || saveLoading}>
+            {saveLoading ? 'Saving...' : 'Save Changes'}
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Snackbar UI */}
       <Snackbar
-        open={false}
-        autoHideDuration={6000}
+        open={snackbarState.open}
+        onClose={handleSnackbarClose}
+        autoHideDuration={5000}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert severity="success" sx={{ width: '100%' }}>
-          This is a success message!
+        <Alert onClose={handleSnackbarClose} severity={snackbarState.severity} sx={{ width: '100%' }}>
+          {snackbarState.message}
         </Alert>
       </Snackbar>
     </>

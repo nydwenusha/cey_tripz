@@ -22,22 +22,38 @@ Route::options('/{any}', function () {
 })->where('any', '.*');
 
 // Public routes
+
+// Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Bookings
 Route::post('/booking', [BookingController::class, 'store']);
+
+// Blog posts
 Route::get('/blogPosts', [BlogPostController::class, 'index']);
 Route::get('/blogPosts/{id}', [BlogPostController::class, 'show']);
 
 // Protected routes
 Route::middleware('auth:api')->group(function () {
+    // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
-    Route::put('/updateStatus', [BookingController::class, 'updateStatus']);
+
+    // Bookings
+    Route::get('/GetBookings', [BookingController::class, 'index']);
+    Route::get('/GetBookings/{id}', [BookingController::class, 'show']);
     Route::get('/TotalBookings', [BookingController::class, 'getTotalBookings']);
     Route::get('/TodayBookings', [BookingController::class, 'getTodayBookings']);
+    Route::put('/updateStatus', [BookingController::class, 'updateStatus']);
+    Route::put('/UpdateBooking/{id}', [BookingController::class, 'update']);
+    Route::delete('/DeleteBooking/{id}', [BookingController::class, 'destroy']);
+
+    // Blog categories
     Route::get('/blogPostCategories', [BlogPostCategoryController::class, 'index']);
     Route::post('/addBlogPostCategory', [BlogPostCategoryController::class, 'store']);
+
+    // Blog posts
     Route::post('/addBlogPost', [BlogPostController::class, 'store']);
-    Route::get('/GetBookings', [BookingController::class, 'index']);
     Route::delete('/blogPostDelete/{id}', [BlogPostController::class, 'destroy']);
 });

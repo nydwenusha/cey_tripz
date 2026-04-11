@@ -15,10 +15,27 @@ class BookingController extends Controller
         $bookings = Booking::all();
         return response()->json([
             'status' => 'success',
-            'message' => 'Bookings retrieved successfully',
             'bookings' => $bookings,
         ], 200);
     }
+
+    public function show($id)
+    {
+        $booking = Booking::find($id);
+
+        if (!$booking) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Booking not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'booking' => $booking,
+        ], 200);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -68,18 +85,81 @@ class BookingController extends Controller
         ], 201);
     }
 
+    public function update(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'customer_name' => 'required|string|max:255',
+            'customer_email' => 'required|string|email|max:255',
+            'customer_phone' => 'nullable|string|max:20',
+            'pickup_location' => 'required|string|max:255',
+            'drop_location' => 'required|string|max:255',
+            'pickup_date' => 'required|date',
+            'return_date' => 'required|date|after_or_equal:pickup_date',
+            'vehicle_type' => 'required|string|max:255',
+            'passengers' => 'required|integer|min:1',
+            'amount' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
+            'status' => 'required|string|in:pending,confirmed,cancelled',
+        ]);
+
+        if ($validator->fails()) {
+            Log::info($validator->errors());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $booking = Booking::find($id);
+
+        if (!$booking) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Booking not found',
+            ], 404);
+        }
+
+        $booking->update($validator->validated());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Booking updated successfully',
+            'booking' => $booking->fresh(),
+        ], 200);
+    }
+
+    public function destroy($id)
+    {
+        $booking = Booking::find($id);
+
+        if (!$booking) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Booking not found',
+            ], 404);
+        }
+
+        $booking->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Booking deleted successfully',
+        ], 200);
+    }
+
     public function getTotalBookings()
     {
         $totalBookings = Booking::count();
         Log::info('Total bookings: ' . $totalBookings);
-        return response()->json(['status' => 'success', 'message' => 'Total bookings retrieved successfully', 'total_bookings' => $totalBookings,], 200);
+        return response()->json(['status' => 'success', 'total_bookings' => $totalBookings,], 200);
     }
 
     public function getTodayBookings(){
         $today = date('Y-m-d');
         $today_bookings = Booking::whereDate('created_at', $today)->count();
         Log::info('Today bookings: ' . $today_bookings);
-        return response()->json(['status' => 'success', 'message' => 'Today bookings retrieved successfully', 'today_bookings' => $today_bookings,], 200);
+        return response()->json(['status' => 'success', 'today_bookings' => $today_bookings,], 200);
     }
 
     public function updateStatus(Request $request)
@@ -109,13 +189,39 @@ class BookingController extends Controller
             ], 404);
         }
 
-        $item->status = $request->status;
+        $allowedTransitions = [
+            'pending' => ['confirmed', 'cancelled'],
+            'confirmed' => ['cancelled'],
+            'cancelled' => [],
+        ];
+
+        $currentStatus = $item->status;
+        $nextStatus = $request->status;
+
+        if ($currentStatus === $nextStatus) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Booking is already marked as ' . $currentStatus,
+                'booking' => $item,
+            ], 200);
+        }
+
+        if (!in_array($nextStatus, $allowedTransitions[$currentStatus] ?? [], true)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "Cannot change booking status from {$currentStatus} to {$nextStatus}",
+            ], 422);
+        }
+
+        $item->status = $nextStatus;
         $item->save();
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Booking status updated successfully',
-            'booking' => $item,
+            'message' => $nextStatus === 'confirmed'
+                ? 'Booking confirmed successfully'
+                : 'Booking cancelled successfully',
+            'booking' => $item->fresh(),
         ], 200);
     }
 }
