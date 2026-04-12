@@ -10,12 +10,71 @@ use Illuminate\Support\Facades\Validator;
 class BookingController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $bookings = Booking::all();
+        $validator = Validator::make($request->all(), [
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|in:5,10,25,50',
+            'search' => 'nullable|string|max:255',
+            'vehicle_type' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:pending,confirmed,cancelled,completed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $page = (int) ($request->query('page', 1));
+        $perPage = (int) ($request->query('per_page', 10));
+        $search = trim((string) $request->query('search', ''));
+        $vehicleType = trim((string) $request->query('vehicle_type', ''));
+        $status = trim((string) $request->query('status', ''));
+
+        $query = Booking::query();
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $likeSearch = '%' . $search . '%';
+
+                $builder->where('customer_name', 'like', $likeSearch)
+                    ->orWhere('customer_email', 'like', $likeSearch)
+                    ->orWhere('customer_phone', 'like', $likeSearch)
+                    ->orWhere('pickup_location', 'like', $likeSearch)
+                    ->orWhere('drop_location', 'like', $likeSearch)
+                    ->orWhere('vehicle_type', 'like', $likeSearch);
+            });
+        }
+
+        if ($vehicleType !== '') {
+            $query->where('vehicle_type', $vehicleType);
+        }
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        $bookings = $query
+            ->orderByDesc('created_at')
+            ->paginate($perPage, ['*'], 'page', $page);
+
         return response()->json([
             'status' => 'success',
-            'bookings' => $bookings,
+            'bookings' => $bookings->items(),
+            'pagination' => [
+                'current_page' => $bookings->currentPage(),
+                'per_page' => $bookings->perPage(),
+                'total' => $bookings->total(),
+                'last_page' => $bookings->lastPage(),
+            ],
+            'filters' => [
+                'search' => $search,
+                'vehicle_type' => $vehicleType,
+                'status' => $status,
+            ],
         ], 200);
     }
 
@@ -99,7 +158,7 @@ class BookingController extends Controller
             'passengers' => 'required|integer|min:1',
             'amount' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
-            'status' => 'required|string|in:pending,confirmed,cancelled',
+            'status' => 'required|string|in:pending,confirmed,cancelled,completed',
         ]);
 
         if ($validator->fails()) {

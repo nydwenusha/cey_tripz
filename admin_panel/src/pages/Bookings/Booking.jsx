@@ -58,6 +58,17 @@ import './Booking.scss';
 import PageHeader from '../../components/layout/PageHeader/PageHeader';
 import api from '../../services/api/api';
 
+const getBookingsPage = (page, perPage, search = '', vehicleType = 'all', status = 'all') =>
+  api.get('/GetBookings', {
+    params: {
+      page,
+      per_page: perPage,
+      ...(search ? { search } : {}),
+      ...(vehicleType !== 'all' ? { vehicle_type: vehicleType } : {}),
+      ...(status !== 'all' ? { status } : {}),
+    },
+  });
+
 const Booking = () => {
   const createInitialEditForm = (booking = {}) => ({
     id: booking.id ?? null,
@@ -184,6 +195,13 @@ const Booking = () => {
   //   }
   // ];
   const [bookings, setBookings] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalBookingsCount, setTotalBookingsCount] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedVehicleType, setSelectedVehicleType] = useState('all');
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -211,22 +229,91 @@ const Booking = () => {
     message: '',
   });
 
+  const hasActiveFilters =
+    searchTerm !== '' ||
+    selectedVehicleType !== 'all' ||
+    selectedStatusFilter !== 'all';
+
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const nextSearchTerm = searchInput.trim();
+      setPage(0);
+      setSearchTerm(nextSearchTerm);
+    }, 350);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchInput]);
+
+  useEffect(() => {
+    let isActive = true;
+
     const loadBookings = async () => {
       try {
-        const response = await api.get('/GetBookings');
+        const response = await getBookingsPage(
+          page + 1,
+          rowsPerPage,
+          searchTerm,
+          selectedVehicleType,
+          selectedStatusFilter
+        );
+
+        if (!isActive) {
+          return;
+        }
+
         setBookings(response.data.bookings || []);
+        setTotalBookingsCount(response.data.pagination?.total || 0);
       } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
         console.error('Error fetching bookings:', error);
         showSnackbar(error.response?.data?.message || 'Failed to retrieve bookings.', 'error');
       }
     };
 
     loadBookings();
-  }, []);
+
+    return () => {
+      isActive = false;
+    };
+  }, [page, rowsPerPage, searchTerm, selectedVehicleType, selectedStatusFilter]);
 
   // Vehicle types for filter dropdown
   const vehicleTypes = vehicleCategories.map(cat => cat.name);
+
+  const refreshBookingsPage = async (targetPage = page) => {
+    const response = await getBookingsPage(
+      targetPage + 1,
+      rowsPerPage,
+      searchTerm,
+      selectedVehicleType,
+      selectedStatusFilter
+    );
+
+    const nextBookings = response.data.bookings || [];
+    const total = response.data.pagination?.total || 0;
+
+    if (targetPage > 0 && nextBookings.length === 0 && total > 0) {
+      const fallbackPage = targetPage - 1;
+      const fallbackResponse = await getBookingsPage(
+        fallbackPage + 1,
+        rowsPerPage,
+        searchTerm,
+        selectedVehicleType,
+        selectedStatusFilter
+      );
+
+      setPage(fallbackPage);
+      setBookings(fallbackResponse.data.bookings || []);
+      setTotalBookingsCount(fallbackResponse.data.pagination?.total || 0);
+      return;
+    }
+
+    setBookings(nextBookings);
+    setTotalBookingsCount(total);
+  };
 
   const syncBookingState = (updatedBooking) => {
     setBookings((prev) =>
@@ -257,7 +344,13 @@ const Booking = () => {
       });
 
       const updatedBooking = response.data.booking;
-      syncBookingState(updatedBooking);
+
+      if (hasActiveFilters) {
+        await refreshBookingsPage();
+      } else {
+        syncBookingState(updatedBooking);
+      }
+
       showSnackbar(response.data.message || `Booking ${newStatus} successfully.`);
       return true;
     } catch (error) {
@@ -381,6 +474,29 @@ const Booking = () => {
       ...prev,
       open: false,
     }));
+  };
+
+  const handleChangePage = (_, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchInput(event.target.value);
+  };
+
+  const handleVehicleFilterChange = (event) => {
+    setSelectedVehicleType(event.target.value);
+    setPage(0);
+  };
+
+  const handleStatusFilterChange = (status) => {
+    setSelectedStatusFilter(status);
+    setPage(0);
   };
 
   const handleEditFieldChange = (field) => (event) => {
@@ -516,7 +632,12 @@ const Booking = () => {
 
       const response = await api.put(`/UpdateBooking/${editFormData.id}`, payload);
       const updatedBooking = response.data.booking;
-      syncBookingState(updatedBooking);
+
+      if (hasActiveFilters) {
+        await refreshBookingsPage();
+      } else {
+        syncBookingState(updatedBooking);
+      }
 
       resetEditDialog();
       showSnackbar(response.data.message || 'Booking updated successfully.');
@@ -544,12 +665,12 @@ const Booking = () => {
     }
 
     const bookingId = deleteDialogState.booking.id;
+    const shouldMoveToPreviousPage = bookings.length === 1 && page > 0;
+    const nextPage = shouldMoveToPreviousPage ? page - 1 : page;
     setDeleteLoading(bookingId);
 
     try {
       const response = await api.delete(`/DeleteBooking/${bookingId}`);
-
-      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId));
 
       if (selectedBooking?.id === bookingId) {
         handleCloseViewDialog();
@@ -563,6 +684,13 @@ const Booking = () => {
         open: false,
         booking: null,
       });
+
+      if (nextPage !== page) {
+        setPage(nextPage);
+      } else {
+        await refreshBookingsPage(nextPage);
+      }
+
       showSnackbar(response.data.message || 'Booking deleted successfully.');
     } catch (error) {
       console.error('Error deleting booking:', error);
@@ -593,6 +721,8 @@ const Booking = () => {
             variant="outlined"
             size="small"
             sx={{ width: 400 }}
+            value={searchInput}
+            onChange={handleSearchChange}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -605,7 +735,11 @@ const Booking = () => {
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
             <FormControl size="small" sx={{ minWidth: 200 }}>
               <InputLabel>Vehicle Model</InputLabel>
-              <Select label="Vehicle Model">
+              <Select
+                label="Vehicle Model"
+                value={selectedVehicleType}
+                onChange={handleVehicleFilterChange}
+              >
                 <MenuItem value="all">All Vehicles</MenuItem>
                 {vehicleTypes.map(vehicle => (
                   <MenuItem key={vehicle} value={vehicle}>{vehicle}</MenuItem>
@@ -622,9 +756,10 @@ const Booking = () => {
                     status === 'pending' ? 'warning' :
                       status === 'cancelled' ? 'error' :
                         status === 'completed' ? 'info' : 'default'}
-                  variant="outlined"
+                  variant={selectedStatusFilter === status ? 'filled' : 'outlined'}
                   size="small"
                   sx={{ cursor: 'pointer' }}
+                  onClick={() => handleStatusFilterChange(status)}
                 />
               ))}
             </Box>
@@ -756,11 +891,11 @@ const Booking = () => {
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
           <TablePagination
             component="div"
-            count={100}
-            page={0}
-            onPageChange={() => { }}
-            rowsPerPage={10}
-            onRowsPerPageChange={() => { }}
+            count={totalBookingsCount}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25, 50]}
           />
         </Box>
@@ -1049,6 +1184,7 @@ const Booking = () => {
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="confirmed">Confirmed</MenuItem>
                 <MenuItem value="cancelled">Cancelled</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
               </TextField>
               <Box />
               <TextField
