@@ -27,7 +27,7 @@ import {
     Brightness7,
 } from '@mui/icons-material';
 import './Header.scss';
-import { AuthContext, useAuth } from '../../../services/auth/AuthContext.jsx';
+import { AuthContext } from '../../../services/auth/AuthContext.jsx';
 import api from '../../../services/api/api.js';
 
 const Header = ({
@@ -36,22 +36,35 @@ const Header = ({
     themeMode = 'light',
     sidebarOpen = true  // Add this prop
 }) => {
-
-    const [totalBookings, setTotalBookings] = useState();
     const [todayBookings, setTodayBookings] = useState();
 
     useEffect(() => {
-        api.get('/TotalBookings').then(response => {
-            setTotalBookings(response.data.total_bookings);
-        }).catch(error => {
-            console.error('Error fetching total bookings:', error);
-        });
+        let isActive = true;
 
+        const fetchBookingStats = async () => {
+            try {
+                const todayResponse = await api.get('/TodayBookings');
 
+                if (!isActive) {
+                    return;
+                }
 
-        api.get('/TodayBookings').then(response => {
-            setTodayBookings(response.data.today_bookings);
-        }).catch(error => { console.error('Error fetching today bookings:', error); });
+                setTodayBookings(todayResponse.data.today_bookings);
+            } catch (error) {
+                console.error('Error fetching booking stats:', error);
+            }
+        };
+
+        fetchBookingStats();
+
+        const intervalId = window.setInterval(fetchBookingStats, 30000);
+        window.addEventListener('focus', fetchBookingStats);
+
+        return () => {
+            isActive = false;
+            window.clearInterval(intervalId);
+            window.removeEventListener('focus', fetchBookingStats);
+        };
     }, []);
 
     const { user } = useContext(AuthContext);
