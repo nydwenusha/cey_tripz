@@ -126,6 +126,34 @@ const Booking = () => {
     );
   };
 
+  const getSelectedFilterChipStyles = (status) => {
+    const selectedStyles = {
+      all: { backgroundColor: '#4b5563 !important', borderColor: '#4b5563 !important' },
+      confirmed: { backgroundColor: '#1b5e20 !important', borderColor: '#1b5e20 !important' },
+      pending: { backgroundColor: '#b45309 !important', borderColor: '#b45309 !important' },
+      cancelled: { backgroundColor: '#b91c1c !important', borderColor: '#b91c1c !important' },
+      completed: { backgroundColor: '#0369a1 !important', borderColor: '#0369a1 !important' },
+    };
+
+    return {
+      color: '#fff !important',
+      opacity: '1 !important',
+      fontWeight: 700,
+      boxShadow: '0 2px 8px rgba(15, 23, 42, 0.18)',
+      backgroundImage: 'none',
+      ...selectedStyles[status],
+      '& .MuiChip-label, & .MuiChip-icon': {
+        color: '#fff !important',
+      },
+      '&:hover': {
+        color: '#fff !important',
+        opacity: '1 !important',
+        backgroundImage: 'none',
+        ...selectedStyles[status],
+      },
+    };
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -758,7 +786,10 @@ const Booking = () => {
                         status === 'completed' ? 'info' : 'default'}
                   variant={selectedStatusFilter === status ? 'filled' : 'outlined'}
                   size="small"
-                  sx={{ cursor: 'pointer' }}
+                  sx={{
+                    cursor: 'pointer',
+                    ...(selectedStatusFilter === status ? getSelectedFilterChipStyles(status) : {}),
+                  }}
                   onClick={() => handleStatusFilterChange(status)}
                 />
               ))}
