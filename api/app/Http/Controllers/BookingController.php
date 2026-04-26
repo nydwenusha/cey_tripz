@@ -4,11 +4,84 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
 {
+    protected function syncCustomerRecord(string $customerEmail): void
+    {
+        $customerEmail = trim($customerEmail);
+
+        if ($customerEmail === '') {
+            return;
+        }
+
+        $existingCustomer = DB::table('customers')
+            ->where('customer_email', $customerEmail)
+            ->first();
+
+        $confirmedBookingsQuery = Booking::where('customer_email', $customerEmail)
+            ->whereIn('status', ['confirmed', 'completed']);
+
+        $totalBookings = (clone $confirmedBookingsQuery)->count();
+
+        if ($totalBookings === 0) {
+            if ($existingCustomer) {
+                DB::table('customers')
+                    ->where('customer_email', $customerEmail)
+                    ->update([
+                        'total_bookings' => 0,
+                        'status' => 'inactive',
+                        'last_activity' => now(),
+                        'updated_at' => now(),
+                    ]);
+            }
+
+            return;
+        }
+
+        $latestBooking = (clone $confirmedBookingsQuery)
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
+            ->first();
+
+        $firstConfirmedBooking = (clone $confirmedBookingsQuery)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->first();
+
+        if (!$latestBooking || !$firstConfirmedBooking) {
+            return;
+        }
+
+        $existingCustomerName = $existingCustomer ? trim((string) $existingCustomer->customer_name) : '';
+        $existingCustomerPhone = $existingCustomer ? trim((string) $existingCustomer->customer_phone) : '';
+
+        $customerPayload = [
+            'customer_name' => $existingCustomerName !== '' ? $existingCustomerName : $latestBooking->customer_name,
+            'customer_email' => $customerEmail,
+            'customer_phone' => $existingCustomerPhone !== '' ? $existingCustomerPhone : $latestBooking->customer_phone,
+            'total_bookings' => $totalBookings,
+            'status' => 'active',
+            'join_date' => $firstConfirmedBooking->created_at->toDateString(),
+            'last_activity' => $latestBooking->updated_at ?? now(),
+            'updated_at' => now(),
+        ];
+
+        if ($existingCustomer) {
+            DB::table('customers')
+                ->where('customer_email', $customerEmail)
+                ->update($customerPayload);
+
+            return;
+        }
+
+        $customerPayload['created_at'] = now();
+
+        DB::table('customers')->insert($customerPayload);
+    }
 
     public function index(Request $request)
     {
@@ -179,7 +252,25 @@ class BookingController extends Controller
             ], 404);
         }
 
+        $originalEmail = $booking->customer_email;
+        $originalStatus = $booking->status;
+
         $booking->update($validator->validated());
+        $booking->refresh();
+
+        $emailsToSync = [];
+
+        if (in_array($originalStatus, ['confirmed', 'completed'], true)) {
+            $emailsToSync[] = $originalEmail;
+        }
+
+        if (in_array($booking->status, ['confirmed', 'completed'], true)) {
+            $emailsToSync[] = $booking->customer_email;
+        }
+
+        foreach (array_unique($emailsToSync) as $email) {
+            $this->syncCustomerRecord($email);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -199,7 +290,14 @@ class BookingController extends Controller
             ], 404);
         }
 
+        $customerEmail = $booking->customer_email;
+        $shouldSyncCustomer = in_array($booking->status, ['confirmed', 'completed'], true);
+
         $booking->delete();
+
+        if ($shouldSyncCustomer) {
+            $this->syncCustomerRecord($customerEmail);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -274,6 +372,9 @@ class BookingController extends Controller
 
         $item->status = $nextStatus;
         $item->save();
+        $item->refresh();
+
+        $this->syncCustomerRecord($item->customer_email);
 
         return response()->json([
             'status' => 'success',

@@ -5,6 +5,7 @@ use App\Http\Controllers\BlockPostCategoryController;
 use App\Http\Controllers\BlogPostCategoryController;
 use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -48,6 +49,12 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/updateStatus', [BookingController::class, 'updateStatus']);
     Route::put('/UpdateBooking/{id}', [BookingController::class, 'update']);
     Route::delete('/DeleteBooking/{id}', [BookingController::class, 'destroy']);
+
+    // Customers
+    Route::get('/GetCustomers', [CustomerController::class, 'index']);
+    Route::get('/GetCustomers/{id}', [CustomerController::class, 'show']);
+    Route::put('/UpdateCustomer/{id}', [CustomerController::class, 'update']);
+    Route::delete('/DeleteCustomer/{id}', [CustomerController::class, 'destroy']);
 
     // Blog categories
     Route::get('/blogPostCategories', [BlogPostCategoryController::class, 'index']);

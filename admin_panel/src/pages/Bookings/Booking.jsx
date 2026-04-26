@@ -944,7 +944,13 @@ const Booking = () => {
       </Menu>
 
       {/* Delete Confirmation Dialog UI */}
-      <Dialog open={deleteDialogState.open} onClose={handleCloseDeleteDialog} maxWidth="xs" fullWidth>
+      <Dialog open={deleteDialogState.open} onClose={handleCloseDeleteDialog} maxWidth="xs" fullWidth sx={{
+          zIndex: 1601,
+          '& .MuiDialog-paper': {
+            mt: { xs: 10, sm: 12 },
+            mb: 3,
+          },
+        }}>
         <DialogTitle className="booking-dialog-title">Delete Booking</DialogTitle>
         <DialogContent>
           <Typography>
@@ -961,7 +967,13 @@ const Booking = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={statusDialogState.open} onClose={closeStatusDialog} maxWidth="xs" fullWidth>
+      <Dialog open={statusDialogState.open} onClose={closeStatusDialog} maxWidth="xs" fullWidth sx={{
+          zIndex: 1601,
+          '& .MuiDialog-paper': {
+            mt: { xs: 10, sm: 12 },
+            mb: 3,
+          },
+        }}>
         <DialogTitle className="booking-dialog-title">
           {statusDialogState.targetStatus === 'confirmed' ? 'Confirm Booking' : 'Cancel Booking'}
         </DialogTitle>
@@ -990,7 +1002,14 @@ const Booking = () => {
       </Dialog>
 
       {/* View/Edit Dialog UI */}
-      <Dialog open={viewDialogOpen} onClose={handleCloseViewDialog} maxWidth="md" fullWidth>
+      <Dialog open={viewDialogOpen} onClose={handleCloseViewDialog} maxWidth="md" fullWidth sx={{
+          zIndex: 1601,
+          '& .MuiDialog-paper': {
+            mt: { xs: 10, sm: 12 },
+            mb: 3,
+            maxHeight: 'calc(100% - 120px)',
+          },
+        }}>
         <DialogTitle className="booking-dialog-title">
           Booking Details
         </DialogTitle>
@@ -1091,7 +1110,20 @@ const Booking = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={editDialogOpen} onClose={handleCloseEditDialog} maxWidth="md" fullWidth>
+      <Dialog
+        open={editDialogOpen}
+        onClose={handleCloseEditDialog}
+        maxWidth="md"
+        fullWidth
+        sx={{
+          zIndex: 1601,
+          '& .MuiDialog-paper': {
+            mt: { xs: 10, sm: 12 },
+            mb: 3,
+            maxHeight: 'calc(100% - 120px)',
+          },
+        }}
+      >
         <DialogTitle className="booking-dialog-title">
           Edit Booking
         </DialogTitle>
