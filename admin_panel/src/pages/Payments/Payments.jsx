@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Chip,
@@ -28,7 +29,8 @@ import {
   TableSortLabel,
   TextField,
   Tooltip,
-  Typography
+  Typography,
+  Popper
 } from '@mui/material';
 import {
   AccountBalance,
@@ -43,6 +45,7 @@ import {
   Download,
   Email,
   ErrorOutline,
+  Edit,
   MoreVert,
   Payment,
   Pending,
@@ -62,6 +65,19 @@ import api from '../../services/api/api';
 const PAYMENT_METHOD_OPTIONS = ['Credit Card', 'Debit Card', 'PayPal', 'Bank Transfer', 'Cash'];
 const STATUS_OPTIONS = ['pending', 'completed', 'failed', 'refunded'];
 
+const createInitialStats = () => ({
+  total: 0,
+  completed: 0,
+  pending: 0,
+  failed: 0,
+  refunded: 0,
+  totalTrend: 12.5,
+  completedTrend: 8.2,
+  pendingTrend: -3.5,
+  failedTrend: 2.1,
+  refundedTrend: -1.8,
+});
+
 const createInitialPaymentForm = () => ({
   booking_id: '',
   customer_name: '',
@@ -74,6 +90,22 @@ const createInitialPaymentForm = () => ({
   payment_date: '',
   due_date: '',
   description: '',
+});
+
+const createInitialEditForm = (payment = null) => ({
+  id: payment?.id ?? null,
+  payment_code: payment?.payment_code ?? '',
+  booking_label: payment?.booking_id ? `Booking #${payment.booking_id}` : 'No booking',
+  customer_name: payment?.customer_name ?? '',
+  customer_email: payment?.customer_email ?? '',
+  amount: payment?.amount !== undefined && payment?.amount !== null ? String(payment.amount) : '',
+  currency: payment?.currency ?? 'USD',
+  payment_method: payment?.payment_method ?? 'Credit Card',
+  status: payment?.status ?? 'pending',
+  transaction_id: payment?.transaction_id ?? '',
+  payment_date: payment?.payment_date ?? '',
+  due_date: payment?.due_date ?? '',
+  description: payment?.description ?? '',
 });
 
 const dialogSx = {
@@ -97,6 +129,10 @@ const dialogSelectMenuProps = {
   },
 };
 
+const DialogAutocompletePopper = (props) => (
+  <Popper {...props} placement="bottom-start" style={{ ...(props.style || {}), zIndex: 1702 }} />
+);
+
 const getPaymentsPage = (page, perPage, search = '', status = 'all', paymentMethod = 'all') =>
   api.get('/GetPayments', {
     params: {
@@ -107,6 +143,16 @@ const getPaymentsPage = (page, perPage, search = '', status = 'all', paymentMeth
       payment_method: paymentMethod !== 'all' ? paymentMethod : undefined,
     },
   });
+
+const getPaymentStats = () => api.get('/PaymentStats');
+
+const mapStatsState = (statsData = {}) => ({
+  total: Number(statsData.total || 0),
+  completed: Number(statsData.completed || 0),
+  pending: Number(statsData.pending || 0),
+  failed: Number(statsData.failed || 0),
+  refunded: Number(statsData.refunded || 0),
+});
 
 const mapPayment = (payment) => ({
   recordId: payment.id,
@@ -161,28 +207,21 @@ const Payments = () => {
   const [filterMethod, setFilterMethod] = useState('all');
   const [openDialog, setOpenDialog] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
   const [bookingOptions, setBookingOptions] = useState([]);
   const [paymentForm, setPaymentForm] = useState(createInitialPaymentForm());
   const [paymentFormErrors, setPaymentFormErrors] = useState({});
+  const [editFormData, setEditFormData] = useState(createInitialEditForm());
+  const [editFormErrors, setEditFormErrors] = useState({});
   const [snackbarState, setSnackbarState] = useState({
     open: false,
     severity: 'success',
     message: '',
   });
-  const [stats] = useState({
-    total: 8567.30,
-    completed: 6542.55,
-    pending: 1120.00,
-    failed: 125.75,
-    refunded: 560.25,
-    totalTrend: 12.5,
-    completedTrend: 8.2,
-    pendingTrend: -3.5,
-    failedTrend: 2.1,
-    refundedTrend: -1.8
-  });
+  const [stats, setStats] = useState(createInitialStats());
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -192,6 +231,37 @@ const Payments = () => {
 
     return () => clearTimeout(timeoutId);
   }, [searchInput]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadStats = async () => {
+      try {
+        const response = await getPaymentStats();
+
+        if (!isActive) {
+          return;
+        }
+
+        setStats((prev) => ({
+          ...prev,
+          ...mapStatsState(response.data.stats),
+        }));
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        console.error('Error fetching payment stats:', error);
+      }
+    };
+
+    loadStats();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -316,17 +386,35 @@ const Payments = () => {
     setSelectedPayment(payment);
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (clearSelection = true) => {
     setAnchorEl(null);
-    setSelectedPayment(null);
+
+    if (clearSelection) {
+      setSelectedPayment(null);
+    }
   };
 
   const handleAction = (action) => {
     console.log(`${action} payment:`, selectedPayment);
+
     if (action === 'View Receipt') {
       setOpenDialog(true);
+      handleMenuClose(false);
+      return;
     }
+
+    if (action === 'Edit Payment') {
+      handleEditPayment(selectedPayment?.recordId);
+      handleMenuClose(false);
+      return;
+    }
+
     handleMenuClose();
+  };
+
+  const handleCloseReceiptDialog = () => {
+    setOpenDialog(false);
+    setSelectedPayment(null);
   };
 
   const handleOpenSaveDialog = async () => {
@@ -352,30 +440,42 @@ const Payments = () => {
   const handlePaymentFieldChange = (field) => (event) => {
     const value = event.target.value;
 
-    if (field === 'booking_id') {
-      const selectedBooking = bookingOptions.find((booking) => String(booking.id) === String(value));
-
-      setPaymentForm((prev) => ({
-        ...prev,
-        booking_id: value,
-        customer_name: selectedBooking ? selectedBooking.customer_name || '' : prev.customer_name,
-        customer_email: selectedBooking ? selectedBooking.customer_email || '' : prev.customer_email,
-        amount: selectedBooking && !prev.amount ? String(selectedBooking.amount || '') : prev.amount,
-        due_date: selectedBooking && !prev.due_date ? selectedBooking.pickup_date || '' : prev.due_date,
-        description: selectedBooking && !prev.description
-          ? `${selectedBooking.vehicle_type || 'Booking'} payment`
-          : prev.description,
-      }));
-    } else {
-      setPaymentForm((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    }
+    setPaymentForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
 
     setPaymentFormErrors((prev) => ({
       ...prev,
       [field]: '',
+    }));
+  };
+
+  const handleEditFieldChange = (field) => (event) => {
+    const value = event.target.value;
+
+    setEditFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    setEditFormErrors((prev) => ({
+      ...prev,
+      [field]: '',
+    }));
+  };
+
+  const handleBookingSelection = (_, selectedBooking) => {
+    setPaymentForm((prev) => ({
+      ...prev,
+      booking_id: selectedBooking ? String(selectedBooking.id) : '',
+      customer_name: selectedBooking ? selectedBooking.customer_name || '' : prev.customer_name,
+      customer_email: selectedBooking ? selectedBooking.customer_email || '' : prev.customer_email,
+      amount: selectedBooking && !prev.amount ? String(selectedBooking.amount || '') : prev.amount,
+      due_date: selectedBooking && !prev.due_date ? selectedBooking.pickup_date || '' : prev.due_date,
+      description: selectedBooking && !prev.description
+        ? `${selectedBooking.vehicle_type || 'Booking'} payment`
+        : prev.description,
     }));
   };
 
@@ -408,6 +508,40 @@ const Payments = () => {
 
     setPaymentFormErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const validateEditForm = () => {
+    const errors = {};
+
+    if (editFormData.amount === '') {
+      errors.amount = 'Amount is required.';
+    } else if (Number(editFormData.amount) < 0) {
+      errors.amount = 'Amount must be 0 or greater.';
+    }
+
+    if (editFormData.transaction_id.length > 191) {
+      errors.transaction_id = 'Transaction ID must be 191 characters or less.';
+    }
+
+    if (editFormData.description.length > 255) {
+      errors.description = 'Description must be 255 characters or less.';
+    }
+
+    setEditFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const refreshPaymentStats = async () => {
+    try {
+      const response = await getPaymentStats();
+
+      setStats((prev) => ({
+        ...prev,
+        ...mapStatsState(response.data.stats),
+      }));
+    } catch (error) {
+      console.error('Error refreshing payment stats:', error);
+    }
   };
 
   const handleSavePayment = async () => {
@@ -446,6 +580,7 @@ const Payments = () => {
         ...prev.filter((payment) => payment.recordId !== createdPayment.recordId),
       ]);
       setTotalPaymentsCount((prev) => prev + 1);
+      await refreshPaymentStats();
       setSaveDialogOpen(false);
       setPaymentForm(createInitialPaymentForm());
       setPaymentFormErrors({});
@@ -468,6 +603,141 @@ const Payments = () => {
       }
 
       showSnackbar(error.response?.data?.message || 'Failed to save payment.', 'error');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const refreshPaymentsPage = async (targetPage = page) => {
+    const response = await getPaymentsPage(
+      targetPage + 1,
+      rowsPerPage,
+      searchTerm,
+      filterStatus,
+      filterMethod
+    );
+
+    const nextPayments = (response.data.payments || []).map(mapPayment);
+    const total = response.data.pagination?.total || 0;
+
+    if (targetPage > 0 && nextPayments.length === 0 && total > 0) {
+      const fallbackPage = targetPage - 1;
+      const fallbackResponse = await getPaymentsPage(
+        fallbackPage + 1,
+        rowsPerPage,
+        searchTerm,
+        filterStatus,
+        filterMethod
+      );
+
+      setPage(fallbackPage);
+      setPayments((fallbackResponse.data.payments || []).map(mapPayment));
+      setTotalPaymentsCount(fallbackResponse.data.pagination?.total || 0);
+      return;
+    }
+
+    setPayments(nextPayments);
+    setTotalPaymentsCount(total);
+  };
+
+  const syncPaymentState = (updatedPayment) => {
+    setPayments((prev) =>
+      prev.map((payment) =>
+        payment.recordId === updatedPayment.recordId ? updatedPayment : payment
+      )
+    );
+
+    if (selectedPayment?.recordId === updatedPayment.recordId) {
+      setSelectedPayment(updatedPayment);
+    }
+  };
+
+  const handleEditPayment = async (id) => {
+    if (!id) {
+      return;
+    }
+
+    setEditDialogOpen(true);
+    setEditLoading(true);
+    setEditFormErrors({});
+
+    try {
+      const response = await api.get(`/GetPayments/${id}`);
+      const payment = response.data.payment;
+
+      if (!payment) {
+        throw new Error('Payment not found');
+      }
+
+      setEditFormData(createInitialEditForm(payment));
+    } catch (error) {
+      console.error('Error fetching payment for edit:', error);
+      setEditDialogOpen(false);
+      setEditFormData(createInitialEditForm());
+      showSnackbar('Unable to load payment for editing.', 'error');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const resetEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditLoading(false);
+    setEditFormErrors({});
+    setEditFormData(createInitialEditForm());
+  };
+
+  const handleCloseEditDialog = () => {
+    if (saveLoading) {
+      return;
+    }
+
+    resetEditDialog();
+  };
+
+  const handleUpdatePayment = async () => {
+    if (!validateEditForm()) {
+      return;
+    }
+
+    setSaveLoading(true);
+
+    try {
+      const payload = {
+        amount: Number(editFormData.amount),
+        payment_method: editFormData.payment_method,
+        status: editFormData.status,
+        transaction_id: editFormData.transaction_id.trim() || null,
+        payment_date: editFormData.payment_date || null,
+        due_date: editFormData.due_date || null,
+        description: editFormData.description.trim() || null,
+      };
+
+      const response = await api.put(`/UpdatePayment/${editFormData.id}`, payload);
+      const updatedPayment = mapPayment(response.data.payment);
+
+      if (searchTerm !== '' || filterStatus !== 'all' || filterMethod !== 'all') {
+        await refreshPaymentsPage();
+      } else {
+        syncPaymentState(updatedPayment);
+      }
+
+      await refreshPaymentStats();
+      resetEditDialog();
+      showSnackbar(response.data.message || 'Payment updated successfully.');
+    } catch (error) {
+      console.error('Error updating payment:', error);
+
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        const fieldErrors = Object.entries(error.response.data.errors).reduce((acc, [field, messages]) => {
+          acc[field] = Array.isArray(messages) ? messages[0] : messages;
+          return acc;
+        }, {});
+
+        setEditFormErrors(fieldErrors);
+      }
+
+      showSnackbar(error.response?.data?.message || 'Failed to update payment.', 'error');
     } finally {
       setSaveLoading(false);
     }
@@ -642,7 +912,7 @@ const Payments = () => {
               className="search-field"
             />
 
-            <FormControl size="small" className="filter-field">
+            <FormControl size="small" className="filter-field" sx={{ minWidth: 200 }}>
               <InputLabel>Status</InputLabel>
               <Select
                 value={filterStatus}
@@ -660,7 +930,7 @@ const Payments = () => {
               </Select>
             </FormControl>
 
-            <FormControl size="small" className="filter-field">
+            <FormControl size="small" className="filter-field" sx={{ minWidth: 200 }}>
               <InputLabel>Method</InputLabel>
               <Select
                 value={filterMethod}
@@ -855,8 +1125,12 @@ const Payments = () => {
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
+        onClose={() => handleMenuClose()}
       >
+        <MenuItem onClick={() => handleAction('Edit Payment')}>
+          <Edit fontSize="small" className="menu-icon" />
+          Edit Payment
+        </MenuItem>
         <MenuItem onClick={() => handleAction('View Receipt')}>
           <Receipt fontSize="small" className="menu-icon" />
           View Receipt
@@ -888,26 +1162,28 @@ const Payments = () => {
               pt: 1,
             }}
           >
-            <TextField
-              label="Booking"
-              select
-              value={paymentForm.booking_id}
-              onChange={handlePaymentFieldChange('booking_id')}
-              fullWidth
-              SelectProps={{ MenuProps: dialogSelectMenuProps }}
-            >
-              <MenuItem value="">None</MenuItem>
-              {bookingOptions.map((booking) => (
-                <MenuItem key={booking.id} value={String(booking.id)}>
-                  #{booking.id} - {booking.customer_name} ({booking.vehicle_type})
-                </MenuItem>
-              ))}
-            </TextField>
+            <Autocomplete
+              options={bookingOptions}
+              value={bookingOptions.find((booking) => String(booking.id) === String(paymentForm.booking_id)) || null}
+              onChange={handleBookingSelection}
+              getOptionLabel={(booking) => `#${booking.id} - ${booking.customer_name} (${booking.vehicle_type})`}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              PopperComponent={DialogAutocompletePopper}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Booking"
+                  placeholder="Search booking..."
+                  fullWidth
+                />
+              )}
+            />
 
             <TextField
               label="Currency"
               value={paymentForm.currency}
-              onChange={handlePaymentFieldChange('currency')}
+              InputProps={{ readOnly: true }}
+              disabled
               fullWidth
             />
 
@@ -1025,9 +1301,157 @@ const Payments = () => {
         </DialogActions>
       </Dialog>
 
+      <Dialog open={editDialogOpen} onClose={handleCloseEditDialog} maxWidth="md" fullWidth sx={dialogSx}>
+        <DialogTitle className="payment-dialog-title">
+          Edit Payment
+        </DialogTitle>
+        <DialogContent dividers>
+          {editLoading ? (
+            <Typography>Loading payment for editing...</Typography>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                gap: 2,
+                pt: 1,
+              }}
+            >
+              <TextField
+                label="Payment ID"
+                value={editFormData.payment_code}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+
+              <TextField
+                label="Booking"
+                value={editFormData.booking_label}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+
+              <TextField
+                label="Customer Name"
+                value={editFormData.customer_name}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+
+              <TextField
+                label="Customer Email"
+                value={editFormData.customer_email}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+
+              <TextField
+                label="Currency"
+                value={editFormData.currency}
+                InputProps={{ readOnly: true }}
+                disabled
+                fullWidth
+              />
+
+              <TextField
+                label="Amount"
+                type="number"
+                value={editFormData.amount}
+                onChange={handleEditFieldChange('amount')}
+                error={Boolean(editFormErrors.amount)}
+                helperText={editFormErrors.amount}
+                inputProps={{ min: 0, step: '0.01' }}
+                fullWidth
+              />
+
+              <TextField
+                label="Payment Method"
+                select
+                value={editFormData.payment_method}
+                onChange={handleEditFieldChange('payment_method')}
+                error={Boolean(editFormErrors.payment_method)}
+                helperText={editFormErrors.payment_method}
+                fullWidth
+                SelectProps={{ MenuProps: dialogSelectMenuProps }}
+              >
+                {PAYMENT_METHOD_OPTIONS.map((method) => (
+                  <MenuItem key={method} value={method}>
+                    {method}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Status"
+                select
+                value={editFormData.status}
+                onChange={handleEditFieldChange('status')}
+                error={Boolean(editFormErrors.status)}
+                helperText={editFormErrors.status}
+                fullWidth
+                SelectProps={{ MenuProps: dialogSelectMenuProps }}
+              >
+                {STATUS_OPTIONS.map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Transaction ID"
+                value={editFormData.transaction_id}
+                onChange={handleEditFieldChange('transaction_id')}
+                error={Boolean(editFormErrors.transaction_id)}
+                helperText={editFormErrors.transaction_id}
+                fullWidth
+              />
+
+              <TextField
+                label="Payment Date"
+                type="datetime-local"
+                value={formatDateTimeInputValue(editFormData.payment_date)}
+                onChange={handleEditFieldChange('payment_date')}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+
+              <TextField
+                label="Due Date"
+                type="date"
+                value={editFormData.due_date}
+                onChange={handleEditFieldChange('due_date')}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+
+              <TextField
+                label="Description"
+                value={editFormData.description}
+                onChange={handleEditFieldChange('description')}
+                error={Boolean(editFormErrors.description)}
+                helperText={editFormErrors.description}
+                multiline
+                rows={4}
+                fullWidth
+                sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEditDialog} disabled={saveLoading}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleUpdatePayment} disabled={editLoading || saveLoading}>
+            {saveLoading ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Receipt Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
+      <Dialog open={openDialog} onClose={handleCloseReceiptDialog} maxWidth="sm" fullWidth sx={dialogSx}>
+        <DialogTitle className="payment-dialog-title">
           <Receipt className="dialog-icon" />
           Payment Receipt
         </DialogTitle>
@@ -1088,7 +1512,7 @@ const Payments = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Close</Button>
+          <Button onClick={handleCloseReceiptDialog}>Close</Button>
           <Button variant="contained" startIcon={<Download />} onClick={() => console.log('Download receipt')}>
             Download Receipt
           </Button>

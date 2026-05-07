@@ -62,6 +62,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/GetPayments/{id}', [PaymentController::class, 'show']);
     Route::get('/PaymentStats', [PaymentController::class, 'stats']);
     Route::post('/AddPayment', [PaymentController::class, 'store']);
+    Route::put('/UpdatePayment/{id}', [PaymentController::class, 'update']);
 
     // Blog categories
     Route::get('/blogPostCategories', [BlogPostCategoryController::class, 'index']);

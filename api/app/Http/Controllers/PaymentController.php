@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
 {
@@ -171,22 +172,89 @@ class PaymentController extends Controller
         ], 201);
     }
 
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $payment = Payment::find($id);
+
+        if (!$payment) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Payment not found',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string|in:Credit Card,Debit Card,PayPal,Bank Transfer,Cash',
+            'status' => 'required|string|in:pending,completed,failed,refunded',
+            'transaction_id' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('payments', 'transaction_id')->ignore($payment->id),
+            ],
+            'payment_date' => 'nullable|date',
+            'due_date' => 'nullable|date',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+        $paymentDate = $validated['payment_date'] ?? null;
+
+        if (($validated['status'] ?? '') === 'completed' && empty($paymentDate)) {
+            $paymentDate = now();
+        }
+
+        $payment->update([
+            'amount' => $validated['amount'],
+            'payment_method' => $validated['payment_method'],
+            'status' => $validated['status'],
+            'transaction_id' => $validated['transaction_id'] ?? null,
+            'payment_date' => $paymentDate,
+            'due_date' => $validated['due_date'] ?? null,
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Payment updated successfully',
+            'payment' => $payment->fresh(),
+        ], 200);
+    }
+
     public function stats(): JsonResponse
     {
-        $baseQuery = Payment::query();
+        $statusTotals = Payment::query()
+            ->select('status', DB::raw('COALESCE(SUM(amount), 0) as total_amount'), DB::raw('COUNT(*) as total_count'))
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
+
+        $completedTotal = (float) ($statusTotals->get('completed')->total_amount ?? 0);
+        $pendingTotal = (float) ($statusTotals->get('pending')->total_amount ?? 0);
+        $failedTotal = (float) ($statusTotals->get('failed')->total_amount ?? 0);
+        $refundedTotal = (float) ($statusTotals->get('refunded')->total_amount ?? 0);
 
         $stats = [
-            'total' => (float) (clone $baseQuery)->sum('amount'),
-            'completed' => (float) Payment::where('status', 'completed')->sum('amount'),
-            'pending' => (float) Payment::where('status', 'pending')->sum('amount'),
-            'failed' => (float) Payment::where('status', 'failed')->sum('amount'),
-            'refunded' => (float) Payment::where('status', 'refunded')->sum('amount'),
+            'total' => $completedTotal + $pendingTotal - $refundedTotal,
+            'completed' => $completedTotal,
+            'pending' => $pendingTotal,
+            'failed' => $failedTotal,
+            'refunded' => $refundedTotal,
             'counts' => [
-                'all' => Payment::count(),
-                'completed' => Payment::where('status', 'completed')->count(),
-                'pending' => Payment::where('status', 'pending')->count(),
-                'failed' => Payment::where('status', 'failed')->count(),
-                'refunded' => Payment::where('status', 'refunded')->count(),
+                'all' => (int) $statusTotals->sum('total_count'),
+                'completed' => (int) ($statusTotals->get('completed')->total_count ?? 0),
+                'pending' => (int) ($statusTotals->get('pending')->total_count ?? 0),
+                'failed' => (int) ($statusTotals->get('failed')->total_count ?? 0),
+                'refunded' => (int) ($statusTotals->get('refunded')->total_count ?? 0),
             ],
         ];
 
