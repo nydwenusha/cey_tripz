@@ -1,5 +1,5 @@
 // Reviews.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Paper,
   Table,
@@ -98,209 +98,47 @@ import {
 import './Reviews.scss';
 import MainLayout from '../../MainLayout';
 import PageHeader from '../../components/layout/PageHeader/PageHeader';
+import api from '../../services/api/api';
 
-// Sample review images - in real app, these would come from your backend
-const sampleReviewImages = {
-  'REV-001': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop', title: 'Sigiriya View', uploadedBy: 'John Doe', isCustomerUploaded: true, uploadDate: '2024-01-15' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1528181304800-259b08848526?w-400&h=300&fit=crop', title: 'Tour Group', uploadedBy: 'John Doe', isCustomerUploaded: true, uploadDate: '2024-01-15' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1552465011-b4e30bf7349d?w=400&h=300&fit=crop', title: 'Guide', uploadedBy: 'John Doe', isCustomerUploaded: true, uploadDate: '2024-01-15' }
-  ],
-  'REV-002': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop', title: 'Beach View', uploadedBy: 'Jane Smith', isCustomerUploaded: true, uploadDate: '2024-01-20' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&h=300&fit=crop', title: 'Resort Pool', uploadedBy: 'Jane Smith', isCustomerUploaded: true, uploadDate: '2024-01-20' }
-  ],
-  'REV-003': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop', title: 'Mountain Peak', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop', title: 'Trekking Trail', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1464278533981-50106e6176b1?w=400&h=300&fit=crop', title: 'Camp Site', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' },
-    { id: 4, url: 'https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=400&h=300&fit=crop', title: 'Sunset View', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' },
-    { id: 5, url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop', title: 'Team Photo', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' }
-  ],
-  'REV-005': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1550358864-518f202c02ba?w=400&h=300&fit=crop', title: 'Wildlife', uploadedBy: 'Michael Wilson', isCustomerUploaded: true, uploadDate: '2024-02-01' }
-  ],
-  'REV-006': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1519925610903-381054cc2a1c?w=400&h=300&fit=crop', title: 'City Tour', uploadedBy: 'Sarah Brown', isCustomerUploaded: true, uploadDate: '2024-02-05' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=400&h=300&fit=crop', title: 'Landmarks', uploadedBy: 'Sarah Brown', isCustomerUploaded: true, uploadDate: '2024-02-05' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop', title: 'City Streets', uploadedBy: 'Sarah Brown', isCustomerUploaded: true, uploadDate: '2024-02-05' },
-    { id: 4, url: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop', title: 'Guide', uploadedBy: 'Sarah Brown', isCustomerUploaded: true, uploadDate: '2024-02-05' }
-  ]
-};
+const mapReviewFromApi = (review) => ({
+  id: review.review_code || `REV-${String(review.id).padStart(5, '0')}`,
+  customer: {
+    name: review.customer_name || 'Unknown Customer',
+    email: review.customer_email || 'Not provided',
+    avatar: '',
+    bookings: 0
+  },
+  tour: {
+    id: review.booking_id ? `BOOKING-${review.booking_id}` : (review.tour_name || `TOUR-${review.id}`),
+    name: review.tour_name || 'Tour not specified',
+    category: 'Traveler Review',
+    duration: '-',
+    price: '-'
+  },
+  rating: Number(review.rating || 0),
+  comment: review.comment || '',
+  date: review.created_at || new Date().toISOString(),
+  status: review.status === 'rejected' ? 'reported' : review.status,
+  verified: Boolean(review.customer_email),
+  helpful: 0,
+  notHelpful: 0,
+  response: '',
+  responseDate: null,
+  photos: Array.isArray(review.images) ? review.images.length : 0,
+  reportCount: review.status === 'rejected' ? 1 : 0,
+  images: Array.isArray(review.images)
+    ? review.images.map((image) => ({
+      id: image.id,
+      url: image.image_url,
+      title: image.image_title || `Review image ${image.id}`,
+      uploadedBy: review.customer_name || 'Customer',
+      isCustomerUploaded: true,
+      uploadDate: image.created_at || review.created_at || new Date().toISOString()
+    }))
+    : []
+});
 
 const Reviews = () => {
-  // Initial reviews data
-  const initialReviews = [
-    {
-      id: 'REV-001',
-      customer: {
-        name: 'John Doe',
-        email: 'john@example.com',
-        avatar: '',
-        bookings: 3
-      },
-      tour: {
-        id: 'TOUR-001',
-        name: 'Sigiriya Adventure',
-        category: 'Adventure',
-        duration: '2 days',
-        price: '$150'
-      },
-      rating: 4,
-      comment: 'Amazing experience! The tour guide was very knowledgeable and the views were breathtaking. Highly recommend this adventure.',
-      date: '2024-01-15 14:30:00',
-      status: 'published',
-      verified: true,
-      helpful: 12,
-      notHelpful: 2,
-      response: 'Thank you for your wonderful review! We\'re thrilled you enjoyed the Sigiriya Adventure.',
-      responseDate: '2024-01-16 10:15:00',
-      photos: 3,
-      reportCount: 0,
-      images: sampleReviewImages['REV-001']
-    },
-    {
-      id: 'REV-002',
-      customer: {
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        avatar: '',
-        bookings: 2
-      },
-      tour: {
-        id: 'TOUR-002',
-        name: 'Beach Paradise',
-        category: 'Relaxation',
-        duration: '3 days',
-        price: '$200'
-      },
-      rating: 4.5,
-      comment: 'Great tour, highly recommended. The beach was pristine and the accommodations were excellent.',
-      date: '2024-01-20 11:45:00',
-      status: 'published',
-      verified: true,
-      helpful: 8,
-      notHelpful: 1,
-      response: 'We appreciate your feedback! Glad you enjoyed your Beach Paradise experience.',
-      responseDate: '2024-01-21 09:30:00',
-      photos: 2,
-      reportCount: 0,
-      images: sampleReviewImages['REV-002']
-    },
-    {
-      id: 'REV-003',
-      customer: {
-        name: 'Robert Johnson',
-        email: 'robert@example.com',
-        avatar: '',
-        bookings: 1
-      },
-      tour: {
-        id: 'TOUR-003',
-        name: 'Mountain Trekking',
-        category: 'Extreme',
-        duration: '5 days',
-        price: '$350'
-      },
-      rating: 5,
-      comment: 'Absolutely fantastic! Challenging but rewarding. The guides were professional and safety was their top priority.',
-      date: '2024-01-25 09:15:00',
-      status: 'published',
-      verified: false,
-      helpful: 15,
-      notHelpful: 0,
-      response: '',
-      responseDate: null,
-      photos: 5,
-      reportCount: 0,
-      images: sampleReviewImages['REV-003']
-    },
-    {
-      id: 'REV-004',
-      customer: {
-        name: 'Emily Davis',
-        email: 'emily@example.com',
-        avatar: '',
-        bookings: 4
-      },
-      tour: {
-        id: 'TOUR-004',
-        name: 'Cultural Heritage',
-        category: 'Cultural',
-        duration: '4 days',
-        price: '$280'
-      },
-      rating: 3,
-      comment: 'Good experience but could be better. Some sites were overcrowded.',
-      date: '2024-01-28 16:20:00',
-      status: 'pending',
-      verified: true,
-      helpful: 5,
-      notHelpful: 3,
-      response: '',
-      responseDate: null,
-      photos: 0,
-      reportCount: 0,
-      images: []
-    },
-    {
-      id: 'REV-005',
-      customer: {
-        name: 'Michael Wilson',
-        email: 'michael@example.com',
-        avatar: '',
-        bookings: 5
-      },
-      tour: {
-        id: 'TOUR-005',
-        name: 'Wildlife Safari',
-        category: 'Wildlife',
-        duration: '3 days',
-        price: '$320'
-      },
-      rating: 2,
-      comment: 'Disappointed with the tour. Expected more wildlife sightings.',
-      date: '2024-02-01 13:45:00',
-      status: 'published',
-      verified: true,
-      helpful: 3,
-      notHelpful: 7,
-      response: 'We\'re sorry to hear about your experience. We\'ll work with our guides to improve wildlife spotting opportunities.',
-      responseDate: '2024-02-02 11:00:00',
-      photos: 1,
-      reportCount: 1,
-      images: sampleReviewImages['REV-005']
-    },
-    {
-      id: 'REV-006',
-      customer: {
-        name: 'Sarah Brown',
-        email: 'sarah@example.com',
-        avatar: '',
-        bookings: 2
-      },
-      tour: {
-        id: 'TOUR-006',
-        name: 'City Explorer',
-        category: 'Urban',
-        duration: '1 day',
-        price: '$75'
-      },
-      rating: 4,
-      comment: 'Great city tour! The guide was very informative.',
-      date: '2024-02-05 10:30:00',
-      status: 'published',
-      verified: true,
-      helpful: 6,
-      notHelpful: 1,
-      response: 'Thank you for joining our City Explorer tour!',
-      responseDate: '2024-02-05 15:20:00',
-      photos: 4,
-      reportCount: 0,
-      images: sampleReviewImages['REV-006']
-    }
-  ];
-
   // Sample tours for dropdown
   const availableTours = [
     { id: 'TOUR-001', name: 'Sigiriya Adventure', category: 'Adventure' },
@@ -314,7 +152,7 @@ const Reviews = () => {
   ];
 
   // State
-  const [reviews, setReviews] = useState(initialReviews);
+  const [reviews, setReviews] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -343,7 +181,7 @@ const Reviews = () => {
     response: '',
     images: []
   });
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     total: 125,
     published: 98,
     pending: 15,
@@ -354,7 +192,35 @@ const Reviews = () => {
     lastMonth: 31
   });
 
-  // Initialize edit form when review is selected
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchReviews = async () => {
+      try {
+        const response = await api.get('/GetReviews');
+        if (!isActive) {
+          return;
+        }
+
+        const reviewRows = Array.isArray(response.data?.reviews)
+          ? response.data.reviews.map(mapReviewFromApi)
+          : [];
+
+        setReviews(reviewRows);
+      } catch (error) {
+        if (isActive) {
+          setReviews([]);
+        }
+        console.error('Failed to load reviews:', error);
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);// Initialize edit form when review is selected
   const initializeEditForm = (review) => {
     setEditForm({
       rating: review.rating,
@@ -1865,3 +1731,5 @@ const Reviews = () => {
 };
 
 export default Reviews;
+
+
