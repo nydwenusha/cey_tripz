@@ -72,7 +72,6 @@ const BlogPostManagement = () => {
     const navigate = useNavigate();
     const [openDialog, setOpenDialog] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-    const [dialogMode, setDialogMode] = useState('create');
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -233,61 +232,36 @@ const BlogPostManagement = () => {
         setFilteredPosts(filtered);
     };
 
-    const handleOpenDialog = async (mode = 'create', post = null) => {
-        setDialogMode(mode);
-        if (mode === 'edit' && post) {
-            setPostForm({
-                id: post.id,
-                title: post.title || '',
-                slug: post.slug || '',
-                content: post.content || '',
-                excerpt: post.excerpt || '',
-                category_id: post.category_id || '',
-                category_name: post.category || '',
-                tags: post.tags || [],
-                author: post.author || '',
-                author_avatar: post.author_avatar || null,
-                status: post.status || 'draft',
-                image: post.image || null,
-                published_date: post.published_date || post.created_at || null,
-                scheduled_date: post.scheduled_date || null,
-                is_featured: post.is_featured || false,
-                meta_title: post.meta_title || '',
-                meta_description: post.meta_description || '',
-                views: post.views || 0,
-                comments: post.comments || 0,
-                likes: post.likes || 0,
-                read_time: post.read_time || '',
-                location: post.location || ''
-            });
-            setImagePreview(getImageUrl(post.image));
-        } else {
-            setPostForm({
-                id: '',
-                title: '',
-                slug: '',
-                content: '',
-                excerpt: '',
-                category_id: '',
-                category_name: '',
-                tags: [],
-                author: 'Admin User',
-                author_avatar: null,
-                status: 'draft',
-                image: null,
-                published_date: null,
-                scheduled_date: null,
-                is_featured: false,
-                meta_title: '',
-                meta_description: '',
-                views: 0,
-                comments: 0,
-                likes: 0,
-                read_time: '',
-                location: ''
-            });
-            setImagePreview(null);
+    const handleOpenDialog = async (post) => {
+        if (!post) {
+            return;
         }
+
+        setPostForm({
+            id: post.id,
+            title: post.title || '',
+            slug: post.slug || '',
+            content: post.content || '',
+            excerpt: post.excerpt || '',
+            category_id: post.category_id || '',
+            category_name: post.category || '',
+            tags: post.tags || [],
+            author: post.author || '',
+            author_avatar: post.author_avatar || null,
+            status: post.status || 'draft',
+            image: post.image || null,
+            published_date: post.published_date || post.created_at || null,
+            scheduled_date: post.scheduled_date || null,
+            is_featured: post.is_featured || false,
+            meta_title: post.meta_title || '',
+            meta_description: post.meta_description || '',
+            views: post.views || 0,
+            comments: post.comments || 0,
+            likes: post.likes || 0,
+            read_time: post.read_time || '',
+            location: post.location || ''
+        });
+        setImagePreview(getImageUrl(post.image));
         setOpenDialog(true);
     };
 
@@ -323,23 +297,14 @@ const BlogPostManagement = () => {
                 formData.append('image', postForm.image);
             }
 
-            let response;
-            if (dialogMode === 'create') {
-                response = await api.post('/blogPosts', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                showSnackbar('Blog post created successfully!', 'success');
-            } else {
-                // For update, use POST with _method PUT or use PUT request
-                formData.append('_method', 'PUT');
-                response = await api.post(`/blogPosts/${postForm.id}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                showSnackbar('Blog post updated successfully!', 'success');
-            }
+            formData.append('_method', 'PUT');
+            const response = await api.post(`/blogPosts/${postForm.id}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            showSnackbar(response.data?.message || 'Blog post updated successfully!', 'success');
 
             if (response.status === 200 || response.status === 201) {
-                await fetchData(); // Refresh data
+                await fetchData();
                 handleCloseDialog();
             }
         } catch (error) {
@@ -525,7 +490,7 @@ const BlogPostManagement = () => {
                     subtitle="Create, edit, and manage all your blog posts in one place."
                     primaryAction={{
                         label: 'Add Blog',
-                        onClick: () => handleOpenDialog('create'),
+                        onClick: () => navigate('/blogs/add'),
                         icon: <AddIcon />
                     }}
                     secondaryActions={[
@@ -857,7 +822,7 @@ const BlogPostManagement = () => {
                                                         <IconButton
                                                             size="small"
                                                             className="action-btn edit-btn"
-                                                            onClick={() => handleOpenDialog('edit', post)}
+                                                            onClick={() => handleOpenDialog(post)}
                                                         >
                                                             <EditIcon fontSize="small" />
                                                         </IconButton>
@@ -892,7 +857,7 @@ const BlogPostManagement = () => {
                     </>
                 )}
 
-                {/* Create/Edit Dialog */}
+                {/* Edit Dialog */}
                 <Dialog
                     open={openDialog}
                     onClose={handleCloseDialog}
@@ -901,7 +866,7 @@ const BlogPostManagement = () => {
                     className="post-dialog"
                 >
                     <DialogTitle>
-                        {dialogMode === 'create' ? 'Create New Blog Post' : 'Edit Blog Post'}
+                        Edit Blog Post
                     </DialogTitle>
                     <DialogContent dividers>
                         <Grid container spacing={3}>
@@ -1130,10 +1095,10 @@ const BlogPostManagement = () => {
                             onClick={handleSavePost}
                             variant="contained"
                             disabled={loading}
-                            startIcon={dialogMode === 'create' ? <AddIcon /> : <Save />}
+                            startIcon={<Save />}
                             className="save-button"
                         >
-                            {loading ? 'Saving...' : dialogMode === 'create' ? 'Create Post' : 'Update Post'}
+                            {loading ? 'Saving...' : 'Update Post'}
                         </Button>
                     </DialogActions>
                 </Dialog>

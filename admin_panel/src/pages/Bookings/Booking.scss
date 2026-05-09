@@ -783,3 +783,36 @@
     }
   }
 }
+
+.booking-container {
+  > .MuiBox-root:first-of-type {
+    background: white;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  > .MuiTableContainer-root {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    background: white;
+  }
+
+  > .MuiTableContainer-root .MuiTableRow-root {
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(102, 126, 234, 0.04);
+    }
+  }
+
+  > .MuiTableContainer-root .MuiTableCell-head {
+    font-weight: 600;
+    background-color: #f8f9fa;
+  }
+
+  > .MuiTableContainer-root + .MuiBox-root {
+    background: white;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+}

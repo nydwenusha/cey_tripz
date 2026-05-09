@@ -821,7 +821,13 @@ const Booking = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {bookings.map((booking) => (
+              {bookings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={11} align="center">
+                    No bookings found.
+                  </TableCell>
+                </TableRow>
+              ) : bookings.map((booking) => (
                 <TableRow key={booking.id} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
