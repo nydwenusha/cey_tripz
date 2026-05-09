@@ -66,9 +66,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/PaymentStats', [PaymentController::class, 'stats']);
     Route::post('/AddPayment', [PaymentController::class, 'store']);
     Route::put('/UpdatePayment/{id}', [PaymentController::class, 'update']);
-
-    // Reviews
     Route::get('/GetReviews', [ReviewController::class, 'index']);
+    Route::get('/GetReviewBookingOptions', [ReviewController::class, 'bookingOptions']);
+    Route::put('/UpdateReview/{id}', [ReviewController::class, 'update']);
 
     // Blog categories
     Route::get('/blogPostCategories', [BlogPostCategoryController::class, 'index']);
@@ -78,6 +78,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/addBlogPost', [BlogPostController::class, 'store']);
     Route::delete('/blogPostDelete/{id}', [BlogPostController::class, 'destroy']);
 });
+
+
+
+
+
+
 
 
 

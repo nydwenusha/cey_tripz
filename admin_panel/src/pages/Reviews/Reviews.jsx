@@ -1,4 +1,4 @@
-// Reviews.jsx
+﻿// Reviews.jsx
 import React, { useEffect, useState } from 'react';
 import {
   Paper,
@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Snackbar,
   Avatar,
   Box,
   Rating,
@@ -111,15 +112,18 @@ const mapReviewFromApi = (review) => ({
   tour: {
     id: review.booking_id ? `BOOKING-${review.booking_id}` : (review.tour_name || `TOUR-${review.id}`),
     name: review.tour_name || 'Tour not specified',
-    category: 'Traveler Review',
-    duration: '-',
-    price: '-'
+    category: '',
+    duration: '',
+    price: ''
   },
   rating: Number(review.rating || 0),
   comment: review.comment || '',
   date: review.created_at || new Date().toISOString(),
   status: review.status === 'rejected' ? 'reported' : review.status,
-  verified: Boolean(review.customer_email),
+  verified: Boolean(review.booking_id),
+  recordId: review.id,
+  bookingId: review.booking_id ? String(review.booking_id) : '',
+  tourName: review.tour_name || 'Tour not specified',
   helpful: 0,
   notHelpful: 0,
   response: '',
@@ -139,18 +143,39 @@ const mapReviewFromApi = (review) => ({
 });
 
 const Reviews = () => {
-  // Sample tours for dropdown
-  const availableTours = [
-    { id: 'TOUR-001', name: 'Sigiriya Adventure', category: 'Adventure' },
-    { id: 'TOUR-002', name: 'Beach Paradise', category: 'Relaxation' },
-    { id: 'TOUR-003', name: 'Mountain Trekking', category: 'Extreme' },
-    { id: 'TOUR-004', name: 'Cultural Heritage', category: 'Cultural' },
-    { id: 'TOUR-005', name: 'Wildlife Safari', category: 'Wildlife' },
-    { id: 'TOUR-006', name: 'City Explorer', category: 'Urban' },
-    { id: 'TOUR-007', name: 'Historical Tour', category: 'History' },
-    { id: 'TOUR-008', name: 'Food Tour', category: 'Culinary' }
-  ];
-
+  const reviewDialogSx = {
+    zIndex: 1601,
+    '& .MuiDialog-paper': {
+      mt: { xs: 10, sm: 12 },
+      mb: 3,
+      maxHeight: 'calc(100% - 120px)',
+    },
+  };
+  const reviewDialogSelectMenuProps = {
+    disableScrollLock: true,
+    sx: {
+      zIndex: 1702,
+    },
+    slotProps: {
+      root: {
+        sx: {
+          zIndex: 1702,
+        },
+      },
+      paper: {
+        sx: {
+          zIndex: 1702,
+          maxHeight: 320,
+        },
+      },
+    },
+    PaperProps: {
+      sx: {
+        zIndex: 1702,
+        maxHeight: 320,
+      },
+    },
+  };
   // State
   const [reviews, setReviews] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -170,17 +195,26 @@ const Reviews = () => {
   const [selectedReviewImages, setSelectedReviewImages] = useState([]);
   const [openDeleteImageDialog, setOpenDeleteImageDialog] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
+  const [snackbarState, setSnackbarState] = useState({
+    open: false,
+    severity: 'success',
+    message: '',
+  });
   const [editForm, setEditForm] = useState({
+    bookingId: '',
+    customerName: '',
+    customerEmail: '',
+    tourName: '',
     rating: 0,
     comment: '',
     status: 'pending',
     verified: false,
-    tourId: '',
     helpful: 0,
     notHelpful: 0,
     response: '',
     images: []
   });
+  const [bookingOptions, setBookingOptions] = useState([]);
   const [stats] = useState({
     total: 125,
     published: 98,
@@ -195,39 +229,67 @@ const Reviews = () => {
   useEffect(() => {
     let isActive = true;
 
-    const fetchReviews = async () => {
+    const fetchReviewData = async () => {
       try {
-        const response = await api.get('/GetReviews');
+        const [reviewsResponse, bookingsResponse] = await Promise.all([
+          api.get('/GetReviews'),
+          api.get('/GetReviewBookingOptions'),
+        ]);
+
         if (!isActive) {
           return;
         }
 
-        const reviewRows = Array.isArray(response.data?.reviews)
-          ? response.data.reviews.map(mapReviewFromApi)
+        const reviewRows = Array.isArray(reviewsResponse.data?.reviews)
+          ? reviewsResponse.data.reviews.map(mapReviewFromApi)
           : [];
 
         setReviews(reviewRows);
+        setBookingOptions(Array.isArray(bookingsResponse.data?.bookings) ? bookingsResponse.data.bookings : []);
       } catch (error) {
         if (isActive) {
           setReviews([]);
+          setBookingOptions([]);
         }
-        console.error('Failed to load reviews:', error);
+        console.error('Failed to load review data:', error);
       }
     };
 
-    fetchReviews();
+    fetchReviewData();
 
     return () => {
       isActive = false;
     };
-  }, []);// Initialize edit form when review is selected
+  }, []);
+
+  const resetEditForm = () => {
+    setEditForm({
+      bookingId: '',
+      customerName: '',
+      customerEmail: '',
+      tourName: '',
+      rating: 0,
+      comment: '',
+      status: 'pending',
+      verified: false,
+      helpful: 0,
+      notHelpful: 0,
+      response: '',
+      images: []
+    });
+  };
+
+  // Initialize edit form when review is selected
   const initializeEditForm = (review) => {
     setEditForm({
+      bookingId: review.bookingId || '',
+      customerName: review.customer.name,
+      customerEmail: review.customer.email === 'Not provided' ? '' : review.customer.email,
+      tourName: review.tour.name,
       rating: review.rating,
       comment: review.comment,
       status: review.status,
       verified: review.verified,
-      tourId: review.tour.id,
       helpful: review.helpful,
       notHelpful: review.notHelpful,
       response: review.response || '',
@@ -240,6 +302,27 @@ const Reviews = () => {
     setEditForm(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleBookingSelectionChange = (bookingId) => {
+    const selectedBooking = bookingOptions.find((booking) => String(booking.id) === String(bookingId));
+
+    if (!selectedBooking) {
+      setEditForm((prev) => ({
+        ...prev,
+        bookingId: '',
+        verified: false,
+      }));
+      return;
+    }
+
+    setEditForm((prev) => ({
+      ...prev,
+      bookingId: String(selectedBooking.id),
+      customerName: selectedBooking.customer_name || '',
+      customerEmail: selectedBooking.customer_email || '',
+      verified: true,
     }));
   };
 
@@ -283,6 +366,25 @@ const Reviews = () => {
     setImageToDelete(null);
   };
 
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbarState({
+      open: true,
+      severity,
+      message,
+    });
+  };
+
+  const handleSnackbarClose = (_, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarState((prev) => ({
+      ...prev,
+      open: false,
+    }));
+  };
+
   // Confirm and delete customer uploaded image
   const confirmDeleteCustomerImage = () => {
     if (!imageToDelete || !selectedReview) return;
@@ -312,7 +414,7 @@ const Reviews = () => {
     }
 
     // Show success message
-    alert(`Image "${imageToDelete.title}" has been deleted successfully.`);
+    showSnackbar(`Image "${imageToDelete.title}" has been deleted successfully.`);
 
     // Close dialogs
     handleCloseDeleteImageDialog();
@@ -322,55 +424,32 @@ const Reviews = () => {
   };
 
   // Handle edit form submit
-  const handleEditSubmit = () => {
+  const handleEditSubmit = async () => {
     if (!selectedReview) return;
 
-    // Find the tour data
-    const selectedTour = availableTours.find(tour => tour.id === editForm.tourId);
-    const originalTour = reviews.find(r => r.id === selectedReview.id)?.tour;
+    try {
+      const payload = {
+        booking_id: editForm.bookingId || null,
+        customer_name: editForm.customerName.trim(),
+        customer_email: editForm.customerEmail.trim() || null,
+        tour_name: editForm.tourName.trim(),
+        rating: Math.max(1, Math.min(5, Math.round(editForm.rating || 0))),
+        comment: editForm.comment.trim(),
+        status: editForm.status === 'reported' ? 'rejected' : editForm.status,
+      };
 
-    const updatedReview = {
-      ...selectedReview,
-      rating: editForm.rating,
-      comment: editForm.comment,
-      status: editForm.status,
-      verified: editForm.verified,
-      tour: selectedTour ? {
-        ...originalTour,
-        id: selectedTour.id,
-        name: selectedTour.name,
-        category: selectedTour.category
-      } : originalTour,
-      helpful: editForm.helpful,
-      notHelpful: editForm.notHelpful,
-      response: editForm.response,
-      images: editForm.images,
-      photos: editForm.images.length,
-      // Update date to current time when edited
-      date: new Date().toISOString()
-    };
+      const response = await api.put(`/UpdateReview/${selectedReview.recordId}`, payload);
+      const updatedReview = mapReviewFromApi(response.data.review);
 
-    // Update reviews list
-    setReviews(reviews.map(review => 
-      review.id === selectedReview.id ? updatedReview : review
-    ));
-
-    // Show success message
-    alert('Review updated successfully!');
-    
-    // Close dialog
-    setOpenDialog(false);
-    setEditForm({
-      rating: 0,
-      comment: '',
-      status: 'pending',
-      verified: false,
-      tourId: '',
-      helpful: 0,
-      notHelpful: 0,
-      response: '',
-      images: []
-    });
+      setReviews((prev) => prev.map((review) => (
+        review.id === selectedReview.id ? updatedReview : review
+      )));
+      showSnackbar(response.data?.message || 'Review updated successfully.');
+      handleCloseEditDialog();
+    } catch (error) {
+      console.error('Failed to update review:', error);
+      showSnackbar(error.response?.data?.message || 'Unable to update review right now.', 'error');
+    }
   };
 
   // Filter reviews
@@ -434,30 +513,49 @@ const Reviews = () => {
     setSelectedReview(review);
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (shouldClearSelectedReview = true) => {
     setAnchorEl(null);
+    if (shouldClearSelectedReview) {
+      setSelectedReview(null);
+    }
+  };
+
+  const handleCloseViewDialog = () => {
+    setOpenDialog(false);
+    setSelectedReview(null);
+  };
+
+  const handleCloseEditDialog = () => {
+    setOpenDialog(false);
+    resetEditForm();
     setSelectedReview(null);
   };
 
   const handleAction = (action) => {
     if (!selectedReview) return;
 
+    let shouldClearSelectedReview = true;
+
     switch (action) {
       case 'view':
         setDialogType('view');
         setOpenDialog(true);
+        shouldClearSelectedReview = false;
         break;
       case 'edit':
         setDialogType('edit');
         initializeEditForm(selectedReview);
         setOpenDialog(true);
+        shouldClearSelectedReview = false;
         break;
       case 'view-images':
         handleViewImages(selectedReview);
+        shouldClearSelectedReview = false;
         break;
       case 'manage-images':
         setDialogType('manage-images');
         setOpenDialog(true);
+        shouldClearSelectedReview = false;
         break;
       case 'publish':
         updateReviewStatus(selectedReview.id, 'published');
@@ -473,6 +571,7 @@ const Reviews = () => {
       case 'reply':
         setDialogType('reply');
         setOpenDialog(true);
+        shouldClearSelectedReview = false;
         break;
       case 'report':
         handleReportReview(selectedReview.id);
@@ -481,7 +580,7 @@ const Reviews = () => {
         break;
     }
 
-    handleMenuClose();
+    handleMenuClose(shouldClearSelectedReview);
   };
 
   // Image gallery functions
@@ -598,6 +697,8 @@ const Reviews = () => {
       isPercentage: true
     }
   ];
+
+  const linkedBookingDetails = bookingOptions.find((booking) => String(booking.id) === editForm.bookingId);
 
   return (
   
@@ -796,7 +897,7 @@ const Reviews = () => {
                               </Typography>
                               {review.verified && (
                                 <Chip
-                                  label="Verified"
+                                  label="Verified User"
                                   size="small"
                                   color="success"
                                   variant="outlined"
@@ -813,7 +914,7 @@ const Reviews = () => {
                               {review.tour.name}
                             </Typography>
                             <Typography variant="caption" color="textSecondary">
-                              {review.tour.category} • {review.tour.duration}
+                              {review.tour.category} {review.tour.duration}
                             </Typography>
                           </div>
                         </TableCell>
@@ -968,12 +1069,12 @@ const Reviews = () => {
         </Menu>
 
         {/* View Review Dialog */}
-        <Dialog open={openDialog && dialogType === 'view'} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-          <DialogTitle>
+        <Dialog open={openDialog && dialogType === 'view'} onClose={handleCloseViewDialog} maxWidth="md" fullWidth sx={reviewDialogSx}>
+          <DialogTitle className="review-dialog-title">
             <Visibility className="dialog-icon" />
             Review Details
           </DialogTitle>
-          <DialogContent>
+          <DialogContent dividers>
             {selectedReview && (
               <div className="review-details">
                 <div className="review-header">
@@ -988,9 +1089,9 @@ const Reviews = () => {
                       </Typography>
                       <div className="customer-tags">
                         {selectedReview.verified && (
-                          <Chip label="Verified Customer" color="success" size="small" />
+                          <Chip label="Verified User" color="success" size="small" />
                         )}
-                        <Chip label={`${selectedReview.customer.bookings} bookings`} size="small" variant="outlined" />
+                        <Chip label={selectedReview.bookingId ? `Booking #${selectedReview.bookingId}` : 'Guest review'} size="small" variant="outlined" />
                       </div>
                     </div>
                   </div>
@@ -1086,250 +1187,261 @@ const Reviews = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Close</Button>
+            <Button onClick={handleCloseViewDialog}>Close</Button>
           </DialogActions>
         </Dialog>
-
         {/* Edit Review Dialog */}
-        <Dialog open={openDialog && dialogType === 'edit'} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-          <DialogTitle>
-            <Edit className="dialog-icon" />
+        <Dialog
+          open={openDialog && dialogType === 'edit'}
+          onClose={handleCloseEditDialog}
+          maxWidth="md"
+          fullWidth
+          sx={reviewDialogSx}
+        >
+          <DialogTitle className="review-dialog-title">
             Edit Review
-            {selectedReview && (
-              <Typography variant="caption" color="textSecondary" display="block" mt={1}>
-                ID: {selectedReview.id} • Customer: {selectedReview.customer.name}
-              </Typography>
-            )}
           </DialogTitle>
-          <DialogContent>
-            <Box sx={{ mt: 2 }}>
-              <Grid container spacing={3}>
-                {/* Rating Section */}
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Rating
+          <DialogContent dividers>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                gap: 2,
+                pt: 1,
+              }}
+            >
+              {selectedReview && (
+                <Box
+                  sx={{
+                    gridColumn: { xs: '1', md: '1 / -1' },
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                    gap: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="subtitle2">Review Summary</Typography>
+                    <Typography variant="body1">Review ID: {selectedReview.id}</Typography>
+                    <Typography variant="body2">Customer: {selectedReview.customer.name}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2">Verification</Typography>
+                    <Typography variant="body1">
+                      {linkedBookingDetails ? `Booking #${linkedBookingDetails.id}` : 'No linked booking'}
+                    </Typography>
+                    <Typography variant="body2">
+                      {linkedBookingDetails ? 'Verified User' : 'Guest Review'}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+
+              <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
+                <Typography variant="subtitle2">Rating</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                  <Rating
+                    value={editForm.rating}
+                    precision={1}
+                    onChange={(event, newValue) => handleEditChange('rating', newValue || 0)}
+                    size="large"
+                  />
+                  <Typography variant="h6" color="primary">
+                    {editForm.rating.toFixed(1)}/5
                   </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Rating
-                      value={editForm.rating}
-                      precision={0.5}
-                      onChange={(event, newValue) => handleEditChange('rating', newValue)}
-                      size="large"
-                    />
-                    <Typography variant="h6" color="primary">
-                      {editForm.rating.toFixed(1)}/5
-                    </Typography>
-                  </Box>
-                </Grid>
+                </Box>
+              </Box>
 
-                {/* Tour Selection */}
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Tour</InputLabel>
-                    <Select
-                      value={editForm.tourId}
-                      label="Tour"
-                      onChange={(e) => handleEditChange('tourId', e.target.value)}
-                    >
-                      <MenuItem value="">
-                        <em>Select a tour</em>
-                      </MenuItem>
-                      {availableTours.map((tour) => (
-                        <MenuItem key={tour.id} value={tour.id}>
-                          {tour.name} ({tour.category})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+              <TextField
+                label="Linked Booking"
+                select
+                value={editForm.bookingId}
+                onChange={(event) => handleBookingSelectionChange(event.target.value)}
+                helperText={linkedBookingDetails
+                  ? `${linkedBookingDetails.customer_email || 'No email'} • ${linkedBookingDetails.vehicle_type} • ${linkedBookingDetails.pickup_location} to ${linkedBookingDetails.drop_location}`
+                  : 'Optional. Link a booking to mark this review as verified.'}
+                fullWidth
+                sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}
+                SelectProps={{ MenuProps: reviewDialogSelectMenuProps }}
+              >
+                <MenuItem value="">No linked booking</MenuItem>
+                {bookingOptions.map((booking) => (
+                  <MenuItem key={booking.id} value={String(booking.id)}>
+                    #{booking.id} - {booking.customer_name} | {booking.vehicle_type} | {booking.pickup_location} to {booking.drop_location}
+                  </MenuItem>
+                ))}
+              </TextField>
 
-                {/* Status Selection */}
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={editForm.status}
-                      label="Status"
-                      onChange={(e) => handleEditChange('status', e.target.value)}
-                    >
-                      <MenuItem value="published">Published</MenuItem>
-                      <MenuItem value="pending">Pending Review</MenuItem>
-                      <MenuItem value="reported">Reported</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+              <TextField
+                label="Customer Name"
+                value={editForm.customerName}
+                onChange={(event) => handleEditChange('customerName', event.target.value)}
+                InputProps={{ readOnly: Boolean(editForm.bookingId) }}
+                fullWidth
+              />
+              <TextField
+                label="Customer Email"
+                value={editForm.customerEmail}
+                onChange={(event) => handleEditChange('customerEmail', event.target.value)}
+                InputProps={{ readOnly: Boolean(editForm.bookingId) }}
+                fullWidth
+              />
+              <TextField
+                label="Tour Name"
+                value={editForm.tourName}
+                onChange={(event) => handleEditChange('tourName', event.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="Status"
+                select
+                value={editForm.status}
+                onChange={(event) => handleEditChange('status', event.target.value)}
+                fullWidth
+                SelectProps={{ MenuProps: reviewDialogSelectMenuProps }}
+              >
+                <MenuItem value="published">Published</MenuItem>
+                <MenuItem value="pending">Pending Review</MenuItem>
+                <MenuItem value="reported">Reported</MenuItem>
+              </TextField>
+              <TextField
+                label="Helpful Votes"
+                type="number"
+                value={editForm.helpful}
+                onChange={(event) => handleEditChange('helpful', parseInt(event.target.value, 10) || 0)}
+                inputProps={{ min: 0 }}
+                fullWidth
+              />
+              <TextField
+                label="Not Helpful Votes"
+                type="number"
+                value={editForm.notHelpful}
+                onChange={(event) => handleEditChange('notHelpful', parseInt(event.target.value, 10) || 0)}
+                inputProps={{ min: 0 }}
+                fullWidth
+              />
+              <TextField
+                label="Review Comment"
+                value={editForm.comment}
+                onChange={(event) => handleEditChange('comment', event.target.value)}
+                multiline
+                rows={4}
+                fullWidth
+                sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}
+              />
+              <TextField
+                label="Your Response (Optional)"
+                value={editForm.response}
+                onChange={(event) => handleEditChange('response', event.target.value)}
+                multiline
+                rows={3}
+                fullWidth
+                sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}
+              />
 
-                {/* Comment Section */}
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    label="Review Comment"
-                    value={editForm.comment}
-                    onChange={(e) => handleEditChange('comment', e.target.value)}
-                    variant="outlined"
-                  />
-                </Grid>
+              <Box
+                sx={{
+                  gridColumn: { xs: '1', md: '1 / -1' },
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: 1.5,
+                }}
+              >
+                <Verified fontSize="small" color={linkedBookingDetails ? 'success' : 'disabled'} />
+                <Typography variant="body2" fontWeight={600}>
+                  {linkedBookingDetails ? 'Verified User' : 'Guest Review'}
+                </Typography>
+                {linkedBookingDetails && (
+                  <Chip label={`Booking #${linkedBookingDetails.id}`} size="small" color="success" variant="outlined" />
+                )}
+              </Box>
 
-                {/* Stats Section */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Helpful Votes"
-                    value={editForm.helpful}
-                    onChange={(e) => handleEditChange('helpful', parseInt(e.target.value) || 0)}
+              <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
+                <Divider sx={{ my: 1 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle2">
+                    Review Images ({editForm.images.length})
+                  </Typography>
+                  <Button
+                    component="label"
                     variant="outlined"
                     size="small"
-                    InputProps={{ inputProps: { min: 0 } }}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Not Helpful Votes"
-                    value={editForm.notHelpful}
-                    onChange={(e) => handleEditChange('notHelpful', parseInt(e.target.value) || 0)}
-                    variant="outlined"
-                    size="small"
-                    InputProps={{ inputProps: { min: 0 } }}
-                  />
-                </Grid>
-
-                {/* Response Section */}
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    label="Your Response (Optional)"
-                    value={editForm.response}
-                    onChange={(e) => handleEditChange('response', e.target.value)}
-                    variant="outlined"
-                    placeholder="Add your response to this review..."
-                  />
-                </Grid>
-
-                {/* Verified Status */}
-                <Grid item xs={12}>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={editForm.verified}
-                          onChange={(e) => handleEditChange('verified', e.target.checked)}
-                        />
-                      }
-                      label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Verified fontSize="small" />
-                          <Typography>Verified Customer</Typography>
-                        </Box>
-                      }
+                    startIcon={<Upload />}
+                  >
+                    Upload New Images
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
                     />
-                  </FormGroup>
-                </Grid>
+                  </Button>
+                </Box>
 
-                {/* Images Section */}
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="subtitle2">
-                      Review Images ({editForm.images.length})
-                    </Typography>
-                    <Button
-                      component="label"
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Upload />}
-                    >
-                      Upload New Images
-                      <input
-                        type="file"
-                        hidden
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                      />
-                    </Button>
-                  </Box>
-
-                  {editForm.images.length > 0 ? (
-                    <Grid container spacing={2}>
-                      {editForm.images.map((image) => (
-                        <Grid item xs={12} sm={6} md={4} key={image.id}>
-                          <Card variant="outlined">
-                            <CardMedia
-                              component="img"
-                              height="140"
-                              image={image.url}
-                              alt={image.title}
-                              sx={{ objectFit: 'cover' }}
-                            />
-                            <CardContent sx={{ p: 1 }}>
-                              <Typography variant="body2" fontWeight="medium">
-                                {image.title}
-                              </Typography>
-                              <Typography variant="caption" color="textSecondary" display="block">
-                                {image.isCustomerUploaded ? 'Customer Upload' : 'Admin Upload'}
-                              </Typography>
-                              <Typography variant="caption" color="textSecondary" display="block">
-                                Uploaded: {formatDate(image.uploadDate)}
-                              </Typography>
-                            </CardContent>
-                            <CardActions sx={{ p: 1, pt: 0 }}>
-                              {image.isCustomerUploaded ? (
-                                <Button
-                                  size="small"
-                                  color="error"
-                                  startIcon={<DeleteForever />}
-                                  onClick={() => handleOpenDeleteImageDialog(image)}
-                                  fullWidth
-                                >
-                                  Delete Customer Photo
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="small"
-                                  color="error"
-                                  startIcon={<DeleteIcon />}
-                                  onClick={() => handleImageDelete(image.id)}
-                                  fullWidth
-                                >
-                                  Delete Admin Photo
-                                </Button>
-                              )}
-                            </CardActions>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Alert severity="info" icon={<Image />}>
-                      No images uploaded for this review. You can upload images using the button above.
-                    </Alert>
-                  )}
-                </Grid>
-              </Grid>
+                {editForm.images.length > 0 ? (
+                  <Grid container spacing={2}>
+                    {editForm.images.map((image) => (
+                      <Grid item xs={12} sm={6} md={4} key={image.id}>
+                        <Card variant="outlined">
+                          <CardMedia
+                            component="img"
+                            height="140"
+                            image={image.url}
+                            alt={image.title}
+                            sx={{ objectFit: 'cover' }}
+                          />
+                          <CardContent sx={{ p: 1 }}>
+                            <Typography variant="body2" fontWeight="medium">
+                              {image.title}
+                            </Typography>
+                            <Typography variant="caption" color="textSecondary" display="block">
+                              {image.isCustomerUploaded ? 'Customer Upload' : 'Admin Upload'}
+                            </Typography>
+                            <Typography variant="caption" color="textSecondary" display="block">
+                              Uploaded: {formatDate(image.uploadDate)}
+                            </Typography>
+                          </CardContent>
+                          <CardActions sx={{ p: 1, pt: 0 }}>
+                            {image.isCustomerUploaded ? (
+                              <Button
+                                size="small"
+                                color="error"
+                                startIcon={<DeleteForever />}
+                                onClick={() => handleOpenDeleteImageDialog(image)}
+                                fullWidth
+                              >
+                                Delete Customer Photo
+                              </Button>
+                            ) : (
+                              <Button
+                                size="small"
+                                color="error"
+                                startIcon={<DeleteIcon />}
+                                onClick={() => handleImageDelete(image.id)}
+                                fullWidth
+                              >
+                                Delete Admin Photo
+                              </Button>
+                            )}
+                          </CardActions>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <Alert severity="info" icon={<Image />}>
+                    No images uploaded for this review. You can upload images using the button above.
+                  </Alert>
+                )}
+              </Box>
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button 
-              onClick={() => setOpenDialog(false)} 
-              startIcon={<Cancel />}
-              color="inherit"
-            >
+            <Button onClick={handleCloseEditDialog} color="inherit">
               Cancel
             </Button>
-            <Button 
-              onClick={handleEditSubmit} 
-              variant="contained" 
-              startIcon={<Save />}
-              color="primary"
-            >
+            <Button onClick={handleEditSubmit} variant="contained" color="primary">
               Save Changes
             </Button>
           </DialogActions>
@@ -1342,7 +1454,7 @@ const Reviews = () => {
             Manage Customer Photos
             {selectedReview && (
               <Typography variant="caption" color="textSecondary" display="block" mt={1}>
-                Review: {selectedReview.id} • Customer: {selectedReview.customer.name}
+                Review: {selectedReview.id} â€¢ Customer: {selectedReview.customer.name}
               </Typography>
             )}
           </DialogTitle>
@@ -1432,7 +1544,7 @@ const Reviews = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Close</Button>
+            <Button onClick={handleCloseViewDialog}>Close</Button>
           </DialogActions>
         </Dialog>
 
@@ -1463,7 +1575,7 @@ const Reviews = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+            <Button onClick={handleCloseEditDialog}>Cancel</Button>
             <Button variant="contained" onClick={() => {
               console.log('Reply sent');
               setOpenDialog(false);
@@ -1725,11 +1837,36 @@ const Reviews = () => {
             )}
           </Box>
         </Modal>
+
+        <Snackbar
+          open={snackbarState.open}
+          onClose={handleSnackbarClose}
+          autoHideDuration={5000}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbarState.severity} sx={{ width: '100%' }}>
+            {snackbarState.message}
+          </Alert>
+        </Snackbar>
       </div>
 
   );
 };
 
 export default Reviews;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

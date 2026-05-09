@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Booking;
 use App\Models\Review;
 use App\Models\ReviewImage;
 use Illuminate\Http\JsonResponse;
@@ -22,35 +23,34 @@ class ReviewController extends Controller
         return response()->json([
             'status' => 'success',
             'reviews' => $reviews->map(function (Review $review) {
-                return [
-                    'id' => $review->id,
-                    'review_code' => $review->review_code,
-                    'booking_id' => $review->booking_id,
-                    'customer_name' => $review->customer_name,
-                    'customer_email' => $review->customer_email,
-                    'tour_name' => $review->tour_name,
-                    'rating' => (int) $review->rating,
-                    'comment' => $review->comment,
-                    'status' => $review->status,
-                    'created_at' => optional($review->created_at)->toDateTimeString(),
-                    'updated_at' => optional($review->updated_at)->toDateTimeString(),
-                    'images' => $review->images->map(function (ReviewImage $image) {
-                        return [
-                            'id' => $image->id,
-                            'image_path' => $image->image_path,
-                            'image_url' => asset('storage/' . ltrim($image->image_path, '/')),
-                            'image_title' => $image->image_title,
-                            'sort_order' => $image->sort_order,
-                            'is_cover' => $image->is_cover,
-                            'created_at' => optional($image->created_at)->toDateTimeString(),
-                        ];
-                    })->values(),
-                ];
+                return $this->transformReview($review);
             })->values(),
         ]);
     }
 
-    public function store(Request $request): JsonResponse{
+    public function bookingOptions(): JsonResponse
+    {
+        $bookings = Booking::query()
+            ->orderByDesc('created_at')
+            ->get([
+                'id',
+                'customer_name',
+                'customer_email',
+                'pickup_location',
+                'drop_location',
+                'vehicle_type',
+                'status',
+                'created_at',
+            ]);
+
+        return response()->json([
+            'status' => 'success',
+            'bookings' => $bookings,
+        ]);
+    }
+
+    public function store(Request $request): JsonResponse
+    {
         $validator = Validator::make($request->all(), [
             'customer_name' => 'required|string|max:255',
             'tour_name' => 'required|string|max:191',
@@ -102,26 +102,94 @@ class ReviewController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Review submitted successfully. It is now pending admin review.',
-            'review' => [
-                'id' => $review->id,
-                'review_code' => $review->review_code,
-                'customer_name' => $review->customer_name,
-                'tour_name' => $review->tour_name,
-                'rating' => $review->rating,
-                'comment' => $review->comment,
-                'status' => $review->status,
-                'images' => $review->images->map(function (ReviewImage $image) {
-                    return [
-                        'id' => $image->id,
-                        'image_path' => $image->image_path,
-                        'image_url' => asset('storage/' . $image->image_path),
-                        'image_title' => $image->image_title,
-                        'sort_order' => $image->sort_order,
-                        'is_cover' => $image->is_cover,
-                    ];
-                })->values(),
-            ],
+            'review' => $this->transformReview($review),
         ], 201);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'booking_id' => 'nullable|integer|exists:bookings,id',
+            'customer_name' => 'required|string|max:255',
+            'customer_email' => 'nullable|email|max:191',
+            'tour_name' => 'required|string|max:191',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:5000',
+            'status' => 'required|string|in:pending,published,rejected,reported',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $review = Review::with('images')->find($id);
+
+        if (!$review) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Review not found',
+            ], 404);
+        }
+
+        $validated = $validator->validated();
+        $booking = null;
+
+        if (!empty($validated['booking_id'])) {
+            $booking = Booking::find($validated['booking_id']);
+        }
+
+        $status = $validated['status'] === 'reported' ? 'rejected' : $validated['status'];
+
+        $review->update([
+            'booking_id' => $booking?->id,
+            'customer_name' => $booking ? $booking->customer_name : trim($validated['customer_name']),
+            'customer_email' => $booking ? $booking->customer_email : ($validated['customer_email'] ?? null),
+            'tour_name' => trim($validated['tour_name']),
+            'rating' => (int) $validated['rating'],
+            'comment' => trim($validated['comment']),
+            'status' => $status,
+        ]);
+
+        $review->refresh();
+        $review->load('images');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Review updated successfully',
+            'review' => $this->transformReview($review),
+        ]);
+    }
+
+    protected function transformReview(Review $review): array
+    {
+        return [
+            'id' => $review->id,
+            'review_code' => $review->review_code,
+            'booking_id' => $review->booking_id,
+            'customer_name' => $review->customer_name,
+            'customer_email' => $review->customer_email,
+            'tour_name' => $review->tour_name,
+            'rating' => (int) $review->rating,
+            'comment' => $review->comment,
+            'status' => $review->status,
+            'created_at' => optional($review->created_at)->toDateTimeString(),
+            'updated_at' => optional($review->updated_at)->toDateTimeString(),
+            'images' => $review->images->map(function (ReviewImage $image) {
+                return [
+                    'id' => $image->id,
+                    'image_path' => $image->image_path,
+                    'image_url' => asset('storage/' . ltrim($image->image_path, '/')),
+                    'image_title' => $image->image_title,
+                    'sort_order' => $image->sort_order,
+                    'is_cover' => $image->is_cover,
+                    'created_at' => optional($image->created_at)->toDateTimeString(),
+                ];
+            })->values(),
+        ];
     }
 
     protected function storeImage(UploadedFile $image, int $reviewId, int $index): string
@@ -138,5 +206,3 @@ class ReviewController extends Controller
         return 'reviews/' . $reviewId . '/' . $fileName;
     }
 }
-
-
