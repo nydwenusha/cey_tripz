@@ -54,6 +54,7 @@ import {
   Payments as PaymentsIcon,
   Route as RouteIcon,
 } from '@mui/icons-material';
+import { useSearchParams } from 'react-router-dom';
 import './Booking.scss';
 import PageHeader from '../../components/layout/PageHeader/PageHeader';
 import api from '../../services/api/api';
@@ -228,6 +229,7 @@ const Booking = () => {
   const [totalBookingsCount, setTotalBookingsCount] = useState(0);
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
   const [selectedVehicleType, setSelectedVehicleType] = useState('all');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -261,6 +263,14 @@ const Booking = () => {
     searchTerm !== '' ||
     selectedVehicleType !== 'all' ||
     selectedStatusFilter !== 'all';
+
+  useEffect(() => {
+    const nextSearch = (searchParams.get('search') || '').trim();
+
+    setSearchInput((prev) => (prev === nextSearch ? prev : nextSearch));
+    setSearchTerm((prev) => (prev === nextSearch ? prev : nextSearch));
+    setPage(0);
+  }, [searchParams]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {

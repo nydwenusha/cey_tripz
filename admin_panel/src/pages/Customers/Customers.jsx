@@ -36,6 +36,7 @@ import {
   Save,
   Print
 } from '@mui/icons-material';
+import { useSearchParams } from 'react-router-dom';
 import './Customers.scss';
 import PageHeader from '../../components/layout/PageHeader/PageHeader';
 import api from '../../services/api/api';
@@ -54,6 +55,7 @@ const Customers = () => {
 
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState('name');
@@ -77,6 +79,12 @@ const Customers = () => {
     severity: 'success',
     message: '',
   });
+
+  useEffect(() => {
+    const nextSearch = (searchParams.get('search') || '').trim();
+    setSearchTerm(nextSearch);
+    setPage(0);
+  }, [searchParams]);
 
   useEffect(() => {
     let isActive = true;

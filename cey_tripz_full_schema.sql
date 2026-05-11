@@ -326,6 +326,8 @@ CREATE TABLE `review_images` (
 
 COMMIT;
 
+INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `phone_number`, `password`, `role`, `status`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'Dineth', 'dinethu126@gmail.com', NULL, '0762567113', '$2y$12$/qdeEwL1A0c/X9LWW192EeNBq3guR.n.9BCirzbVyYV92GKaPjeq.', 'admin', 'active', NULL, '2026-03-24 12:36:15', '2026-03-24 12:36:15')
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
