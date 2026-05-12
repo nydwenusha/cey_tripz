@@ -2,7 +2,6 @@
 
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import "../css/VehicleDetails.scss";
 import Layout from "../../Layout";
@@ -11,12 +10,56 @@ import { getVehicleById } from "../data/vehicles";
 function VehicleDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const vehicle = getVehicleById(id);
-  const [mainImg, setMainImg] = useState(vehicle?.images?.[0]);
+  const [vehicle, setVehicle] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [mainImg, setMainImg] = useState("");
 
   useEffect(() => {
-    setMainImg(vehicle?.images?.[0]);
-  }, [vehicle]);
+    let isActive = true;
+
+    const loadVehicle = async () => {
+      setLoading(true);
+
+      try {
+        const nextVehicle = await getVehicleById(id);
+
+        if (!isActive) {
+          return;
+        }
+
+        setVehicle(nextVehicle || null);
+        setMainImg(nextVehicle?.images?.[0] || "");
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        console.error("Error fetching vehicle details:", error);
+        setVehicle(null);
+        setMainImg("");
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadVehicle();
+
+    return () => {
+      isActive = false;
+    };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <Container className="nav-vehicle">
+          <h3>Loading vehicle details...</h3>
+        </Container>
+      </Layout>
+    );
+  }
 
   if (!vehicle)
     return (
@@ -35,11 +78,7 @@ function VehicleDetails() {
 
     <Layout>
       <Container fluid className="py-5 vehicle-details-page">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div>
           <Card className="p-4 shadow-sm vehicle-details-card">
             <Row>
               <Col md={6}>
@@ -82,7 +121,7 @@ function VehicleDetails() {
               </Col>
             </Row>
           </Card>
-        </motion.div>
+        </div>
       </Container>
 
     </Layout>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -70,6 +70,19 @@ const getBookingsPage = (page, perPage, search = '', vehicleType = 'all', status
     },
   });
 
+const fallbackVehicleCategories = {
+  'Suzuki Alto': 'Mini Car',
+  'Toyota Prius': 'Sedan Car',
+  'Honda Shuttle': 'Sedan Car',
+  'Toyota Axio': 'Sedan Car',
+  'Suzuki Wagon R (FX)': 'Hatchback Car',
+  'Suzuki Wagon R (FZ)': 'Hatchback Car',
+  'Suzuki Wagon R (Stingray)': 'Hatchback Car',
+  'Suzuki Every': 'Mini Van',
+  'Toyota KDH': 'Seater Van',
+  'Toyota Hiace': 'Seater Van',
+};
+
 const Booking = () => {
   const createInitialEditForm = (booking = {}) => ({
     id: booking.id ?? null,
@@ -86,26 +99,6 @@ const Booking = () => {
     status: booking.status ?? 'pending',
     notes: booking.notes ?? '',
   });
-
-  // Vehicle categories for UI display
-  const vehicleCategories = [
-    { id: 1, name: 'Suzuki Alto', category: 'Mini Car' },
-    { id: 2, name: 'Toyota Prius', category: 'Sedan Car' },
-    { id: 3, name: 'Honda Shuttle', category: 'Sedan Car' },
-    { id: 4, name: 'Toyota Axio', category: 'Sedan Car' },
-    { id: 5, name: 'Suzuki Wagon R (FX)', category: 'Hatchback Car' },
-    { id: 6, name: 'Suzuki Wagon R (FZ)', category: 'Hatchback Car' },
-    { id: 7, name: 'Suzuki Wagon R (Stingray)', category: 'Hatchback Car' },
-    { id: 8, name: 'Suzuki Every', category: 'Mini Van' },
-    { id: 9, name: 'Toyota KDH', category: 'Seater Van' },
-    { id: 10, name: 'Toyota Hiace', category: 'Seater Van' }
-  ];
-
-  // UI-only functions for display
-  const getVehicleCategory = (vehicleType) => {
-    const vehicle = vehicleCategories.find(v => v.name === vehicleType);
-    return vehicle ? vehicle.category : 'Unknown';
-  };
 
   const getStatusChip = (status) => {
     const statusConfig = {
@@ -232,6 +225,7 @@ const Booking = () => {
   const [searchParams] = useSearchParams();
   const [selectedVehicleType, setSelectedVehicleType] = useState('all');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('all');
+  const [vehicleOptions, setVehicleOptions] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -258,6 +252,32 @@ const Booking = () => {
     severity: 'success',
     message: '',
   });
+
+  const bookingDialogSelectMenuProps = {
+    disableScrollLock: true,
+    sx: {
+      zIndex: 1702,
+    },
+    slotProps: {
+      root: {
+        sx: {
+          zIndex: 1702,
+        },
+      },
+      paper: {
+        sx: {
+          zIndex: 1702,
+          maxHeight: 320,
+        },
+      },
+    },
+    PaperProps: {
+      sx: {
+        zIndex: 1702,
+        maxHeight: 320,
+      },
+    },
+  };
 
   const hasActiveFilters =
     searchTerm !== '' ||
@@ -318,8 +338,68 @@ const Booking = () => {
     };
   }, [page, rowsPerPage, searchTerm, selectedVehicleType, selectedStatusFilter]);
 
-  // Vehicle types for filter dropdown
-  const vehicleTypes = vehicleCategories.map(cat => cat.name);
+  useEffect(() => {
+    let isActive = true;
+
+    const loadVehicles = async () => {
+      try {
+        const response = await api.get('/GetVehicles');
+
+        if (!isActive) {
+          return;
+        }
+
+        setVehicleOptions(response.data?.vehicles || []);
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        console.error('Error fetching vehicles:', error);
+        setVehicleOptions([]);
+        showSnackbar(error.response?.data?.message || 'Failed to load vehicles.', 'error');
+      }
+    };
+
+    loadVehicles();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const getVehicleCategory = (vehicleType) => {
+    const matchedVehicle = vehicleOptions.find((vehicle) => vehicle.name === vehicleType);
+
+    if (matchedVehicle?.category) {
+      return matchedVehicle.category;
+    }
+
+    if (matchedVehicle?.type) {
+      return matchedVehicle.type;
+    }
+
+    return fallbackVehicleCategories[vehicleType] || 'Unknown';
+  };
+
+  const vehicleTypes = useMemo(() => {
+    const nextVehicleTypes = new Set(
+      vehicleOptions
+        .map((vehicle) => vehicle?.name?.trim())
+        .filter(Boolean)
+    );
+
+    [
+      editFormData.vehicle_type,
+      selectedBooking?.vehicle_type,
+      selectedVehicleType !== 'all' ? selectedVehicleType : '',
+    ]
+      .map((vehicleName) => vehicleName?.trim())
+      .filter(Boolean)
+      .forEach((vehicleName) => nextVehicleTypes.add(vehicleName));
+
+    return Array.from(nextVehicleTypes).sort((left, right) => left.localeCompare(right));
+  }, [editFormData.vehicle_type, selectedBooking?.vehicle_type, selectedVehicleType, vehicleOptions]);
 
   const refreshBookingsPage = async (targetPage = page) => {
     const response = await getBookingsPage(
@@ -1187,6 +1267,7 @@ const Booking = () => {
                 onChange={handleEditFieldChange('vehicle_type')}
                 error={Boolean(editFormErrors.vehicle_type)}
                 helperText={editFormErrors.vehicle_type}
+                SelectProps={{ MenuProps: bookingDialogSelectMenuProps }}
                 fullWidth
               >
                 {vehicleTypes.map((vehicle) => (
@@ -1258,6 +1339,7 @@ const Booking = () => {
                 onChange={handleEditFieldChange('status')}
                 error={Boolean(editFormErrors.status)}
                 helperText={editFormErrors.status}
+                SelectProps={{ MenuProps: bookingDialogSelectMenuProps }}
                 fullWidth
               >
                 <MenuItem value="pending">Pending</MenuItem>

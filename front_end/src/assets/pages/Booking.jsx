@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Container, Form, Button, Row, Col, Card } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import "../css/Booking.scss";
 import Layout from "../../Layout";
 import api from "../services/api/api";
+
+const MotionDiv = motion.div;
 
 const initialFormData = {
   customer_name: "",
@@ -22,13 +24,13 @@ const initialFormData = {
 };
 
 function Booking() {
-  const [pickupDate, setPickupDate] = useState(null);
-  const [returnDate, setReturnDate] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [formData, setFormData] = useState(initialFormData);
+  const [vehicleOptions, setVehicleOptions] = useState([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(true);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,17 +47,57 @@ function Booking() {
     }
   };
 
+  useEffect(() => {
+    let isActive = true;
+
+    const loadVehicles = async () => {
+      try {
+        const response = await api.get("/vehicles");
+
+        if (!isActive) {
+          return;
+        }
+
+        setVehicleOptions(Array.isArray(response.data?.vehicles) ? response.data.vehicles : []);
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        console.error("Failed to load vehicles:", error);
+        setVehicleOptions([]);
+      } finally {
+        if (isActive) {
+          setVehiclesLoading(false);
+        }
+      }
+    };
+
+    loadVehicles();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const groupedVehicleOptions = useMemo(() => (
+    vehicleOptions.reduce((groups, vehicle) => {
+      const groupLabel = vehicle.type || vehicle.category || "Other Vehicles";
+
+      if (!groups[groupLabel]) {
+        groups[groupLabel] = [];
+      }
+
+      groups[groupLabel].push(vehicle);
+      return groups;
+    }, {})
+  ), [vehicleOptions]);
+
   const handleDateChange = (date, fieldName) => {
     setFormData((prev) => ({
       ...prev,
       [fieldName]: date,
     }));
-
-    if (fieldName === "pickup_date") {
-      setPickupDate(date);
-    } else if (fieldName === "return_date") {
-      setReturnDate(date);
-    }
 
     if (errors[fieldName]) {
       setErrors((prev) => ({
@@ -127,8 +169,6 @@ function Booking() {
 
   const clearFormFields = () => {
     setFormData(initialFormData);
-    setPickupDate(null);
-    setReturnDate(null);
     setErrors({});
   };
 
@@ -193,7 +233,7 @@ function Booking() {
 
             <AnimatePresence mode="wait">
               {showConfirm ? (
-                <motion.div
+                <MotionDiv
                   key="success-state"
                   className="booking-success-state"
                   initial={{ opacity: 0, y: 24 }}
@@ -211,9 +251,9 @@ function Booking() {
                   >
                     Make Another Booking
                   </Button>
-                </motion.div>
+                </MotionDiv>
               ) : (
-                <motion.div
+                <MotionDiv
                   key="form-state"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -354,30 +394,24 @@ function Booking() {
                             value={formData.vehicle_type}
                             onChange={handleChange}
                             isInvalid={!!errors.vehicle_type}
+                            disabled={vehiclesLoading || vehicleOptions.length === 0}
                           >
-                            <option value="">Select Vehicle</option>
-                            <optgroup label="Mini Car">
-                              <option value="Suzuki Alto">Suzuki Alto</option>
-                            </optgroup>
-                            <optgroup label="Exclusive / Sedan Car">
-                              <option value="Toyota Prius">Toyota Prius</option>
-                              <option value="Honda Shuttle">Honda Shuttle</option>
-                              <option value="Toyota Axio">Toyota Axio</option>
-                            </optgroup>
-                            <optgroup label="Hatchback Car">
-                              <option value="Suzuki Wagon R (FX)">Suzuki Wagon R (FX)</option>
-                              <option value="Suzuki Wagon R (FZ)">Suzuki Wagon R (FZ)</option>
-                              <option value="Suzuki Wagon R (Stingray)">Suzuki Wagon R (Stingray)</option>
-                            </optgroup>
-                            <optgroup label="Mini Van">
-                              <option value="Suzuki Every">Suzuki Every</option>
-                            </optgroup>
-                            <optgroup label="Seater Van (Flat Roof)">
-                              <option value="Toyota KDH">Toyota KDH</option>
-                            </optgroup>
-                            <optgroup label="Seater Van (High Roof)">
-                              <option value="Toyota Hiace">Toyota Hiace</option>
-                            </optgroup>
+                            <option value="">
+                              {vehiclesLoading
+                                ? "Loading vehicles..."
+                                : vehicleOptions.length === 0
+                                  ? "No vehicles available"
+                                  : "Select Vehicle"}
+                            </option>
+                            {Object.entries(groupedVehicleOptions).map(([groupLabel, vehicles]) => (
+                              <optgroup key={groupLabel} label={groupLabel}>
+                                {vehicles.map((vehicle) => (
+                                  <option key={vehicle.id} value={vehicle.name}>
+                                    {vehicle.name}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
                           </Form.Select>
                           <Form.Control.Feedback type="invalid">
                             {errors.vehicle_type}
@@ -426,7 +460,7 @@ function Booking() {
                       </Button>
                     </div>
                   </Form>
-                </motion.div>
+                </MotionDiv>
               )}
             </AnimatePresence>
           </Card>
@@ -437,3 +471,4 @@ function Booking() {
 }
 
 export default Booking;
+

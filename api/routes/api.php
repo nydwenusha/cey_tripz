@@ -8,6 +8,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -40,6 +41,10 @@ Route::get('/blogPosts/{id}', [BlogPostController::class, 'show']);
 // Reviews
 Route::post('/reviews', [ReviewController::class, 'store']);
 
+// Vehicles
+Route::get('/vehicles', [VehicleController::class, 'publicIndex']);
+Route::get('/vehicles/{id}', [VehicleController::class, 'publicShow']);
+
 // Protected routes
 Route::middleware('auth:api')->group(function () {
     // Auth
@@ -54,6 +59,16 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/updateStatus', [BookingController::class, 'updateStatus']);
     Route::put('/UpdateBooking/{id}', [BookingController::class, 'update']);
     Route::delete('/DeleteBooking/{id}', [BookingController::class, 'destroy']);
+
+    // Vehicles
+    Route::get('/GetVehicles', [VehicleController::class, 'index']);
+    Route::post('/AddVehicle', [VehicleController::class, 'store']);
+    Route::put('/UpdateVehicle/{id}', [VehicleController::class, 'update']);
+    Route::put('/UpdateVehicleStatus/{id}', [VehicleController::class, 'updateStatus']);
+    Route::put('/UpdateVehicleFeatured/{id}', [VehicleController::class, 'updateFeatured']);
+    Route::post('/AddVehicleImage/{id}', [VehicleController::class, 'addImage']);
+    Route::delete('/DeleteVehicleImage/{id}', [VehicleController::class, 'removeImage']);
+    Route::delete('/DeleteVehicle/{id}', [VehicleController::class, 'destroy']);
 
     // Customers
     Route::get('/GetCustomers', [CustomerController::class, 'index']);
