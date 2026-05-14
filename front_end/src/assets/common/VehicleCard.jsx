@@ -103,7 +103,7 @@ function VehicleCards() {
                     <Card.Body className="text-center d-flex flex-column justify-content-between">
                       <div>
                         <Card.Title>{v.name}</Card.Title>
-                        <div className="vehicle-category">{v.category}</div>
+                        <div className="vehicle-category">{v.type}</div>
                         <Card.Text className="text-primary fw-semibold">
                           {v.price}
                         </Card.Text>

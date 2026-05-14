@@ -3,6 +3,7 @@ import api from "../services/api/api";
 const normalizeVehicle = (vehicle = {}) => ({
   id: vehicle.id,
   name: vehicle.name || "Unnamed Vehicle",
+  type: vehicle.type || vehicle.category || "Vehicle",
   category: vehicle.category || vehicle.type || "Vehicle",
   shortDesc: vehicle.shortDesc || vehicle.description || "",
   cardImg: vehicle.cardImg || vehicle.images?.[0] || "",

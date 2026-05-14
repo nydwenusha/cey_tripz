@@ -91,6 +91,15 @@ const vehicleTypeOptions = [
     'Sports Car'
 ];
 
+const vehicleCategoryOptions = [
+    'Economy',
+    'Family',
+    'Luxury',
+    'Executive',
+    'Adventure',
+    'Commercial',
+];
+
 const fuelTypeOptions = ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'CNG'];
 const transmissionOptions = ['Automatic', 'Manual', 'Semi-Automatic'];
 const statusOptions = ['active', 'inactive'];
@@ -149,8 +158,47 @@ const createVehicleFormFromVehicle = (vehicle) => ({
     featured: Boolean(vehicle?.featured),
 });
 
+const bookingsPageSize = 50;
+
+const getVehicleBookingKey = (vehicleName) => String(vehicleName || '').trim().toLowerCase();
+
+const fetchBookingCountsByVehicle = async () => {
+    const firstResponse = await api.get('/GetBookings', {
+        params: {
+            page: 1,
+            per_page: bookingsPageSize,
+        },
+    });
+    const lastPage = Number(firstResponse.data?.pagination?.last_page || 1);
+
+    const remainingResponses = await Promise.all(
+        Array.from({ length: Math.max(lastPage - 1, 0) }, (_, index) =>
+            api.get('/GetBookings', {
+                params: {
+                    page: index + 2,
+                    per_page: bookingsPageSize,
+                },
+            })
+        )
+    );
+
+    return [firstResponse, ...remainingResponses]
+        .flatMap((response) => (Array.isArray(response.data?.bookings) ? response.data.bookings : []))
+        .reduce((counts, booking) => {
+            const vehicleKey = getVehicleBookingKey(booking.vehicle_type);
+
+            if (!vehicleKey) {
+                return counts;
+            }
+
+            counts[vehicleKey] = (counts[vehicleKey] || 0) + 1;
+            return counts;
+        }, {});
+};
+
 const Vehicles = () => {
     const [vehicles, setVehicles] = useState([]);
+    const [bookingCountsByVehicle, setBookingCountsByVehicle] = useState({});
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState(0);
     const [filter, setFilter] = useState('all');
@@ -158,6 +206,15 @@ const Vehicles = () => {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [actionLoadingId, setActionLoadingId] = useState(null);
+    const [deleteDialogState, setDeleteDialogState] = useState({
+        open: false,
+        vehicle: null,
+    });
+    const [imageDeleteDialogState, setImageDeleteDialogState] = useState({
+        open: false,
+        vehicle: null,
+        imageIndex: null,
+    });
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [vehicleDialogMode, setVehicleDialogMode] = useState('add');
     const [editingVehicleId, setEditingVehicleId] = useState(null);
@@ -193,19 +250,27 @@ const Vehicles = () => {
             setLoading(true);
 
             try {
-                const response = await api.get('/GetVehicles');
+                const [vehiclesResponse, nextBookingCounts] = await Promise.all([
+                    api.get('/GetVehicles'),
+                    fetchBookingCountsByVehicle().catch((error) => {
+                        console.error('Error fetching vehicle booking counts:', error);
+                        return {};
+                    }),
+                ]);
 
                 if (!isActive) {
                     return;
                 }
 
-                setVehicles(response.data?.vehicles || []);
+                setBookingCountsByVehicle(nextBookingCounts);
+                setVehicles(vehiclesResponse.data?.vehicles || []);
             } catch (error) {
                 if (!isActive) {
                     return;
                 }
 
                 console.error('Error fetching vehicles:', error);
+                setBookingCountsByVehicle({});
                 setVehicles([]);
                 showSnackbar(error.response?.data?.message || 'Failed to load vehicles.', 'error');
             } finally {
@@ -221,6 +286,8 @@ const Vehicles = () => {
             isActive = false;
         };
     }, []);
+
+    const getVehicleBookingCount = (vehicle) => bookingCountsByVehicle[getVehicleBookingKey(vehicle?.name)] || 0;
 
     useEffect(() => {
         if (!selectedVehicle) {
@@ -567,10 +634,31 @@ const Vehicles = () => {
         }
     };
 
-    const handleDelete = async (vehicleId) => {
-        if (!window.confirm('Are you sure you want to delete this vehicle?')) {
+    const handleOpenDeleteDialog = (vehicle) => {
+        setDeleteDialogState({
+            open: true,
+            vehicle,
+        });
+    };
+
+    const handleCloseDeleteDialog = () => {
+        if (deleteDialogState.vehicle && actionLoadingId === deleteDialogState.vehicle.id) {
             return;
         }
+
+        setDeleteDialogState({
+            open: false,
+            vehicle: null,
+        });
+    };
+
+    const handleDelete = async () => {
+        if (!deleteDialogState.vehicle) {
+            return;
+        }
+
+        const vehicleId = deleteDialogState.vehicle.id;
+        let deleteSucceeded = false;
 
         setActionLoadingId(vehicleId);
 
@@ -583,11 +671,19 @@ const Vehicles = () => {
             }
 
             showSnackbar(response.data.message || 'Vehicle deleted successfully.');
+            deleteSucceeded = true;
         } catch (error) {
             console.error('Error deleting vehicle:', error);
             showSnackbar(error.response?.data?.message || 'Failed to delete vehicle.', 'error');
         } finally {
             setActionLoadingId(null);
+
+            if (deleteSucceeded) {
+                setDeleteDialogState({
+                    open: false,
+                    vehicle: null,
+                });
+            }
         }
     };
 
@@ -642,10 +738,34 @@ const Vehicles = () => {
         }
     };
 
-    const handleRemoveImage = async (vehicleId, imageIndex) => {
-        if (!window.confirm('Remove this image?')) {
+    const handleOpenImageDeleteDialog = (vehicle, imageIndex) => {
+        setImageDeleteDialogState({
+            open: true,
+            vehicle,
+            imageIndex,
+        });
+    };
+
+    const handleCloseImageDeleteDialog = () => {
+        if (imageDeleteDialogState.vehicle && actionLoadingId === imageDeleteDialogState.vehicle.id) {
             return;
         }
+
+        setImageDeleteDialogState({
+            open: false,
+            vehicle: null,
+            imageIndex: null,
+        });
+    };
+
+    const handleRemoveImage = async () => {
+        if (!imageDeleteDialogState.vehicle || imageDeleteDialogState.imageIndex === null) {
+            return;
+        }
+
+        const vehicleId = imageDeleteDialogState.vehicle.id;
+        const imageIndex = imageDeleteDialogState.imageIndex;
+        let removeSucceeded = false;
 
         setActionLoadingId(vehicleId);
 
@@ -658,11 +778,20 @@ const Vehicles = () => {
 
             updateVehicleState(response.data.vehicle);
             showSnackbar(response.data.message || 'Vehicle image removed successfully.');
+            removeSucceeded = true;
         } catch (error) {
             console.error('Error removing vehicle image:', error);
             showSnackbar(error.response?.data?.message || 'Failed to remove vehicle image.', 'error');
         } finally {
             setActionLoadingId(null);
+
+            if (removeSucceeded) {
+                setImageDeleteDialogState({
+                    open: false,
+                    vehicle: null,
+                    imageIndex: null,
+                });
+            }
         }
     };
 
@@ -1058,8 +1187,8 @@ const Vehicles = () => {
                                             <Box className="vehicle-metrics">
                                                 <Box className="rating-section">
                                                     <Rating value={Number(vehicle.rating || 0)} readOnly precision={0.5} size="small" />
-                                                    <Typography variant="body2" sx={{ ml: 1 }}>
-                                                        {vehicle.totalBookings} bookings
+                                                    <Typography variant="body2" className="booking-count">
+                                                        {getVehicleBookingCount(vehicle)} bookings
                                                     </Typography>
                                                 </Box>
                                                 <Typography color="primary" className="price">
@@ -1093,7 +1222,7 @@ const Vehicles = () => {
                                                         <EditIcon />
                                                     </IconButton>
                                                     <IconButton
-                                                        onClick={() => handleDelete(vehicle.id)}
+                                                        onClick={() => handleOpenDeleteDialog(vehicle)}
                                                         color="error"
                                                         disabled={actionLoadingId === vehicle.id}
                                                     >
@@ -1145,7 +1274,6 @@ const Vehicles = () => {
                                                         alt={vehicle.name}
                                                         variant="rounded"
                                                         className="main-table-image"
-                                                        onClick={() => handleOpenImageDialog(vehicle)}
                                                     >
                                                         <CarIcon />
                                                     </Avatar>
@@ -1156,7 +1284,6 @@ const Vehicles = () => {
                                                                 src={img}
                                                                 variant="rounded"
                                                                 className="table-thumbnail"
-                                                                onClick={() => handleOpenImageDialog(vehicle)}
                                                             />
                                                         ))}
                                                         {vehicle.images.length > 3 && (
@@ -1226,7 +1353,7 @@ const Vehicles = () => {
                                                         {Number(vehicle.rating || 0).toFixed(1)}/5
                                                     </Typography>
                                                     <Typography variant="body2" color="textSecondary">
-                                                        {vehicle.totalBookings} bookings
+                                                        {getVehicleBookingCount(vehicle)} bookings
                                                     </Typography>
                                                 </Box>
                                             </TableCell>
@@ -1262,7 +1389,7 @@ const Vehicles = () => {
                                                     <IconButton
                                                         size="small"
                                                         color="error"
-                                                        onClick={() => handleDelete(vehicle.id)}
+                                                        onClick={() => handleOpenDeleteDialog(vehicle)}
                                                         title="Delete"
                                                         disabled={actionLoadingId === vehicle.id}
                                                     >
@@ -1357,9 +1484,9 @@ const Vehicles = () => {
                                 onChange={handleAddFieldChange('category')}
                                 MenuProps={vehicleDialogSelectMenuProps}
                             >
-                                {vehicleTypeOptions.map((type) => (
-                                    <MenuItem key={type} value={type.toLowerCase()}>
-                                        {type}
+                                {vehicleCategoryOptions.map((category) => (
+                                    <MenuItem key={category} value={category}>
+                                        {category}
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -1622,11 +1749,14 @@ const Vehicles = () => {
                 sx={{
                     zIndex: 1601,
                     '& .MuiDialog-paper': {
+                        width: { xs: 'calc(100% - 32px)', md: 980 },
+                        maxWidth: 980,
                         mt: { xs: 10, sm: 12 },
-                        mb: 3,
-                        maxHeight: 'calc(100% - 120px)',
+                        mb: 2,
+                        maxHeight: 'calc(100% - 104px)',
                     },
                 }}
+                PaperProps={{ className: 'image-gallery-dialog-paper' }}
             >
                 {selectedVehicle && (
                     <>
@@ -1654,9 +1784,6 @@ const Vehicles = () => {
                                     >
                                         Add Images
                                     </Button>
-                                    <IconButton onClick={handleCloseImageDialog} className="image-gallery-close-btn">
-                                        <CloseIcon />
-                                    </IconButton>
                                 </Box>
                             </Box>
                         </DialogTitle>
@@ -1722,7 +1849,7 @@ const Vehicles = () => {
                                                     <Box className="grid-image-actions">
                                                         <IconButton
                                                             size="small"
-                                                            onClick={() => handleRemoveImage(selectedVehicle.id, idx)}
+                                                            onClick={() => handleOpenImageDeleteDialog(selectedVehicle, idx)}
                                                             color="error"
                                                             disabled={actionLoadingId === selectedVehicle.id}
                                                         >
@@ -1743,6 +1870,86 @@ const Vehicles = () => {
                         </DialogActions>
                     </>
                 )}
+            </Dialog>
+
+            <Dialog
+                open={deleteDialogState.open}
+                onClose={handleCloseDeleteDialog}
+                maxWidth="xs"
+                fullWidth
+                sx={{
+                    zIndex: 1601,
+                    '& .MuiDialog-paper': {
+                        mt: { xs: 10, sm: 12 },
+                        mb: 3,
+                    },
+                }}
+            >
+                <DialogTitle className="vehicle-dialog-title">Delete Vehicle</DialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="body1" sx={{ mb: 1.5 }}>
+                        Are you sure you want to delete this vehicle?
+                    </Typography>
+                    {deleteDialogState.vehicle && (
+                        <Typography variant="body2" color="text.secondary">
+                            <strong>{deleteDialogState.vehicle.name}</strong>
+                            {deleteDialogState.vehicle.type ? ` • ${deleteDialogState.vehicle.type}` : ''}
+                            {deleteDialogState.vehicle.year ? ` • ${deleteDialogState.vehicle.year}` : ''}
+                        </Typography>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDeleteDialog} disabled={Boolean(deleteDialogState.vehicle && actionLoadingId === deleteDialogState.vehicle.id)}>
+                        Cancel
+                    </Button>
+                    <Button
+                        color="error"
+                        variant="contained"
+                        onClick={handleDelete}
+                        disabled={Boolean(deleteDialogState.vehicle && actionLoadingId === deleteDialogState.vehicle.id)}
+                    >
+                        {deleteDialogState.vehicle && actionLoadingId === deleteDialogState.vehicle.id ? 'Deleting...' : 'Delete Vehicle'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={imageDeleteDialogState.open}
+                onClose={handleCloseImageDeleteDialog}
+                maxWidth="xs"
+                fullWidth
+                sx={{
+                    zIndex: 1601,
+                    '& .MuiDialog-paper': {
+                        mt: { xs: 10, sm: 12 },
+                        mb: 3,
+                    },
+                }}
+            >
+                <DialogTitle className="vehicle-dialog-title">Remove Image</DialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="body1" sx={{ mb: 1.5 }}>
+                        Are you sure you want to remove this image?
+                    </Typography>
+                    {imageDeleteDialogState.vehicle && (
+                        <Typography variant="body2" color="text.secondary">
+                            Vehicle: <strong>{imageDeleteDialogState.vehicle.name}</strong>
+                        </Typography>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseImageDeleteDialog} disabled={Boolean(imageDeleteDialogState.vehicle && actionLoadingId === imageDeleteDialogState.vehicle.id)}>
+                        Cancel
+                    </Button>
+                    <Button
+                        color="error"
+                        variant="contained"
+                        onClick={handleRemoveImage}
+                        disabled={Boolean(imageDeleteDialogState.vehicle && actionLoadingId === imageDeleteDialogState.vehicle.id)}
+                    >
+                        {imageDeleteDialogState.vehicle && actionLoadingId === imageDeleteDialogState.vehicle.id ? 'Removing...' : 'Remove Image'}
+                    </Button>
+                </DialogActions>
             </Dialog>
 
             <Card className="categories-card">

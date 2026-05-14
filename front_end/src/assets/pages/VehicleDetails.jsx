@@ -104,9 +104,11 @@ function VehicleDetails() {
 
               <Col md={6}>
                 <h2>{vehicle.name}</h2>
+                <div className="text-muted fw-semibold mb-2">{vehicle.type}</div>
                 <h5 className="text-primary mb-3">{vehicle.price}</h5>
                 <p>{vehicle.description}</p>
                 <ul className="spec-list">
+                  <li>Category: {vehicle.category}</li>
                   {vehicle.specs.map((s, i) => (
                     <li key={i}> {s}</li>
                   ))}
