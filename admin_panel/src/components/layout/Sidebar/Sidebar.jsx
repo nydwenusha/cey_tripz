@@ -81,7 +81,6 @@ const menuItems = [
         subItems: [
             { title: 'Destinations', path: '/content/destinations' },
             { title: 'Blog Posts', path: '/blogs' },
-            { title: 'Add New Post', path: '/blogs/add' },
             { title: 'Blog Categories', path: '/blogs/categories' },
             { title: 'Offers', path: '/content/offers' },
         ],

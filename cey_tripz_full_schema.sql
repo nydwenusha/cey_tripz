@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS `review_images`;
 DROP TABLE IF EXISTS `reviews`;
 DROP TABLE IF EXISTS `payments`;
 DROP TABLE IF EXISTS `customers`;
+DROP TABLE IF EXISTS `vehicles`;
 DROP TABLE IF EXISTS `blog_post_tag`;
 DROP TABLE IF EXISTS `tags`;
 DROP TABLE IF EXISTS `blog_posts`;
@@ -163,6 +164,37 @@ CREATE TABLE `bookings` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `vehicles` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `type` VARCHAR(100) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+  `category` VARCHAR(100) NOT NULL,
+  `daily_rate` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `weekly_rate` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `monthly_rate` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `fuel_type` VARCHAR(50) NOT NULL,
+  `transmission` VARCHAR(50) NOT NULL,
+  `year` SMALLINT UNSIGNED DEFAULT NULL,
+  `color` VARCHAR(100) DEFAULT NULL,
+  `mileage` VARCHAR(50) DEFAULT NULL,
+  `engine` VARCHAR(50) NOT NULL,
+  `capacity` INT UNSIGNED NOT NULL DEFAULT 1,
+  `tags` JSON DEFAULT NULL,
+  `featured` TINYINT(1) NOT NULL DEFAULT 0,
+  `images` JSON DEFAULT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `vehicles_status_index` (`status`),
+  KEY `vehicles_featured_index` (`featured`),
+  KEY `vehicles_type_index` (`type`),
+  KEY `vehicles_category_index` (`category`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `blog_post_categories` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
@@ -188,10 +220,17 @@ CREATE TABLE `blog_posts` (
   `excerpt` VARCHAR(255) DEFAULT NULL,
   `content` LONGTEXT NOT NULL,
   `category_id` BIGINT UNSIGNED DEFAULT NULL,
+  `status` ENUM('draft', 'published', 'scheduled') NOT NULL DEFAULT 'draft',
+  `scheduled_date` DATETIME DEFAULT NULL,
+  `is_featured` TINYINT(1) NOT NULL DEFAULT 0,
+  `meta_title` VARCHAR(255) DEFAULT NULL,
+  `meta_description` TEXT DEFAULT NULL,
   `created_at` TIMESTAMP NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `blog_posts_category_id_foreign` (`category_id`),
+  KEY `blog_posts_status_index` (`status`),
+  KEY `blog_posts_scheduled_date_index` (`scheduled_date`),
   CONSTRAINT `blog_posts_category_id_foreign`
     FOREIGN KEY (`category_id`) REFERENCES `blog_post_categories` (`id`)
     ON DELETE SET NULL
@@ -327,7 +366,8 @@ CREATE TABLE `review_images` (
 COMMIT;
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `phone_number`, `password`, `role`, `status`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Dineth', 'dinethu126@gmail.com', NULL, '0762567113', '$2y$12$/qdeEwL1A0c/X9LWW192EeNBq3guR.n.9BCirzbVyYV92GKaPjeq.', 'admin', 'active', NULL, '2026-03-24 12:36:15', '2026-03-24 12:36:15')
+(1, 'Dineth', 'dinethu126@gmail.com', NULL, '0762567113', '$2y$12$/qdeEwL1A0c/X9LWW192EeNBq3guR.n.9BCirzbVyYV92GKaPjeq.', 'admin', 'active', NULL, '2026-03-24 12:36:15', '2026-03-24 12:36:15'),
+(2, 'Isuru Gamage', 'info@ceytripz.com', NULL, '94710877100', '$2y$12$r9JDqZe090fpl6cYVRBlCOqfqGQRGOIa5aOrHNmNBSkvxTFEomb9W', 'admin', 'active', NULL, '2026-03-24 14:12:31', '2026-03-24 14:12:31');
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

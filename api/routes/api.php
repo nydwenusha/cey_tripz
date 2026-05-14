@@ -91,6 +91,8 @@ Route::middleware('auth:api')->group(function () {
 
     // Blog posts
     Route::post('/addBlogPost', [BlogPostController::class, 'store']);
+    Route::put('/blogPosts/{id}', [BlogPostController::class, 'update']);
+    Route::post('/blogPosts/{id}', [BlogPostController::class, 'update']);
     Route::delete('/blogPostDelete/{id}', [BlogPostController::class, 'destroy']);
 });
 

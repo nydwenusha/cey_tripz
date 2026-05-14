@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Box,
     Button,
@@ -128,16 +128,28 @@ const BlogPostManagement = () => {
         return `${import.meta.env.VITE_BLOG_IMAGE_URL || 'http://localhost:8000/storage'}/${imagePath}`;
     };
 
-    // Fetch initial data
-    useEffect(() => {
-        fetchData();
+    const showSnackbar = useCallback((message, severity = 'success') => {
+        setSnackbar({ open: true, message, severity });
     }, []);
 
-    useEffect(() => {
-        filterAndSortPosts();
-    }, [posts, searchQuery, statusFilter, categoryFilter, sortBy]);
+    const updateStats = useCallback((postsData) => {
+        const published = postsData.filter(p => p.status === 'published').length;
+        const drafts = postsData.filter(p => p.status === 'draft').length;
+        const scheduled = postsData.filter(p => p.status === 'scheduled').length;
+        const totalViews = postsData.reduce((sum, post) => sum + (post.views || 0), 0);
+        const totalComments = postsData.reduce((sum, post) => sum + (post.comments || 0), 0);
 
-    const fetchData = async () => {
+        setStats({
+            totalPosts: postsData.length,
+            published,
+            drafts,
+            scheduled,
+            totalViews,
+            totalComments
+        });
+    }, []);
+
+    const fetchData = useCallback(async () => {
         setInitialLoading(true);
         try {
             // Fetch posts and categories in parallel
@@ -174,26 +186,9 @@ const BlogPostManagement = () => {
         } finally {
             setInitialLoading(false);
         }
-    };
+    }, [showSnackbar, updateStats]);
 
-    const updateStats = (postsData) => {
-        const published = postsData.filter(p => p.status === 'published').length;
-        const drafts = postsData.filter(p => p.status === 'draft').length;
-        const scheduled = postsData.filter(p => p.status === 'scheduled').length;
-        const totalViews = postsData.reduce((sum, post) => sum + (post.views || 0), 0);
-        const totalComments = postsData.reduce((sum, post) => sum + (post.comments || 0), 0);
-
-        setStats({
-            totalPosts: postsData.length,
-            published,
-            drafts,
-            scheduled,
-            totalViews,
-            totalComments
-        });
-    };
-
-    const filterAndSortPosts = () => {
+    const filterAndSortPosts = useCallback(() => {
         let filtered = [...posts];
 
         if (searchQuery) {
@@ -230,7 +225,16 @@ const BlogPostManagement = () => {
         });
 
         setFilteredPosts(filtered);
-    };
+    }, [categoryFilter, posts, searchQuery, sortBy, statusFilter]);
+
+    // Fetch initial data
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    useEffect(() => {
+        filterAndSortPosts();
+    }, [filterAndSortPosts]);
 
     const handleOpenDialog = async (post) => {
         if (!post) {
@@ -278,6 +282,7 @@ const BlogPostManagement = () => {
             formData.append('content', postForm.content);
             formData.append('excerpt', postForm.excerpt);
             formData.append('category_id', postForm.category_id);
+            formData.append('category', postForm.category_name || '');
             formData.append('tags', JSON.stringify(postForm.tags));
             formData.append('author', postForm.author);
             formData.append('status', postForm.status);
@@ -292,8 +297,6 @@ const BlogPostManagement = () => {
             }
 
             if (postForm.image && typeof postForm.image !== 'string') {
-                formData.append('image', postForm.image);
-            } else if (postForm.image && typeof postForm.image === 'string' && !postForm.image.startsWith('http')) {
                 formData.append('image', postForm.image);
             }
 
@@ -382,10 +385,6 @@ const BlogPostManagement = () => {
         if (post.content && post.content.length > 300) score += 25;
         if (post.tags && post.tags.length >= 3) score += 25;
         return score;
-    };
-
-    const showSnackbar = (message, severity = 'success') => {
-        setSnackbar({ open: true, message, severity });
     };
 
     const handleCloseSnackbar = () => {
@@ -685,7 +684,13 @@ const BlogPostManagement = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {paginatedPosts.map((post) => (
+                                    {paginatedPosts.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={7} align="center">
+                                                No blog posts found.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : paginatedPosts.map((post) => (
                                         <TableRow key={post.id} className={post.is_featured ? 'featured-post' : ''}>
                                             <TableCell>
                                                 <Box className="post-image-container">
@@ -864,8 +869,16 @@ const BlogPostManagement = () => {
                     maxWidth="md"
                     fullWidth
                     className="post-dialog"
+                    sx={{
+                        zIndex: 1601,
+                        '& .MuiDialog-paper': {
+                            mt: { xs: 10, sm: 12 },
+                            mb: 3,
+                            maxHeight: 'calc(100% - 120px)',
+                        },
+                    }}
                 >
-                    <DialogTitle>
+                    <DialogTitle className="blog-dialog-title">
                         Edit Blog Post
                     </DialogTitle>
                     <DialogContent dividers>
