@@ -12,6 +12,10 @@ const initialFormData = {
   images: [],
 };
 
+const MAX_IMAGE_SIZE_MB = 10;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+const MAX_IMAGE_COUNT = 10;
+
 const travelerStories = [
   {
     id: 1,
@@ -85,6 +89,28 @@ const ShareExperience = () => {
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const navigate = useNavigate();
 
+  const getFeedbackAlertClass = () => {
+    if (feedback.type === 'success') {
+      return 'alert-success';
+    }
+
+    if (feedback.type === 'warning') {
+      return 'alert-warning';
+    }
+
+    return 'alert-danger';
+  };
+
+  const buildImageSizeWarning = (files) => {
+    const fileNames = files.slice(0, 3).map((file) => file.name).join(', ');
+    const remainingCount = files.length - 3;
+    const fileList = fileNames
+      ? ` Remove or resize: ${fileNames}${remainingCount > 0 ? ` and ${remainingCount} more` : ''}.`
+      : '';
+
+    return `Each photo must be less than ${MAX_IMAGE_SIZE_MB} MB.${fileList}`;
+  };
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
@@ -96,22 +122,44 @@ const ShareExperience = () => {
 
   const handleFilesChange = (event) => {
     const selectedFiles = Array.from(event.target.files || []);
+    const oversizedFiles = selectedFiles.filter((file) => file.size > MAX_IMAGE_SIZE_BYTES);
+    const validFiles = selectedFiles.filter((file) => file.size <= MAX_IMAGE_SIZE_BYTES);
 
-    setFormData((prev) => {
-      const mergedFiles = [...prev.images, ...selectedFiles];
-      const uniqueFiles = mergedFiles.filter((file, index, array) => {
-        return index === array.findIndex((candidate) => (
-          candidate.name === file.name &&
-          candidate.size === file.size &&
-          candidate.lastModified === file.lastModified
-        ));
+    if (oversizedFiles.length > 0) {
+      setFeedback({
+        type: 'warning',
+        message: buildImageSizeWarning(oversizedFiles),
       });
+    } else if (feedback.type === 'warning') {
+      setFeedback({ type: '', message: '' });
+    }
 
-      return {
-        ...prev,
-        images: uniqueFiles,
-      };
+    if (validFiles.length === 0) {
+      event.target.value = '';
+      return;
+    }
+
+    const mergedFiles = [...formData.images, ...validFiles];
+    const uniqueFiles = mergedFiles.filter((file, index, array) => {
+      return index === array.findIndex((candidate) => (
+        candidate.name === file.name &&
+        candidate.size === file.size &&
+        candidate.lastModified === file.lastModified
+      ));
     });
+    const limitedFiles = uniqueFiles.slice(0, MAX_IMAGE_COUNT);
+
+    if (uniqueFiles.length > MAX_IMAGE_COUNT) {
+      setFeedback({
+        type: 'warning',
+        message: `You can upload up to ${MAX_IMAGE_COUNT} photos per review.`,
+      });
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      images: limitedFiles,
+    }));
 
     event.target.value = '';
   };
@@ -138,8 +186,19 @@ const ShareExperience = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setSubmitting(true);
     setFeedback({ type: '', message: '' });
+
+    const oversizedFiles = formData.images.filter((file) => file.size > MAX_IMAGE_SIZE_BYTES);
+
+    if (oversizedFiles.length > 0) {
+      setFeedback({
+        type: 'warning',
+        message: buildImageSizeWarning(oversizedFiles),
+      });
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const payload = new FormData();
@@ -168,10 +227,13 @@ const ShareExperience = () => {
 
       const backendErrors = error.response?.data?.errors || {};
       const firstErrorMessage = Object.values(backendErrors).flat().find(Boolean);
+      const requestTooLargeMessage = error.response?.status === 413
+        ? `Your selected photos are too large together. Each photo must be less than ${MAX_IMAGE_SIZE_MB} MB.`
+        : '';
 
       setFeedback({
         type: 'error',
-        message: firstErrorMessage || error.response?.data?.message || 'Unable to submit your review right now.',
+        message: firstErrorMessage || requestTooLargeMessage || error.response?.data?.message || 'Unable to submit your review right now.',
       });
     } finally {
       setSubmitting(false);
@@ -206,7 +268,7 @@ const ShareExperience = () => {
               </p>
 
               {feedback.message && (
-                <div className={`alert ${feedback.type === 'success' ? 'alert-success' : 'alert-danger'} mb-4`}>
+                <div className={`alert ${getFeedbackAlertClass()} mb-4`}>
                   {feedback.message}
                 </div>
               )}
@@ -297,6 +359,9 @@ const ShareExperience = () => {
                           : 'No files chosen'}
                       </span>
                     </div>
+                    <p className="file-size-warning">
+                      Photos must be less than {MAX_IMAGE_SIZE_MB} MB each.
+                    </p>
                     {formData.images.length > 0 && (
                       <div className="selected-files-list">
                         {formData.images.map((file) => (

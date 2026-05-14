@@ -79,10 +79,9 @@ const menuItems = [
         icon: <ContentIcon />,
         path: '/content',
         subItems: [
-            { title: 'Destinations', path: '/content/destinations' },
+            // { title: 'Destinations', path: '/content/destinations' },
             { title: 'Blog Posts', path: '/blogs' },
-            { title: 'Blog Categories', path: '/blogs/categories' },
-            { title: 'Offers', path: '/content/offers' },
+            // { title: 'Offers', path: '/content/offers' },
         ],
     },
     {

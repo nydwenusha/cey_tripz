@@ -115,6 +115,16 @@
           font-size: 1.2rem;
         }
       }
+
+      .file-size-warning {
+        position: relative;
+        z-index: 4;
+        margin: 10px 0 0;
+        color: #7c5a00;
+        font-size: 0.9rem;
+        font-weight: 600;
+        line-height: 1.4;
+      }
     }
     
     .btn-primary {

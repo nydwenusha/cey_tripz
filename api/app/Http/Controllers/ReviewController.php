@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Validator;
 
 class ReviewController extends Controller
 {
+    private const MAX_REVIEW_IMAGE_SIZE_KB = 10240;
+
     public function index(): JsonResponse
     {
         $reviews = Review::with('images')
@@ -57,7 +59,12 @@ class ReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string|max:5000',
             'images' => 'nullable|array|max:10',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:' . self::MAX_REVIEW_IMAGE_SIZE_KB,
+        ], [
+            'images.max' => 'You can upload up to 10 photos per review.',
+            'images.*.image' => 'Each uploaded file must be a valid image.',
+            'images.*.mimes' => 'Photos must be JPEG, PNG, JPG, GIF, or WEBP files.',
+            'images.*.max' => 'Each photo must be less than 10 MB.',
         ]);
 
         if ($validator->fails()) {
