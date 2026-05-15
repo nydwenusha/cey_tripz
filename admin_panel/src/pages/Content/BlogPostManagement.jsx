@@ -122,6 +122,24 @@ const BlogPostManagement = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [sortBy, setSortBy] = useState('newest');
+    const editSelectMenuProps = {
+        sx: { zIndex: 1702 },
+        PaperProps: {
+            sx: {
+                maxHeight: 320,
+                zIndex: 1702,
+            },
+        },
+    };
+    const editDatePickerSlotProps = {
+        popper: {
+            sx: { zIndex: 1702 },
+        },
+        textField: {
+            fullWidth: true,
+            margin: 'dense',
+        },
+    };
 
     // Get image URL helper
     const getImageUrl = (imagePath) => {
@@ -293,13 +311,14 @@ const BlogPostManagement = () => {
         setLoading(true);
         try {
             const formData = new FormData();
+            const selectedCategory = categories.find((cat) => String(cat.id) === String(postForm.category_id));
+
             formData.append('title', postForm.title);
             formData.append('slug', postForm.slug);
             formData.append('content', postForm.content);
             formData.append('excerpt', postForm.excerpt);
-            formData.append('category_id', postForm.category_id);
-            formData.append('category', postForm.category_name || '');
-            formData.append('tags', JSON.stringify(postForm.tags));
+            formData.append('category_id', postForm.category_id || '');
+            formData.append('category', selectedCategory?.name || postForm.category_name || '');
             formData.append('author', postForm.author);
             formData.append('status', postForm.status);
             formData.append('is_featured', postForm.is_featured);
@@ -315,6 +334,10 @@ const BlogPostManagement = () => {
             if (postForm.image && typeof postForm.image !== 'string') {
                 formData.append('image', postForm.image);
             }
+
+            postForm.tags.forEach((tag, index) => {
+                formData.append(`tags[${index}]`, tag);
+            });
 
             formData.append('_method', 'PUT');
             const response = await api.post(`/blogPosts/${postForm.id}`, formData, {
@@ -1101,6 +1124,7 @@ const BlogPostManagement = () => {
                                                 value={postForm.status}
                                                 onChange={(e) => handleInputChange('status', e.target.value)}
                                                 label="Status"
+                                                MenuProps={editSelectMenuProps}
                                             >
                                                 <MenuItem value="draft">Draft</MenuItem>
                                                 <MenuItem value="pending">Pending</MenuItem>
@@ -1114,7 +1138,7 @@ const BlogPostManagement = () => {
                                                 label="Schedule Date"
                                                 value={postForm.scheduled_date}
                                                 onChange={(date) => handleInputChange('scheduled_date', date)}
-                                                renderInput={(params) => <TextField {...params} fullWidth margin="dense" />}
+                                                slotProps={editDatePickerSlotProps}
                                             />
                                         )}
 
@@ -1124,6 +1148,7 @@ const BlogPostManagement = () => {
                                                 value={postForm.category_id}
                                                 onChange={(e) => handleInputChange('category_id', e.target.value)}
                                                 label="Category"
+                                                MenuProps={editSelectMenuProps}
                                             >
                                                 {categories.map((cat) => (
                                                     <MenuItem key={cat.id} value={cat.id}>
@@ -1154,6 +1179,7 @@ const BlogPostManagement = () => {
                                                 value={postForm.tags}
                                                 onChange={(e) => handleInputChange('tags', e.target.value)}
                                                 label="Select Tags"
+                                                MenuProps={editSelectMenuProps}
                                                 renderValue={(selected) => (
                                                     <Box className="selected-tags">
                                                         {selected.map((value) => (
@@ -1304,7 +1330,7 @@ const BlogPostManagement = () => {
                     open={snackbar.open}
                     autoHideDuration={6000}
                     onClose={handleCloseSnackbar}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
                     <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} elevation={6} variant="filled">
                         {snackbar.message}

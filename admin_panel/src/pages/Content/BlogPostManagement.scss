@@ -739,3 +739,73 @@
     margin: 0;
   }
 }
+
+.post-dialog {
+  .MuiDialog-paper {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .MuiDialogContent-root {
+    overflow-x: hidden;
+  }
+
+  .MuiGrid-container {
+    width: 100%;
+    margin: 0;
+  }
+
+  .sidebar-paper {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 20px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    border: 1px solid #eaeaea;
+
+    .sidebar-section {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eaeaea;
+
+      &:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+    }
+  }
+
+  .image-preview-large {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 16px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #eef2f7;
+
+    .preview-image {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .upload-button {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    text-transform: none;
+    color: #666;
+    font-weight: 500;
+
+    &:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+    }
+  }
+}
