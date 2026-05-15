@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import "../css/BlogPost.scss";
 import Layout from "../../Layout";
 import api from "../services/api/api";
+import { getBlogImageUrl } from "../utils/blogImages";
 
 const BlogPost = () => {
   const { id } = useParams();
@@ -15,13 +16,6 @@ const BlogPost = () => {
   const [likesCount, setLikesCount] = useState(0);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [error, setError] = useState(null);
-
-  // Get image URL with proper path
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return 'https://via.placeholder.com/1200x600?text=No+Image';
-    if (imagePath.startsWith('http')) return imagePath;
-    return `https://api.ceytripz.com/storage/${imagePath}`;
-  };
 
   // Fetch single blog post
   useEffect(() => {
@@ -46,7 +40,7 @@ const BlogPost = () => {
 
           console.log("Post data:", postData);
 
-          if (postData && postData.id) {
+          if (postData && postData.id && postData.status === 'published') {
             setPost(postData);
             setLikesCount(postData.likes || 0);
 
@@ -65,7 +59,7 @@ const BlogPost = () => {
                 if (relatedResponse.status === 200) {
                   let relatedData = relatedResponse.data.blogPosts || relatedResponse.data.data || relatedResponse.data;
                   if (Array.isArray(relatedData)) {
-                    const filtered = relatedData.filter(p => p.id !== parseInt(id));
+                    const filtered = relatedData.filter(p => p.id !== parseInt(id) && p.status === 'published');
                     setRelatedPosts(filtered.slice(0, 3));
                   }
                 }
@@ -209,7 +203,7 @@ const BlogPost = () => {
         <div className="post-hero-banner">
           <div className="hero-image-wrapper">
             <img
-              src={getImageUrl(post.image || post.featured_image)}
+              src={getBlogImageUrl(post)}
               alt={post.title}
             />
             <div className="hero-overlay"></div>
@@ -239,7 +233,7 @@ const BlogPost = () => {
               >
                 <div className="hero-author">
                   {post.author_avatar ? (
-                    <img src={getImageUrl(post.author_avatar)} alt={post.author} />
+                    <img src={getBlogImageUrl(post.author_avatar)} alt={post.author} />
                   ) : (
                     <div className="author-initials">
                       {getAuthorInitial(post.author)}
@@ -310,7 +304,7 @@ const BlogPost = () => {
                   transition={{ delay: 0.6 }}
                 >
                   {post.author_avatar ? (
-                    <img src={getImageUrl(post.author_avatar)} alt={post.author} />
+                    <img src={getBlogImageUrl(post.author_avatar)} alt={post.author} />
                   ) : (
                     <div className="author-initials large">
                       {getAuthorInitial(post.author)}
@@ -346,7 +340,7 @@ const BlogPost = () => {
                           onClick={() => handleRelatedPostClick(relatedPost.id)}
                         >
                           <img
-                            src={getImageUrl(relatedPost.image || relatedPost.featured_image)}
+                            src={getBlogImageUrl(relatedPost)}
                             alt={relatedPost.title}
                           />
                           <div>

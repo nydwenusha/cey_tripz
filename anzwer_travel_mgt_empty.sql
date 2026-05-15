@@ -92,7 +92,7 @@ CREATE TABLE `bookings` (
   `passengers` int(11) NOT NULL,
   `amount` decimal(10,2) NOT NULL,
   `notes` text DEFAULT NULL,
-  `status` enum('pending','confirmed','cancelled') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','confirmed','cancelled','completed') NOT NULL DEFAULT 'pending',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

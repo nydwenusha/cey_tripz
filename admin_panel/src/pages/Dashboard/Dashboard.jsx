@@ -1,5 +1,5 @@
 // Dashboard.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box,
     Grid,
@@ -21,9 +21,15 @@ import {
 } from '@mui/icons-material';
 import './Dashboard.scss';
 import MainLayout from '../../MainLayout';
+import api from '../../services/api/api';
 
 const Dashboard = () => {
     const theme = useTheme();
+    const [dashboardStats, setDashboardStats] = useState({
+        totalBookings: 0,
+        totalRevenue: 0,
+        customers: 0,
+    });
 
     // Booking trends data
     const bookingTrends = [
@@ -42,16 +48,61 @@ const Dashboard = () => {
         { name: 'Europe', percentage: 5, color: '#FFEAA7' },
     ];
 
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchDashboardStats = async () => {
+            try {
+                const [bookingsResponse, revenueResponse, customersResponse] = await Promise.all([
+                    api.get('/TotalBookings'),
+                    api.get('/PaymentStats'),
+                    api.get('/GetCustomers'),
+                ]);
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setDashboardStats({
+                    totalBookings: Number(bookingsResponse.data?.total_bookings || 0),
+                    totalRevenue: Number(revenueResponse.data?.stats?.total || 0),
+                    customers: Array.isArray(customersResponse.data?.customers)
+                        ? customersResponse.data.customers.length
+                        : 0,
+                });
+            } catch {
+                if (!isMounted) {
+                    return;
+                }
+
+                setDashboardStats({
+                    totalBookings: 0,
+                    totalRevenue: 0,
+                    customers: 0,
+                });
+            }
+        };
+
+        fetchDashboardStats();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
     // Stats cards data
     const statsCards = [
         {
             title: 'Total Bookings',
-            value: '1,842',
+            value: dashboardStats.totalBookings.toLocaleString(),
             icon: <Tour sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
         },
         {
             title: 'Total Revenue',
-            value: '$124,580',
+            value: `$${dashboardStats.totalRevenue.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            })}`,
             icon: <AttachMoney sx={{ fontSize: 40, color: theme.palette.success.main }} />,
         },
         {
@@ -61,7 +112,7 @@ const Dashboard = () => {
         },
         {
             title: 'Customers',
-            value: '3,248',
+            value: dashboardStats.customers.toLocaleString(),
             icon: <People sx={{ fontSize: 40, color: theme.palette.info.main }} />,
         },
     ];

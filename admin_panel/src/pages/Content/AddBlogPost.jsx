@@ -33,7 +33,6 @@ import {
 } from '@mui/material';
 import {
   Save as SaveIcon,
-  Publish as PublishIcon,
   Image as ImageIcon,
   Delete as DeleteIcon,
   AddPhotoAlternate as AddPhotoIcon,
@@ -102,13 +101,13 @@ const AddBlogPost = () => {
     tags: [],
     featuredImage: null,
     featuredImagePreview: '',
-    // author: '',
-    // visibility: 'public',
-    // allowComments: true,
-    // publishDate: '',
-    // seoTitle: '',
-    // seoDescription: '',
-    // seoKeywords: '',
+    author: '',
+    visibility: 'public',
+    allowComments: true,
+    publishDate: '',
+    seoTitle: '',
+    seoDescription: '',
+    seoKeywords: '',
   });
 
   const [categories, setCategories] = useState([]);
@@ -139,15 +138,44 @@ const AddBlogPost = () => {
 
   // Handle category addition
   const handleAddCategory = async () => {
-    await api.post('/addBlogPostCategory', {
-      category: newCategoryName.trim(),
-    })
-      .then((res) => {
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
+    if (!newCategoryName.trim()) {
+      setCategoryError('Category name is required');
+      return;
+    }
+
+    setAddingCategory(true);
+    setCategoryError('');
+
+    try {
+      const response = await api.post('/addBlogPostCategory', {
+        category: newCategoryName.trim(),
+      });
+
+      const createdCategory = response.data;
+
+      setCategories((prev) => {
+        const nextCategories = Array.isArray(prev) ? [...prev] : [];
+        const exists = nextCategories.some((category) => category.id === createdCategory.id || category.name === createdCategory.name);
+
+        if (!exists) {
+          nextCategories.push(createdCategory);
+        }
+
+        return nextCategories;
+      });
+
+      setFormData((prev) => ({
+        ...prev,
+        category: createdCategory.name,
+      }));
+
+      handleCloseCategoryDialog();
+    } catch (err) {
+      console.error('Error adding category:', err);
+      setCategoryError(err.response?.data?.message || 'Failed to add category. Please try again.');
+    } finally {
+      setAddingCategory(false);
+    }
   };
 
   const handleCloseCategoryDialog = () => {
@@ -177,31 +205,16 @@ const AddBlogPost = () => {
     setTagError('');
 
     try {
-      // API call to add tag
-      const response = await api.post('/blogTags', {
-        name: newTagName.trim(),
-      });
+      const nextTag = newTagName.trim();
 
-      // Add new tag to the list
-      const newTag = response.data.name || newTagName.trim();
+      setAllTags((prev) => [...prev, nextTag]);
+      setFormData((prev) => ({
+        ...prev,
+        tags: prev.tags.includes(nextTag) ? prev.tags : [...prev.tags, nextTag],
+      }));
 
-      setAllTags([...allTags, newTag]);
-      // Also add to form data tags
-      if (!formData.tags.includes(newTag)) {
-        setFormData({
-          ...formData,
-          tags: [...formData.tags, newTag],
-        });
-      }
       setTagDialogOpen(false);
       setNewTagName('');
-
-      // Show success message
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-      console.error('Error adding tag:', err);
-      setTagError('Failed to add tag. Please try again.');
     } finally {
       setAddingTag(false);
     }
@@ -301,6 +314,17 @@ const AddBlogPost = () => {
     setFormData(prev => ({ ...prev, content }));
   };
 
+  const getNormalizedEditorContent = useCallback(() => {
+    const rawHtml = contentEditorRef.current?.innerHTML || formData.content || '';
+    const trimmedText = rawHtml
+      .replace(/<br\s*\/?>/gi, '')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/<[^>]+>/g, '')
+      .trim();
+
+    return trimmedText ? rawHtml : '';
+  }, [formData.content]);
+
 
 
   const handleKeyDown = (e) => {
@@ -385,21 +409,46 @@ const AddBlogPost = () => {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (targetStatus = 'pending') => {
     try {
       setLoading(true);
+      setError('');
+
+      const normalizedContent = getNormalizedEditorContent();
+
+      if (!formData.title.trim()) {
+        setError('Title is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.category) {
+        setError('Category is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!normalizedContent) {
+        setError('Content is required');
+        setLoading(false);
+        return;
+      }
 
       const data = new FormData();
       data.append('title', formData.title);
       data.append('excerpt', formData.excerpt);
-      data.append('content', formData.content);
+      data.append('content', normalizedContent);
       data.append('category', formData.category);
+      data.append('status', formData.publishDate && targetStatus === 'published' ? 'scheduled' : targetStatus);
       data.append('seoTitle', formData.seoTitle || '');
       data.append('seoDescription', formData.seoDescription || '');
       data.append('seoKeywords', formData.seoKeywords || '');
       data.append('visibility', formData.visibility || 'public');
       data.append('allowComments', formData.allowComments ? 1 : 0);
-      data.append('publishDate', formData.publishDate || '');
+      data.append('scheduled_date', formData.publishDate || '');
+      data.append('meta_title', formData.seoTitle || '');
+      data.append('meta_description', formData.seoDescription || '');
+      data.append('is_featured', 0);
 
       formData.tags.forEach((tag, index) => {
         data.append(`tags[${index}]`, tag);
@@ -409,11 +458,7 @@ const AddBlogPost = () => {
         data.append('featuredImage', formData.featuredImage);
       }
 
-      const response = await api.post('/addBlogPost', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await api.post('/addBlogPost', data);
 
       setSuccess(true);
       setTimeout(() => {
@@ -429,8 +474,8 @@ const AddBlogPost = () => {
     }
   };
 
-  const handleSaveDraft = () => handleSubmit(false);
-  const handlePublish = () => handleSubmit(true);
+  const handleSaveDraft = () => handleSubmit('draft');
+  const handleSavePending = () => handleSubmit('pending');
 
   const textEditorTools = [
     { icon: <UndoIcon />, action: handleUndo, title: 'Undo (Ctrl+Z)' },
@@ -461,7 +506,13 @@ const AddBlogPost = () => {
     <Box className="add-blog-page">
       {loading && <LinearProgress className="loading-bar" />}
 
-      <form className="blog-form" onSubmit={handleSubmit}>
+      <form
+        className="blog-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleSubmit('pending');
+        }}
+      >
 
         {/* Header with Theme Styling */}
         <Container maxWidth="xl" className="header-container" sx={{ mt: 3 }}>
@@ -485,9 +536,9 @@ const AddBlogPost = () => {
               },
             ]}
             primaryAction={{
-              label: 'Publish',
-              onClick: handleSubmit,
-              icon: <PublishIcon />,
+              label: 'Save',
+              onClick: handleSavePending,
+              icon: <SaveIcon />,
             }}
             variant="gradient"
           />
@@ -981,7 +1032,7 @@ const AddBlogPost = () => {
           </DialogContent>
           <DialogActions className="preview-actions">
             <Button onClick={() => setPreviewOpen(false)}>Close</Button>
-            <Button variant="contained" onClick={handlePublish}>Publish Now</Button>
+            <Button type="button" variant="contained" onClick={handleSavePending}>Save</Button>
           </DialogActions>
         </Dialog>
 

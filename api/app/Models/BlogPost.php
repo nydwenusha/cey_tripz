@@ -14,6 +14,11 @@ class BlogPost extends Model
         'date',
         'category',
         'category_id',
+        'status',
+        'scheduled_date',
+        'is_featured',
+        'meta_title',
+        'meta_description',
         'location',
         'read_time',
         'likes',
@@ -22,10 +27,13 @@ class BlogPost extends Model
         'user_id',
     ];
 
-     public function tags()
+    public function tags()
     {
-        return $this->belongsToMany(Tag::class, 'blo_post_tag', 'blog_post_id', 'tag_id');
+        return $this->belongsToMany(Tag::class, 'blog_post_tag', 'blog_post_id', 'tag_id');
     }
 
- 
+    public function categoryRelation()
+    {
+        return $this->belongsTo(BlogPostCategory::class, 'category_id');
+    }
 }

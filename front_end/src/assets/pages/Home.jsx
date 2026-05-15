@@ -36,10 +36,10 @@ function Home() {
       <SriLankaLocations />
       <SriLankaMap />
       <PopularPlacesGallery />
-      {/* <ShareExperience /> */}
+      <ShareExperience />
       {hasPosts && <Blog />}
 
-      {/* <Teatmonials /> */}
+      <Teatmonials />
     </Layout>
   );
 }

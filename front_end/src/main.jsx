@@ -13,16 +13,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import TravelerStoryDetail from "./assets/pages/TravelerStoryDetail";
 import AllStoriesPage from "./assets/pages/AllStoriesPage";
 import BlogPost from "./assets/pages/BlogPost";
+import ShareExperiencePage from "./assets/pages/ShareExperiencePage";
 
 
-function NotFound() {
-  return (
-    <div style={{ padding: 40, textAlign: "center" }}>
-      <h1>404 — Page not found</h1>
-      <p>The page you requested does not exist. Check the URL or use the navigation.</p>
-    </div>
-  );
-}
 
 const router = createBrowserRouter([
 
@@ -32,6 +25,7 @@ const router = createBrowserRouter([
   { path: "/vehicles/:id", element: <VehicleDetails /> },
   { path: "/contact", element: <Contact /> },
   { path: "/booking", element: <Booking /> },
+  { path: "/share-experience", element: <ShareExperiencePage /> },
   { path: "/story/:id", element: <TravelerStoryDetail /> },
   {path:"/stories", element: <AllStoriesPage />},
   { path: "/blog/:id", element: <BlogPost /> },

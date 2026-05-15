@@ -25,6 +25,29 @@
   width: 100%;
   overflow-x: hidden;
 
+  .form-card,
+  .sidebar-card,
+  .category-dialog,
+  .tag-dialog {
+    .MuiOutlinedInput-root {
+      border-radius: 12px;
+      background: #fff;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+      &:hover {
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+      }
+
+      &.Mui-focused {
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+      }
+    }
+
+    .MuiFormLabel-root.Mui-focused {
+      color: #667eea;
+    }
+  }
+
   .loading-bar {
     position: fixed;
     top: 0;

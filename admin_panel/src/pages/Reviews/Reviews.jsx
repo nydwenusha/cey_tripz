@@ -1,5 +1,5 @@
-// Reviews.jsx
-import React, { useState } from 'react';
+﻿// Reviews.jsx
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Paper,
   Table,
@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Snackbar,
   Avatar,
   Box,
   Rating,
@@ -43,7 +44,6 @@ import {
   Divider,
   Input,
   FormHelperText,
-  Stack,
   Card,
   CardMedia,
   CardContent,
@@ -61,14 +61,12 @@ import {
   ThumbUp,
   ThumbDown,
   Flag,
-  Reply,
   CheckCircle,
   Block,
   Refresh,
   Download,
   Print,
   Email,
-  Person,
   CalendarToday,
   ChatBubble,
   AutoAwesome,
@@ -90,231 +88,91 @@ import {
   Image,
   StarRate,
   DeleteForever,
-  Photo,
   RemoveCircle,
-  Report,
-  Security
+  Report
 } from '@mui/icons-material';
 import './Reviews.scss';
 import MainLayout from '../../MainLayout';
 import PageHeader from '../../components/layout/PageHeader/PageHeader';
+import api from '../../services/api/api';
 
-// Sample review images - in real app, these would come from your backend
-const sampleReviewImages = {
-  'REV-001': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop', title: 'Sigiriya View', uploadedBy: 'John Doe', isCustomerUploaded: true, uploadDate: '2024-01-15' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1528181304800-259b08848526?w-400&h=300&fit=crop', title: 'Tour Group', uploadedBy: 'John Doe', isCustomerUploaded: true, uploadDate: '2024-01-15' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1552465011-b4e30bf7349d?w=400&h=300&fit=crop', title: 'Guide', uploadedBy: 'John Doe', isCustomerUploaded: true, uploadDate: '2024-01-15' }
-  ],
-  'REV-002': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop', title: 'Beach View', uploadedBy: 'Jane Smith', isCustomerUploaded: true, uploadDate: '2024-01-20' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&h=300&fit=crop', title: 'Resort Pool', uploadedBy: 'Jane Smith', isCustomerUploaded: true, uploadDate: '2024-01-20' }
-  ],
-  'REV-003': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop', title: 'Mountain Peak', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop', title: 'Trekking Trail', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1464278533981-50106e6176b1?w=400&h=300&fit=crop', title: 'Camp Site', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' },
-    { id: 4, url: 'https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=400&h=300&fit=crop', title: 'Sunset View', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' },
-    { id: 5, url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop', title: 'Team Photo', uploadedBy: 'Robert Johnson', isCustomerUploaded: true, uploadDate: '2024-01-25' }
-  ],
-  'REV-005': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1550358864-518f202c02ba?w=400&h=300&fit=crop', title: 'Wildlife', uploadedBy: 'Michael Wilson', isCustomerUploaded: true, uploadDate: '2024-02-01' }
-  ],
-  'REV-006': [
-    { id: 1, url: 'https://images.unsplash.com/photo-1519925610903-381054cc2a1c?w=400&h=300&fit=crop', title: 'City Tour', uploadedBy: 'Sarah Brown', isCustomerUploaded: true, uploadDate: '2024-02-05' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=400&h=300&fit=crop', title: 'Landmarks', uploadedBy: 'Sarah Brown', isCustomerUploaded: true, uploadDate: '2024-02-05' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop', title: 'City Streets', uploadedBy: 'Sarah Brown', isCustomerUploaded: true, uploadDate: '2024-02-05' },
-    { id: 4, url: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop', title: 'Guide', uploadedBy: 'Sarah Brown', isCustomerUploaded: true, uploadDate: '2024-02-05' }
-  ]
-};
+const mapReviewFromApi = (review) => ({
+  id: review.review_code || `REV-${String(review.id).padStart(5, '0')}`,
+  customer: {
+    name: review.customer_name || 'Unknown Customer',
+    email: review.customer_email || 'Not provided',
+    avatar: '',
+    bookings: 0
+  },
+  tour: {
+    id: review.booking_id ? `BOOKING-${review.booking_id}` : (review.tour_name || `TOUR-${review.id}`),
+    name: review.tour_name || 'Tour not specified',
+    category: '',
+    duration: '',
+    price: ''
+  },
+  rating: Number(review.rating || 0),
+  comment: review.comment || '',
+  date: review.created_at || new Date().toISOString(),
+  status: review.status === 'rejected' ? 'reported' : review.status,
+  verified: Boolean(review.booking_id),
+  recordId: review.id,
+  bookingId: review.booking_id ? String(review.booking_id) : '',
+  tourName: review.tour_name || 'Tour not specified',
+  helpful: 0,
+  notHelpful: 0,
+  response: '',
+  responseDate: null,
+  photos: Array.isArray(review.images) ? review.images.length : 0,
+  reportCount: review.status === 'rejected' ? 1 : 0,
+  images: Array.isArray(review.images)
+    ? review.images.map((image) => ({
+      id: image.id,
+      url: image.image_url,
+      title: image.image_title || `Review image ${image.id}`,
+      uploadedBy: review.customer_name || 'Customer',
+      isCustomerUploaded: true,
+      uploadDate: image.created_at || review.created_at || new Date().toISOString()
+    }))
+    : []
+});
 
 const Reviews = () => {
-  // Initial reviews data
-  const initialReviews = [
-    {
-      id: 'REV-001',
-      customer: {
-        name: 'John Doe',
-        email: 'john@example.com',
-        avatar: '',
-        bookings: 3
-      },
-      tour: {
-        id: 'TOUR-001',
-        name: 'Sigiriya Adventure',
-        category: 'Adventure',
-        duration: '2 days',
-        price: '$150'
-      },
-      rating: 4,
-      comment: 'Amazing experience! The tour guide was very knowledgeable and the views were breathtaking. Highly recommend this adventure.',
-      date: '2024-01-15 14:30:00',
-      status: 'published',
-      verified: true,
-      helpful: 12,
-      notHelpful: 2,
-      response: 'Thank you for your wonderful review! We\'re thrilled you enjoyed the Sigiriya Adventure.',
-      responseDate: '2024-01-16 10:15:00',
-      photos: 3,
-      reportCount: 0,
-      images: sampleReviewImages['REV-001']
+  const reviewDialogSx = {
+    zIndex: 1601,
+    '& .MuiDialog-paper': {
+      mt: { xs: 10, sm: 12 },
+      mb: 3,
+      maxHeight: 'calc(100% - 120px)',
     },
-    {
-      id: 'REV-002',
-      customer: {
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        avatar: '',
-        bookings: 2
-      },
-      tour: {
-        id: 'TOUR-002',
-        name: 'Beach Paradise',
-        category: 'Relaxation',
-        duration: '3 days',
-        price: '$200'
-      },
-      rating: 4.5,
-      comment: 'Great tour, highly recommended. The beach was pristine and the accommodations were excellent.',
-      date: '2024-01-20 11:45:00',
-      status: 'published',
-      verified: true,
-      helpful: 8,
-      notHelpful: 1,
-      response: 'We appreciate your feedback! Glad you enjoyed your Beach Paradise experience.',
-      responseDate: '2024-01-21 09:30:00',
-      photos: 2,
-      reportCount: 0,
-      images: sampleReviewImages['REV-002']
+  };
+  const reviewDialogSelectMenuProps = {
+    disableScrollLock: true,
+    sx: {
+      zIndex: 1702,
     },
-    {
-      id: 'REV-003',
-      customer: {
-        name: 'Robert Johnson',
-        email: 'robert@example.com',
-        avatar: '',
-        bookings: 1
+    slotProps: {
+      root: {
+        sx: {
+          zIndex: 1702,
+        },
       },
-      tour: {
-        id: 'TOUR-003',
-        name: 'Mountain Trekking',
-        category: 'Extreme',
-        duration: '5 days',
-        price: '$350'
+      paper: {
+        sx: {
+          zIndex: 1702,
+          maxHeight: 320,
+        },
       },
-      rating: 5,
-      comment: 'Absolutely fantastic! Challenging but rewarding. The guides were professional and safety was their top priority.',
-      date: '2024-01-25 09:15:00',
-      status: 'published',
-      verified: false,
-      helpful: 15,
-      notHelpful: 0,
-      response: '',
-      responseDate: null,
-      photos: 5,
-      reportCount: 0,
-      images: sampleReviewImages['REV-003']
     },
-    {
-      id: 'REV-004',
-      customer: {
-        name: 'Emily Davis',
-        email: 'emily@example.com',
-        avatar: '',
-        bookings: 4
+    PaperProps: {
+      sx: {
+        zIndex: 1702,
+        maxHeight: 320,
       },
-      tour: {
-        id: 'TOUR-004',
-        name: 'Cultural Heritage',
-        category: 'Cultural',
-        duration: '4 days',
-        price: '$280'
-      },
-      rating: 3,
-      comment: 'Good experience but could be better. Some sites were overcrowded.',
-      date: '2024-01-28 16:20:00',
-      status: 'pending',
-      verified: true,
-      helpful: 5,
-      notHelpful: 3,
-      response: '',
-      responseDate: null,
-      photos: 0,
-      reportCount: 0,
-      images: []
     },
-    {
-      id: 'REV-005',
-      customer: {
-        name: 'Michael Wilson',
-        email: 'michael@example.com',
-        avatar: '',
-        bookings: 5
-      },
-      tour: {
-        id: 'TOUR-005',
-        name: 'Wildlife Safari',
-        category: 'Wildlife',
-        duration: '3 days',
-        price: '$320'
-      },
-      rating: 2,
-      comment: 'Disappointed with the tour. Expected more wildlife sightings.',
-      date: '2024-02-01 13:45:00',
-      status: 'published',
-      verified: true,
-      helpful: 3,
-      notHelpful: 7,
-      response: 'We\'re sorry to hear about your experience. We\'ll work with our guides to improve wildlife spotting opportunities.',
-      responseDate: '2024-02-02 11:00:00',
-      photos: 1,
-      reportCount: 1,
-      images: sampleReviewImages['REV-005']
-    },
-    {
-      id: 'REV-006',
-      customer: {
-        name: 'Sarah Brown',
-        email: 'sarah@example.com',
-        avatar: '',
-        bookings: 2
-      },
-      tour: {
-        id: 'TOUR-006',
-        name: 'City Explorer',
-        category: 'Urban',
-        duration: '1 day',
-        price: '$75'
-      },
-      rating: 4,
-      comment: 'Great city tour! The guide was very informative.',
-      date: '2024-02-05 10:30:00',
-      status: 'published',
-      verified: true,
-      helpful: 6,
-      notHelpful: 1,
-      response: 'Thank you for joining our City Explorer tour!',
-      responseDate: '2024-02-05 15:20:00',
-      photos: 4,
-      reportCount: 0,
-      images: sampleReviewImages['REV-006']
-    }
-  ];
-
-  // Sample tours for dropdown
-  const availableTours = [
-    { id: 'TOUR-001', name: 'Sigiriya Adventure', category: 'Adventure' },
-    { id: 'TOUR-002', name: 'Beach Paradise', category: 'Relaxation' },
-    { id: 'TOUR-003', name: 'Mountain Trekking', category: 'Extreme' },
-    { id: 'TOUR-004', name: 'Cultural Heritage', category: 'Cultural' },
-    { id: 'TOUR-005', name: 'Wildlife Safari', category: 'Wildlife' },
-    { id: 'TOUR-006', name: 'City Explorer', category: 'Urban' },
-    { id: 'TOUR-007', name: 'Historical Tour', category: 'History' },
-    { id: 'TOUR-008', name: 'Food Tour', category: 'Culinary' }
-  ];
-
+  };
   // State
-  const [reviews, setReviews] = useState(initialReviews);
+  const [reviews, setReviews] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -332,36 +190,91 @@ const Reviews = () => {
   const [selectedReviewImages, setSelectedReviewImages] = useState([]);
   const [openDeleteImageDialog, setOpenDeleteImageDialog] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
+  const [snackbarState, setSnackbarState] = useState({
+    open: false,
+    severity: 'success',
+    message: '',
+  });
   const [editForm, setEditForm] = useState({
+    bookingId: '',
+    customerName: '',
+    customerEmail: '',
+    tourName: '',
     rating: 0,
     comment: '',
     status: 'pending',
     verified: false,
-    tourId: '',
     helpful: 0,
     notHelpful: 0,
     response: '',
     images: []
   });
-  const [stats, setStats] = useState({
-    total: 125,
-    published: 98,
-    pending: 15,
-    reported: 12,
-    averageRating: 4.2,
-    responseRate: 78,
-    thisMonth: 24,
-    lastMonth: 31
-  });
+  const [bookingOptions, setBookingOptions] = useState([]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchReviewData = async () => {
+      try {
+        const [reviewsResponse, bookingsResponse] = await Promise.all([
+          api.get('/GetReviews'),
+          api.get('/GetReviewBookingOptions'),
+        ]);
+
+        if (!isActive) {
+          return;
+        }
+
+        const reviewRows = Array.isArray(reviewsResponse.data?.reviews)
+          ? reviewsResponse.data.reviews.map(mapReviewFromApi)
+          : [];
+
+        setReviews(reviewRows);
+        setBookingOptions(Array.isArray(bookingsResponse.data?.bookings) ? bookingsResponse.data.bookings : []);
+      } catch (error) {
+        if (isActive) {
+          setReviews([]);
+          setBookingOptions([]);
+        }
+        console.error('Failed to load review data:', error);
+      }
+    };
+
+    fetchReviewData();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const resetEditForm = () => {
+    setEditForm({
+      bookingId: '',
+      customerName: '',
+      customerEmail: '',
+      tourName: '',
+      rating: 0,
+      comment: '',
+      status: 'pending',
+      verified: false,
+      helpful: 0,
+      notHelpful: 0,
+      response: '',
+      images: []
+    });
+  };
 
   // Initialize edit form when review is selected
   const initializeEditForm = (review) => {
     setEditForm({
+      bookingId: review.bookingId || '',
+      customerName: review.customer.name,
+      customerEmail: review.customer.email === 'Not provided' ? '' : review.customer.email,
+      tourName: review.tour.name,
       rating: review.rating,
       comment: review.comment,
       status: review.status,
       verified: review.verified,
-      tourId: review.tour.id,
       helpful: review.helpful,
       notHelpful: review.notHelpful,
       response: review.response || '',
@@ -374,6 +287,27 @@ const Reviews = () => {
     setEditForm(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleBookingSelectionChange = (bookingId) => {
+    const selectedBooking = bookingOptions.find((booking) => String(booking.id) === String(bookingId));
+
+    if (!selectedBooking) {
+      setEditForm((prev) => ({
+        ...prev,
+        bookingId: '',
+        verified: false,
+      }));
+      return;
+    }
+
+    setEditForm((prev) => ({
+      ...prev,
+      bookingId: String(selectedBooking.id),
+      customerName: selectedBooking.customer_name || '',
+      customerEmail: selectedBooking.customer_email || '',
+      verified: true,
     }));
   };
 
@@ -417,6 +351,25 @@ const Reviews = () => {
     setImageToDelete(null);
   };
 
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbarState({
+      open: true,
+      severity,
+      message,
+    });
+  };
+
+  const handleSnackbarClose = (_, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarState((prev) => ({
+      ...prev,
+      open: false,
+    }));
+  };
+
   // Confirm and delete customer uploaded image
   const confirmDeleteCustomerImage = () => {
     if (!imageToDelete || !selectedReview) return;
@@ -446,7 +399,7 @@ const Reviews = () => {
     }
 
     // Show success message
-    alert(`Image "${imageToDelete.title}" has been deleted successfully.`);
+    showSnackbar(`Image "${imageToDelete.title}" has been deleted successfully.`);
 
     // Close dialogs
     handleCloseDeleteImageDialog();
@@ -455,56 +408,51 @@ const Reviews = () => {
     }
   };
 
+  const normalizeReviewStatus = (status) => (status === 'reported' ? 'rejected' : status);
+
+  const buildReviewUpdatePayload = (review, status = review.status) => {
+    const customerEmail = review.customer.email && review.customer.email !== 'Not provided'
+      ? review.customer.email.trim()
+      : null;
+
+    return {
+      booking_id: review.bookingId || null,
+      customer_name: review.customer.name.trim(),
+      customer_email: customerEmail,
+      tour_name: (review.tourName || review.tour?.name || '').trim(),
+      rating: Math.max(1, Math.min(5, Math.round(review.rating || 0))),
+      comment: review.comment.trim(),
+      status: normalizeReviewStatus(status),
+    };
+  };
+
   // Handle edit form submit
-  const handleEditSubmit = () => {
+  const handleEditSubmit = async () => {
     if (!selectedReview) return;
 
-    // Find the tour data
-    const selectedTour = availableTours.find(tour => tour.id === editForm.tourId);
-    const originalTour = reviews.find(r => r.id === selectedReview.id)?.tour;
+    try {
+      const payload = {
+        booking_id: editForm.bookingId || null,
+        customer_name: editForm.customerName.trim(),
+        customer_email: editForm.customerEmail.trim() || null,
+        tour_name: editForm.tourName.trim(),
+        rating: Math.max(1, Math.min(5, Math.round(editForm.rating || 0))),
+        comment: editForm.comment.trim(),
+        status: normalizeReviewStatus(editForm.status),
+      };
 
-    const updatedReview = {
-      ...selectedReview,
-      rating: editForm.rating,
-      comment: editForm.comment,
-      status: editForm.status,
-      verified: editForm.verified,
-      tour: selectedTour ? {
-        ...originalTour,
-        id: selectedTour.id,
-        name: selectedTour.name,
-        category: selectedTour.category
-      } : originalTour,
-      helpful: editForm.helpful,
-      notHelpful: editForm.notHelpful,
-      response: editForm.response,
-      images: editForm.images,
-      photos: editForm.images.length,
-      // Update date to current time when edited
-      date: new Date().toISOString()
-    };
+      const response = await api.put(`/UpdateReview/${selectedReview.recordId}`, payload);
+      const updatedReview = mapReviewFromApi(response.data.review);
 
-    // Update reviews list
-    setReviews(reviews.map(review => 
-      review.id === selectedReview.id ? updatedReview : review
-    ));
-
-    // Show success message
-    alert('Review updated successfully!');
-    
-    // Close dialog
-    setOpenDialog(false);
-    setEditForm({
-      rating: 0,
-      comment: '',
-      status: 'pending',
-      verified: false,
-      tourId: '',
-      helpful: 0,
-      notHelpful: 0,
-      response: '',
-      images: []
-    });
+      setReviews((prev) => prev.map((review) => (
+        review.id === selectedReview.id ? updatedReview : review
+      )));
+      showSnackbar(response.data?.message || 'Review updated successfully.');
+      handleCloseEditDialog();
+    } catch (error) {
+      console.error('Failed to update review:', error);
+      showSnackbar(error.response?.data?.message || 'Unable to update review right now.', 'error');
+    }
   };
 
   // Filter reviews
@@ -568,30 +516,44 @@ const Reviews = () => {
     setSelectedReview(review);
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (shouldClearSelectedReview = true) => {
     setAnchorEl(null);
+    if (shouldClearSelectedReview) {
+      setSelectedReview(null);
+    }
+  };
+
+  const handleCloseViewDialog = () => {
+    setOpenDialog(false);
+    setSelectedReview(null);
+  };
+
+  const handleCloseEditDialog = () => {
+    setOpenDialog(false);
+    resetEditForm();
     setSelectedReview(null);
   };
 
   const handleAction = (action) => {
     if (!selectedReview) return;
 
+    let shouldClearSelectedReview = true;
+
     switch (action) {
       case 'view':
         setDialogType('view');
         setOpenDialog(true);
+        shouldClearSelectedReview = false;
         break;
       case 'edit':
         setDialogType('edit');
         initializeEditForm(selectedReview);
         setOpenDialog(true);
+        shouldClearSelectedReview = false;
         break;
       case 'view-images':
         handleViewImages(selectedReview);
-        break;
-      case 'manage-images':
-        setDialogType('manage-images');
-        setOpenDialog(true);
+        shouldClearSelectedReview = false;
         break;
       case 'publish':
         updateReviewStatus(selectedReview.id, 'published');
@@ -604,10 +566,6 @@ const Reviews = () => {
           setReviews(reviews.filter(r => r.id !== selectedReview.id));
         }
         break;
-      case 'reply':
-        setDialogType('reply');
-        setOpenDialog(true);
-        break;
       case 'report':
         handleReportReview(selectedReview.id);
         break;
@@ -615,7 +573,7 @@ const Reviews = () => {
         break;
     }
 
-    handleMenuClose();
+    handleMenuClose(shouldClearSelectedReview);
   };
 
   // Image gallery functions
@@ -641,10 +599,26 @@ const Reviews = () => {
     setSelectedImageIndex(0);
   };
 
-  const updateReviewStatus = (id, status) => {
-    setReviews(reviews.map(review =>
-      review.id === id ? { ...review, status } : review
-    ));
+  const updateReviewStatus = async (id, status) => {
+    const reviewToUpdate = reviews.find((review) => review.id === id);
+
+    if (!reviewToUpdate) return;
+
+    try {
+      const response = await api.put(
+        `/UpdateReview/${reviewToUpdate.recordId}`,
+        buildReviewUpdatePayload(reviewToUpdate, status)
+      );
+      const updatedReview = mapReviewFromApi(response.data.review);
+
+      setReviews((prev) => prev.map((review) => (
+        review.id === id ? updatedReview : review
+      )));
+      showSnackbar(response.data?.message || 'Review status updated successfully.');
+    } catch (error) {
+      console.error('Failed to update review status:', error);
+      showSnackbar(error.response?.data?.message || 'Unable to update review status right now.', 'error');
+    }
   };
 
   const handleReportReview = (id) => {
@@ -699,6 +673,33 @@ const Reviews = () => {
     return total > 0 ? Math.round((helpful / total) * 100) : 0;
   };
 
+  const stats = useMemo(() => {
+    const validRatings = reviews
+      .map((review) => Number(review.rating))
+      .filter((rating) => Number.isFinite(rating) && rating > 0);
+    const ratingTotal = validRatings.reduce((sum, rating) => sum + rating, 0);
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    return {
+      total: reviews.length,
+      published: reviews.filter((review) => review.status === 'published').length,
+      pending: reviews.filter((review) => review.status === 'pending').length,
+      reported: reviews.filter((review) => review.status === 'reported').length,
+      averageRating: validRatings.length > 0 ? Number((ratingTotal / validRatings.length).toFixed(1)) : 0,
+      responseRate: 78,
+      thisMonth: reviews.filter((review) => {
+        const reviewDate = new Date(review.date);
+        return !Number.isNaN(reviewDate.getTime()) && reviewDate >= thisMonthStart;
+      }).length,
+      lastMonth: reviews.filter((review) => {
+        const reviewDate = new Date(review.date);
+        return !Number.isNaN(reviewDate.getTime()) && reviewDate >= lastMonthStart && reviewDate < thisMonthStart;
+      }).length
+    };
+  }, [reviews]);
+
   // Stats data
   const statCards = [
     {
@@ -732,6 +733,8 @@ const Reviews = () => {
       isPercentage: true
     }
   ];
+
+  const linkedBookingDetails = bookingOptions.find((booking) => String(booking.id) === editForm.bookingId);
 
   return (
   
@@ -930,7 +933,7 @@ const Reviews = () => {
                               </Typography>
                               {review.verified && (
                                 <Chip
-                                  label="Verified"
+                                  label="Verified User"
                                   size="small"
                                   color="success"
                                   variant="outlined"
@@ -947,7 +950,7 @@ const Reviews = () => {
                               {review.tour.name}
                             </Typography>
                             <Typography variant="caption" color="textSecondary">
-                              {review.tour.category} • {review.tour.duration}
+                              {review.tour.category} {review.tour.duration}
                             </Typography>
                           </div>
                         </TableCell>
@@ -1060,24 +1063,14 @@ const Reviews = () => {
             View Details
           </MenuItem>
           {selectedReview?.images && selectedReview.images.length > 0 && (
-            <>
-              <MenuItem onClick={() => handleAction('view-images')}>
-                <PhotoLibrary fontSize="small" className="menu-icon" />
-                View Images ({selectedReview.images.length})
-              </MenuItem>
-              <MenuItem onClick={() => handleAction('manage-images')}>
-                <Security fontSize="small" className="menu-icon" />
-                Manage Customer Photos
-              </MenuItem>
-            </>
+            <MenuItem onClick={() => handleAction('view-images')}>
+              <PhotoLibrary fontSize="small" className="menu-icon" />
+              View Images ({selectedReview.images.length})
+            </MenuItem>
           )}
           <MenuItem onClick={() => handleAction('edit')}>
             <Edit fontSize="small" className="menu-icon" />
             Edit Review
-          </MenuItem>
-          <MenuItem onClick={() => handleAction('reply')}>
-            <Reply fontSize="small" className="menu-icon" />
-            Reply to Review
           </MenuItem>
           {selectedReview?.status === 'pending' && (
             <MenuItem onClick={() => handleAction('publish')}>
@@ -1102,12 +1095,12 @@ const Reviews = () => {
         </Menu>
 
         {/* View Review Dialog */}
-        <Dialog open={openDialog && dialogType === 'view'} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-          <DialogTitle>
+        <Dialog open={openDialog && dialogType === 'view'} onClose={handleCloseViewDialog} maxWidth="md" fullWidth sx={reviewDialogSx}>
+          <DialogTitle className="review-dialog-title">
             <Visibility className="dialog-icon" />
             Review Details
           </DialogTitle>
-          <DialogContent>
+          <DialogContent dividers>
             {selectedReview && (
               <div className="review-details">
                 <div className="review-header">
@@ -1122,9 +1115,9 @@ const Reviews = () => {
                       </Typography>
                       <div className="customer-tags">
                         {selectedReview.verified && (
-                          <Chip label="Verified Customer" color="success" size="small" />
+                          <Chip label="Verified User" color="success" size="small" />
                         )}
-                        <Chip label={`${selectedReview.customer.bookings} bookings`} size="small" variant="outlined" />
+                        <Chip label={selectedReview.bookingId ? `Booking #${selectedReview.bookingId}` : 'Guest review'} size="small" variant="outlined" />
                       </div>
                     </div>
                   </div>
@@ -1220,395 +1213,272 @@ const Reviews = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Close</Button>
+            <Button onClick={handleCloseViewDialog}>Close</Button>
           </DialogActions>
         </Dialog>
-
         {/* Edit Review Dialog */}
-        <Dialog open={openDialog && dialogType === 'edit'} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-          <DialogTitle>
-            <Edit className="dialog-icon" />
+        <Dialog
+          open={openDialog && dialogType === 'edit'}
+          onClose={handleCloseEditDialog}
+          maxWidth="md"
+          fullWidth
+          sx={reviewDialogSx}
+        >
+          <DialogTitle className="review-dialog-title">
             Edit Review
-            {selectedReview && (
-              <Typography variant="caption" color="textSecondary" display="block" mt={1}>
-                ID: {selectedReview.id} • Customer: {selectedReview.customer.name}
-              </Typography>
-            )}
           </DialogTitle>
-          <DialogContent>
-            <Box sx={{ mt: 2 }}>
-              <Grid container spacing={3}>
-                {/* Rating Section */}
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Rating
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Rating
-                      value={editForm.rating}
-                      precision={0.5}
-                      onChange={(event, newValue) => handleEditChange('rating', newValue)}
-                      size="large"
-                    />
-                    <Typography variant="h6" color="primary">
-                      {editForm.rating.toFixed(1)}/5
+          <DialogContent dividers>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                gap: 2,
+                pt: 1,
+              }}
+            >
+              {selectedReview && (
+                <Box
+                  sx={{
+                    gridColumn: { xs: '1', md: '1 / -1' },
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                    gap: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="subtitle2">Review Summary</Typography>
+                    <Typography variant="body1">Review ID: {selectedReview.id}</Typography>
+                    <Typography variant="body2">Customer: {selectedReview.customer.name}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2">Verification</Typography>
+                    <Typography variant="body1">
+                      {linkedBookingDetails ? `Booking #${linkedBookingDetails.id}` : 'No linked booking'}
+                    </Typography>
+                    <Typography variant="body2">
+                      {linkedBookingDetails ? 'Verified User' : 'Guest Review'}
                     </Typography>
                   </Box>
-                </Grid>
+                </Box>
+              )}
 
-                {/* Tour Selection */}
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Tour</InputLabel>
-                    <Select
-                      value={editForm.tourId}
-                      label="Tour"
-                      onChange={(e) => handleEditChange('tourId', e.target.value)}
-                    >
-                      <MenuItem value="">
-                        <em>Select a tour</em>
-                      </MenuItem>
-                      {availableTours.map((tour) => (
-                        <MenuItem key={tour.id} value={tour.id}>
-                          {tour.name} ({tour.category})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                {/* Status Selection */}
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={editForm.status}
-                      label="Status"
-                      onChange={(e) => handleEditChange('status', e.target.value)}
-                    >
-                      <MenuItem value="published">Published</MenuItem>
-                      <MenuItem value="pending">Pending Review</MenuItem>
-                      <MenuItem value="reported">Reported</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                {/* Comment Section */}
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    label="Review Comment"
-                    value={editForm.comment}
-                    onChange={(e) => handleEditChange('comment', e.target.value)}
-                    variant="outlined"
+              <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
+                <Typography variant="subtitle2">Rating</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                  <Rating
+                    value={editForm.rating}
+                    precision={1}
+                    onChange={(event, newValue) => handleEditChange('rating', newValue || 0)}
+                    size="large"
                   />
-                </Grid>
-
-                {/* Stats Section */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Helpful Votes"
-                    value={editForm.helpful}
-                    onChange={(e) => handleEditChange('helpful', parseInt(e.target.value) || 0)}
-                    variant="outlined"
-                    size="small"
-                    InputProps={{ inputProps: { min: 0 } }}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Not Helpful Votes"
-                    value={editForm.notHelpful}
-                    onChange={(e) => handleEditChange('notHelpful', parseInt(e.target.value) || 0)}
-                    variant="outlined"
-                    size="small"
-                    InputProps={{ inputProps: { min: 0 } }}
-                  />
-                </Grid>
-
-                {/* Response Section */}
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    label="Your Response (Optional)"
-                    value={editForm.response}
-                    onChange={(e) => handleEditChange('response', e.target.value)}
-                    variant="outlined"
-                    placeholder="Add your response to this review..."
-                  />
-                </Grid>
-
-                {/* Verified Status */}
-                <Grid item xs={12}>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={editForm.verified}
-                          onChange={(e) => handleEditChange('verified', e.target.checked)}
-                        />
-                      }
-                      label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Verified fontSize="small" />
-                          <Typography>Verified Customer</Typography>
-                        </Box>
-                      }
-                    />
-                  </FormGroup>
-                </Grid>
-
-                {/* Images Section */}
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="subtitle2">
-                      Review Images ({editForm.images.length})
-                    </Typography>
-                    <Button
-                      component="label"
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Upload />}
-                    >
-                      Upload New Images
-                      <input
-                        type="file"
-                        hidden
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                      />
-                    </Button>
-                  </Box>
-
-                  {editForm.images.length > 0 ? (
-                    <Grid container spacing={2}>
-                      {editForm.images.map((image) => (
-                        <Grid item xs={12} sm={6} md={4} key={image.id}>
-                          <Card variant="outlined">
-                            <CardMedia
-                              component="img"
-                              height="140"
-                              image={image.url}
-                              alt={image.title}
-                              sx={{ objectFit: 'cover' }}
-                            />
-                            <CardContent sx={{ p: 1 }}>
-                              <Typography variant="body2" fontWeight="medium">
-                                {image.title}
-                              </Typography>
-                              <Typography variant="caption" color="textSecondary" display="block">
-                                {image.isCustomerUploaded ? 'Customer Upload' : 'Admin Upload'}
-                              </Typography>
-                              <Typography variant="caption" color="textSecondary" display="block">
-                                Uploaded: {formatDate(image.uploadDate)}
-                              </Typography>
-                            </CardContent>
-                            <CardActions sx={{ p: 1, pt: 0 }}>
-                              {image.isCustomerUploaded ? (
-                                <Button
-                                  size="small"
-                                  color="error"
-                                  startIcon={<DeleteForever />}
-                                  onClick={() => handleOpenDeleteImageDialog(image)}
-                                  fullWidth
-                                >
-                                  Delete Customer Photo
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="small"
-                                  color="error"
-                                  startIcon={<DeleteIcon />}
-                                  onClick={() => handleImageDelete(image.id)}
-                                  fullWidth
-                                >
-                                  Delete Admin Photo
-                                </Button>
-                              )}
-                            </CardActions>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Alert severity="info" icon={<Image />}>
-                      No images uploaded for this review. You can upload images using the button above.
-                    </Alert>
-                  )}
-                </Grid>
-              </Grid>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button 
-              onClick={() => setOpenDialog(false)} 
-              startIcon={<Cancel />}
-              color="inherit"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleEditSubmit} 
-              variant="contained" 
-              startIcon={<Save />}
-              color="primary"
-            >
-              Save Changes
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Manage Customer Photos Dialog */}
-        <Dialog open={openDialog && dialogType === 'manage-images'} onClose={() => setOpenDialog(false)} maxWidth="lg" fullWidth>
-          <DialogTitle>
-            <Security className="dialog-icon" />
-            Manage Customer Photos
-            {selectedReview && (
-              <Typography variant="caption" color="textSecondary" display="block" mt={1}>
-                Review: {selectedReview.id} • Customer: {selectedReview.customer.name}
-              </Typography>
-            )}
-          </DialogTitle>
-          <DialogContent>
-            {selectedReview && (
-              <Box sx={{ mt: 2 }}>
-                <Alert severity="warning" sx={{ mb: 3 }}>
-                  <Typography variant="body2">
-                    <strong>Warning:</strong> Deleting customer photos is permanent. Customers may have uploaded these photos as part of their review experience. Consider whether deletion is necessary.
+                  <Typography variant="h6" color="primary">
+                    {editForm.rating.toFixed(1)}/5
                   </Typography>
-                </Alert>
+                </Box>
+              </Box>
 
-                <Typography variant="h6" gutterBottom>
-                  Customer Uploaded Photos ({selectedReview.images.filter(img => img.isCustomerUploaded).length})
+              <TextField
+                label="Linked Booking"
+                select
+                value={editForm.bookingId}
+                onChange={(event) => handleBookingSelectionChange(event.target.value)}
+                helperText={linkedBookingDetails
+                  ? `${linkedBookingDetails.customer_email || 'No email'} • ${linkedBookingDetails.vehicle_type} • ${linkedBookingDetails.pickup_location} to ${linkedBookingDetails.drop_location}`
+                  : 'Optional. Link a booking to mark this review as verified.'}
+                fullWidth
+                sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}
+                SelectProps={{ MenuProps: reviewDialogSelectMenuProps }}
+              >
+                <MenuItem value="">No linked booking</MenuItem>
+                {bookingOptions.map((booking) => (
+                  <MenuItem key={booking.id} value={String(booking.id)}>
+                    #{booking.id} - {booking.customer_name} | {booking.vehicle_type} | {booking.pickup_location} to {booking.drop_location}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Customer Name"
+                value={editForm.customerName}
+                onChange={(event) => handleEditChange('customerName', event.target.value)}
+                InputProps={{ readOnly: Boolean(editForm.bookingId) }}
+                fullWidth
+              />
+              <TextField
+                label="Customer Email"
+                value={editForm.customerEmail}
+                onChange={(event) => handleEditChange('customerEmail', event.target.value)}
+                InputProps={{ readOnly: Boolean(editForm.bookingId) }}
+                fullWidth
+              />
+              <TextField
+                label="Tour Name"
+                value={editForm.tourName}
+                onChange={(event) => handleEditChange('tourName', event.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="Status"
+                select
+                value={editForm.status}
+                onChange={(event) => handleEditChange('status', event.target.value)}
+                fullWidth
+                SelectProps={{ MenuProps: reviewDialogSelectMenuProps }}
+              >
+                <MenuItem value="published">Published</MenuItem>
+                <MenuItem value="pending">Pending Review</MenuItem>
+                <MenuItem value="reported">Reported</MenuItem>
+              </TextField>
+              <TextField
+                label="Helpful Votes"
+                type="number"
+                value={editForm.helpful}
+                onChange={(event) => handleEditChange('helpful', parseInt(event.target.value, 10) || 0)}
+                inputProps={{ min: 0 }}
+                fullWidth
+              />
+              <TextField
+                label="Not Helpful Votes"
+                type="number"
+                value={editForm.notHelpful}
+                onChange={(event) => handleEditChange('notHelpful', parseInt(event.target.value, 10) || 0)}
+                inputProps={{ min: 0 }}
+                fullWidth
+              />
+              <TextField
+                label="Review Comment"
+                value={editForm.comment}
+                onChange={(event) => handleEditChange('comment', event.target.value)}
+                multiline
+                rows={4}
+                fullWidth
+                sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}
+              />
+              <TextField
+                label="Your Response (Optional)"
+                value={editForm.response}
+                onChange={(event) => handleEditChange('response', event.target.value)}
+                multiline
+                rows={3}
+                fullWidth
+                sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}
+              />
+
+              <Box
+                sx={{
+                  gridColumn: { xs: '1', md: '1 / -1' },
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: 1.5,
+                }}
+              >
+                <Verified fontSize="small" color={linkedBookingDetails ? 'success' : 'disabled'} />
+                <Typography variant="body2" fontWeight={600}>
+                  {linkedBookingDetails ? 'Verified User' : 'Guest Review'}
                 </Typography>
-                
-                {selectedReview.images.filter(img => img.isCustomerUploaded).length > 0 ? (
+                {linkedBookingDetails && (
+                  <Chip label={`Booking #${linkedBookingDetails.id}`} size="small" color="success" variant="outlined" />
+                )}
+              </Box>
+
+              <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
+                <Divider sx={{ my: 1 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle2">
+                    Review Images ({editForm.images.length})
+                  </Typography>
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Upload />}
+                  >
+                    Upload New Images
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                    />
+                  </Button>
+                </Box>
+
+                {editForm.images.length > 0 ? (
                   <Grid container spacing={2}>
-                    {selectedReview.images.filter(img => img.isCustomerUploaded).map((image) => (
+                    {editForm.images.map((image) => (
                       <Grid item xs={12} sm={6} md={4} key={image.id}>
-                        <Card variant="outlined" sx={{ position: 'relative' }}>
+                        <Card variant="outlined">
                           <CardMedia
                             component="img"
-                            height="160"
+                            height="140"
                             image={image.url}
                             alt={image.title}
                             sx={{ objectFit: 'cover' }}
                           />
-                          <CardContent sx={{ p: 2 }}>
-                            <Typography variant="subtitle1" fontWeight="medium">
+                          <CardContent sx={{ p: 1 }}>
+                            <Typography variant="body2" fontWeight="medium">
                               {image.title}
                             </Typography>
-                            <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                              <Chip
-                                label="Customer Upload"
-                                size="small"
-                                color="primary"
-                                variant="outlined"
-                                icon={<Person fontSize="small" />}
-                              />
-                              <Chip
-                                label={formatDate(image.uploadDate)}
-                                size="small"
-                                variant="outlined"
-                                icon={<CalendarToday fontSize="small" />}
-                              />
-                            </Stack>
+                            <Typography variant="caption" color="textSecondary" display="block">
+                              {image.isCustomerUploaded ? 'Customer Upload' : 'Admin Upload'}
+                            </Typography>
+                            <Typography variant="caption" color="textSecondary" display="block">
+                              Uploaded: {formatDate(image.uploadDate)}
+                            </Typography>
                           </CardContent>
-                          <CardActions sx={{ p: 2, pt: 0 }}>
-                            <Button
-                              fullWidth
-                              variant="contained"
-                              color="error"
-                              startIcon={<DeleteForever />}
-                              onClick={() => handleOpenDeleteImageDialog(image)}
-                            >
-                              Delete Photo
-                            </Button>
+                          <CardActions sx={{ p: 1, pt: 0 }}>
+                            {image.isCustomerUploaded ? (
+                              <Button
+                                size="small"
+                                color="error"
+                                startIcon={<DeleteForever />}
+                                onClick={() => handleOpenDeleteImageDialog(image)}
+                                fullWidth
+                              >
+                                Delete Customer Photo
+                              </Button>
+                            ) : (
+                              <Button
+                                size="small"
+                                color="error"
+                                startIcon={<DeleteIcon />}
+                                onClick={() => handleImageDelete(image.id)}
+                                fullWidth
+                              >
+                                Delete Admin Photo
+                              </Button>
+                            )}
                           </CardActions>
                         </Card>
                       </Grid>
                     ))}
                   </Grid>
                 ) : (
-                  <Alert severity="info" icon={<Photo />}>
-                    No customer uploaded photos found for this review.
+                  <Alert severity="info" icon={<Image />}>
+                    No images uploaded for this review. You can upload images using the button above.
                   </Alert>
                 )}
-
-                <Divider sx={{ my: 3 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  Photo Management Guidelines
-                </Typography>
-                <Alert severity="info">
-                  <Typography variant="body2">
-                    <strong>When to delete customer photos:</strong>
-                  </Typography>
-                  <ul style={{ marginTop: 8, marginBottom: 0, paddingLeft: 20 }}>
-                    <li>Inappropriate or offensive content</li>
-                    <li>Violation of community guidelines</li>
-                    <li>Poor quality or irrelevant images</li>
-                    <li>Copyright infringement concerns</li>
-                  </ul>
-                </Alert>
               </Box>
-            )}
+            </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Close</Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Reply Dialog */}
-        <Dialog open={openDialog && dialogType === 'reply'} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-          <DialogTitle>
-            <Reply className="dialog-icon" />
-            Reply to Review
-          </DialogTitle>
-          <DialogContent>
-            {selectedReview && (
-              <div className="reply-form">
-                <Typography variant="body1" paragraph>
-                  Replying to review by {selectedReview.customer.name}
-                </Typography>
-                <Typography variant="body2" color="textSecondary" paragraph>
-                  Original Review: "{selectedReview.comment.substring(0, 100)}..."
-                </Typography>
-                <TextField
-                  multiline
-                  rows={6}
-                  fullWidth
-                  label="Your Response"
-                  variant="outlined"
-                  defaultValue={selectedReview.response || ''}
-                />
-              </div>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-            <Button variant="contained" onClick={() => {
-              console.log('Reply sent');
-              setOpenDialog(false);
-            }}>
-              Send Response
+            <Button onClick={handleCloseEditDialog} color="inherit">
+              Cancel
+            </Button>
+            <Button onClick={handleEditSubmit} variant="contained" color="primary">
+              Save Changes
             </Button>
           </DialogActions>
         </Dialog>
 
         {/* Delete Image Confirmation Dialog */}
-        <Dialog open={openDeleteImageDialog} onClose={handleCloseDeleteImageDialog}>
+        <Dialog
+          open={openDeleteImageDialog}
+          onClose={handleCloseDeleteImageDialog}
+          sx={{ zIndex: 2400 }}
+        >
           <DialogTitle>
             <DeleteForever className="dialog-icon" color="error" />
             Delete Customer Photo
@@ -1665,203 +1535,153 @@ const Reviews = () => {
         <Modal
           open={openImageGallery}
           onClose={handleCloseImageGallery}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            p: 2
-          }}
+          className="review-image-gallery-modal"
         >
-          <Box sx={{
-            position: 'relative',
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            boxShadow: 24,
-            maxWidth: '90vw',
-            maxHeight: '90vh',
-            overflow: 'hidden'
-          }}>
-            {/* Close button */}
-            <IconButton
-              onClick={handleCloseImageGallery}
-              sx={{
-                position: 'absolute',
-                top: 16,
-                right: 16,
-                bgcolor: 'rgba(0,0,0,0.5)',
-                color: 'white',
-                zIndex: 1,
-                '&:hover': {
-                  bgcolor: 'rgba(0,0,0,0.7)'
-                }
-              }}
-            >
-              <Close />
-            </IconButton>
-
-            {/* Delete button for customer photos */}
-            {selectedReviewImages[selectedImageIndex]?.isCustomerUploaded && (
-              <IconButton
-                onClick={() => handleOpenDeleteImageDialog(selectedReviewImages[selectedImageIndex])}
-                sx={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 60,
-                  bgcolor: 'rgba(220, 53, 69, 0.8)',
-                  color: 'white',
-                  zIndex: 1,
-                  '&:hover': {
-                    bgcolor: 'rgba(220, 53, 69, 1)'
-                  }
-                }}
-              >
-                <DeleteForever />
-              </IconButton>
-            )}
-
-            {/* Navigation buttons */}
-            {selectedReviewImages.length > 1 && (
-              <>
-                <IconButton
-                  onClick={handlePrevImage}
-                  sx={{
-                    position: 'absolute',
-                    left: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    bgcolor: 'rgba(0,0,0,0.5)',
-                    color: 'white',
-                    zIndex: 1,
-                    '&:hover': {
-                      bgcolor: 'rgba(0,0,0,0.7)'
-                    }
-                  }}
-                >
-                  <ArrowBack />
-                </IconButton>
-                <IconButton
-                  onClick={handleNextImage}
-                  sx={{
-                    position: 'absolute',
-                    right: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    bgcolor: 'rgba(0,0,0,0.5)',
-                    color: 'white',
-                    zIndex: 1,
-                    '&:hover': {
-                      bgcolor: 'rgba(0,0,0,0.7)'
-                    }
-                  }}
-                >
-                  <ArrowForward />
-                </IconButton>
-              </>
-            )}
-
-            {/* Current image */}
+          <Box
+            className="review-image-gallery"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Review image gallery"
+          >
             {selectedReviewImages[selectedImageIndex] && (
               <>
-                <img
-                  src={selectedReviewImages[selectedImageIndex].url}
-                  alt={selectedReviewImages[selectedImageIndex].title}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '80vh',
-                    display: 'block',
-                    margin: '0 auto'
-                  }}
-                />
-                
-                {/* Image info */}
-                <Box sx={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  bgcolor: 'rgba(0,0,0,0.7)',
-                  color: 'white',
-                  p: 2
-                }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="h6">
-                        {selectedReviewImages[selectedImageIndex].title}
-                      </Typography>
-                      <Typography variant="body2">
-                        Uploaded by: {selectedReviewImages[selectedImageIndex].uploadedBy}
-                        {selectedReviewImages[selectedImageIndex].isCustomerUploaded && (
-                          <Chip
-                            label="Customer Photo"
-                            size="small"
-                            color="primary"
-                            sx={{ ml: 1 }}
-                          />
-                        )}
-                      </Typography>
-                    </Box>
-                    <Typography variant="caption">
-                      Image {selectedImageIndex + 1} of {selectedReviewImages.length}
+                <Box className="gallery-toolbar">
+                  <Box className="gallery-title-group">
+                    <Typography className="gallery-title" component="h2">
+                      {selectedReviewImages[selectedImageIndex].title}
                     </Typography>
+                    <Box className="gallery-meta">
+                      <Typography component="span">
+                        Uploaded by {selectedReviewImages[selectedImageIndex].uploadedBy}
+                      </Typography>
+                      {selectedReviewImages[selectedImageIndex].isCustomerUploaded && (
+                        <Chip
+                          label="Customer Photo"
+                          size="small"
+                          className="gallery-chip"
+                        />
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Box className="gallery-actions">
+                    {selectedReviewImages[selectedImageIndex].isCustomerUploaded && (
+                      <Tooltip title="Delete customer photo">
+                        <IconButton
+                          onClick={() => handleOpenDeleteImageDialog(selectedReviewImages[selectedImageIndex])}
+                          className="gallery-icon-button gallery-delete-button"
+                          size="small"
+                          aria-label="Delete customer photo"
+                        >
+                          <DeleteForever />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    <Tooltip title="Close gallery">
+                      <IconButton
+                        onClick={handleCloseImageGallery}
+                        className="gallery-icon-button"
+                        size="small"
+                        aria-label="Close gallery"
+                      >
+                        <Close />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                 </Box>
 
-                {/* Thumbnail strip */}
-                {selectedReviewImages.length > 1 && (
-                  <Box sx={{
-                    display: 'flex',
-                    gap: 1,
-                    p: 2,
-                    overflowX: 'auto',
-                    bgcolor: 'background.default'
-                  }}>
-                    {selectedReviewImages.map((image, index) => (
-                      <Box key={image.id} sx={{ position: 'relative' }}>
-                        <img
-                          src={image.url}
-                          alt={image.title}
+                <Box className="gallery-stage">
+                  {selectedReviewImages.length > 1 && (
+                    <>
+                      <IconButton
+                        onClick={handlePrevImage}
+                        className="gallery-nav gallery-nav-prev"
+                        aria-label="Previous image"
+                      >
+                        <ArrowBack />
+                      </IconButton>
+                      <IconButton
+                        onClick={handleNextImage}
+                        className="gallery-nav gallery-nav-next"
+                        aria-label="Next image"
+                      >
+                        <ArrowForward />
+                      </IconButton>
+                    </>
+                  )}
+
+                  <img
+                    src={selectedReviewImages[selectedImageIndex].url}
+                    alt={selectedReviewImages[selectedImageIndex].title}
+                    className="gallery-main-image"
+                  />
+                </Box>
+
+                <Box className="gallery-footer">
+                  <Typography className="gallery-counter">
+                    Image {selectedImageIndex + 1} of {selectedReviewImages.length}
+                  </Typography>
+
+                  {selectedReviewImages.length > 1 && (
+                    <Box className="gallery-thumbnails" aria-label="Image thumbnails">
+                      {selectedReviewImages.map((image, index) => (
+                        <Box
+                          key={image.id}
+                          component="button"
+                          type="button"
+                          className={`gallery-thumbnail${index === selectedImageIndex ? ' is-active' : ''}`}
                           onClick={() => setSelectedImageIndex(index)}
-                          style={{
-                            width: 80,
-                            height: 60,
-                            objectFit: 'cover',
-                            cursor: 'pointer',
-                            opacity: index === selectedImageIndex ? 1 : 0.5,
-                            border: index === selectedImageIndex ? '2px solid #1976d2' : 'none',
-                            borderRadius: 4
-                          }}
-                        />
-                        {image.isCustomerUploaded && (
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              top: 2,
-                              right: 2,
-                              bgcolor: 'primary.main',
-                              color: 'white',
-                              borderRadius: '50%',
-                              width: 16,
-                              height: 16,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '10px'
-                            }}
-                          >
-                            C
-                          </Box>
-                        )}
-                      </Box>
-                    ))}
-                  </Box>
-                )}
+                          aria-label={`View image ${index + 1}`}
+                          aria-current={index === selectedImageIndex ? 'true' : undefined}
+                        >
+                          <img
+                            src={image.url}
+                            alt={image.title}
+                          />
+                          {image.isCustomerUploaded && (
+                            <Box className="thumbnail-badge">
+                              C
+                            </Box>
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
               </>
             )}
           </Box>
         </Modal>
+
+        <Snackbar
+          open={snackbarState.open}
+          onClose={handleSnackbarClose}
+          autoHideDuration={5000}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbarState.severity} sx={{ width: '100%' }}>
+            {snackbarState.message}
+          </Alert>
+        </Snackbar>
       </div>
 
   );
 };
 
 export default Reviews;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

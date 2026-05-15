@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Box,
     Button,
@@ -72,18 +72,19 @@ const BlogPostManagement = () => {
     const navigate = useNavigate();
     const [openDialog, setOpenDialog] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-    const [dialogMode, setDialogMode] = useState('create');
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [imagePreview, setImagePreview] = useState(null);
     const [postToDelete, setPostToDelete] = useState(null);
+    const [previewPost, setPreviewPost] = useState(null);
 
     // Stats
     const [stats, setStats] = useState({
         totalPosts: 0,
         published: 0,
+        pending: 0,
         drafts: 0,
         scheduled: 0,
         totalViews: 0,
@@ -121,6 +122,24 @@ const BlogPostManagement = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [sortBy, setSortBy] = useState('newest');
+    const editSelectMenuProps = {
+        sx: { zIndex: 1702 },
+        PaperProps: {
+            sx: {
+                maxHeight: 320,
+                zIndex: 1702,
+            },
+        },
+    };
+    const editDatePickerSlotProps = {
+        popper: {
+            sx: { zIndex: 1702 },
+        },
+        textField: {
+            fullWidth: true,
+            margin: 'dense',
+        },
+    };
 
     // Get image URL helper
     const getImageUrl = (imagePath) => {
@@ -129,16 +148,30 @@ const BlogPostManagement = () => {
         return `${import.meta.env.VITE_BLOG_IMAGE_URL || 'http://localhost:8000/storage'}/${imagePath}`;
     };
 
-    // Fetch initial data
-    useEffect(() => {
-        fetchData();
+    const showSnackbar = useCallback((message, severity = 'success') => {
+        setSnackbar({ open: true, message, severity });
     }, []);
 
-    useEffect(() => {
-        filterAndSortPosts();
-    }, [posts, searchQuery, statusFilter, categoryFilter, sortBy]);
+    const updateStats = useCallback((postsData) => {
+        const published = postsData.filter(p => p.status === 'published').length;
+        const pending = postsData.filter(p => p.status === 'pending').length;
+        const drafts = postsData.filter(p => p.status === 'draft').length;
+        const scheduled = postsData.filter(p => p.status === 'scheduled').length;
+        const totalViews = postsData.reduce((sum, post) => sum + (post.views || 0), 0);
+        const totalComments = postsData.reduce((sum, post) => sum + (post.comments || 0), 0);
 
-    const fetchData = async () => {
+        setStats({
+            totalPosts: postsData.length,
+            published,
+            pending,
+            drafts,
+            scheduled,
+            totalViews,
+            totalComments
+        });
+    }, []);
+
+    const fetchData = useCallback(async () => {
         setInitialLoading(true);
         try {
             // Fetch posts and categories in parallel
@@ -175,26 +208,9 @@ const BlogPostManagement = () => {
         } finally {
             setInitialLoading(false);
         }
-    };
+    }, [showSnackbar, updateStats]);
 
-    const updateStats = (postsData) => {
-        const published = postsData.filter(p => p.status === 'published').length;
-        const drafts = postsData.filter(p => p.status === 'draft').length;
-        const scheduled = postsData.filter(p => p.status === 'scheduled').length;
-        const totalViews = postsData.reduce((sum, post) => sum + (post.views || 0), 0);
-        const totalComments = postsData.reduce((sum, post) => sum + (post.comments || 0), 0);
-
-        setStats({
-            totalPosts: postsData.length,
-            published,
-            drafts,
-            scheduled,
-            totalViews,
-            totalComments
-        });
-    };
-
-    const filterAndSortPosts = () => {
+    const filterAndSortPosts = useCallback(() => {
         let filtered = [...posts];
 
         if (searchQuery) {
@@ -231,63 +247,47 @@ const BlogPostManagement = () => {
         });
 
         setFilteredPosts(filtered);
-    };
+    }, [categoryFilter, posts, searchQuery, sortBy, statusFilter]);
 
-    const handleOpenDialog = async (mode = 'create', post = null) => {
-        setDialogMode(mode);
-        if (mode === 'edit' && post) {
-            setPostForm({
-                id: post.id,
-                title: post.title || '',
-                slug: post.slug || '',
-                content: post.content || '',
-                excerpt: post.excerpt || '',
-                category_id: post.category_id || '',
-                category_name: post.category || '',
-                tags: post.tags || [],
-                author: post.author || '',
-                author_avatar: post.author_avatar || null,
-                status: post.status || 'draft',
-                image: post.image || null,
-                published_date: post.published_date || post.created_at || null,
-                scheduled_date: post.scheduled_date || null,
-                is_featured: post.is_featured || false,
-                meta_title: post.meta_title || '',
-                meta_description: post.meta_description || '',
-                views: post.views || 0,
-                comments: post.comments || 0,
-                likes: post.likes || 0,
-                read_time: post.read_time || '',
-                location: post.location || ''
-            });
-            setImagePreview(getImageUrl(post.image));
-        } else {
-            setPostForm({
-                id: '',
-                title: '',
-                slug: '',
-                content: '',
-                excerpt: '',
-                category_id: '',
-                category_name: '',
-                tags: [],
-                author: 'Admin User',
-                author_avatar: null,
-                status: 'draft',
-                image: null,
-                published_date: null,
-                scheduled_date: null,
-                is_featured: false,
-                meta_title: '',
-                meta_description: '',
-                views: 0,
-                comments: 0,
-                likes: 0,
-                read_time: '',
-                location: ''
-            });
-            setImagePreview(null);
+    // Fetch initial data
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    useEffect(() => {
+        filterAndSortPosts();
+    }, [filterAndSortPosts]);
+
+    const handleOpenDialog = async (post) => {
+        if (!post) {
+            return;
         }
+
+        setPostForm({
+            id: post.id,
+            title: post.title || '',
+            slug: post.slug || '',
+            content: post.content || '',
+            excerpt: post.excerpt || '',
+            category_id: post.category_id || '',
+            category_name: post.category || '',
+            tags: post.tags || [],
+            author: post.author || '',
+            author_avatar: post.author_avatar || null,
+            status: post.status || 'draft',
+            image: post.image || null,
+            published_date: post.published_date || post.created_at || null,
+            scheduled_date: post.scheduled_date || null,
+            is_featured: post.is_featured || false,
+            meta_title: post.meta_title || '',
+            meta_description: post.meta_description || '',
+            views: post.views || 0,
+            comments: post.comments || 0,
+            likes: post.likes || 0,
+            read_time: post.read_time || '',
+            location: post.location || ''
+        });
+        setImagePreview(getImageUrl(post.image));
         setOpenDialog(true);
     };
 
@@ -295,16 +295,30 @@ const BlogPostManagement = () => {
         setOpenDialog(false);
     };
 
+    const handleOpenPreview = (post) => {
+        if (!post) {
+            return;
+        }
+
+        setPreviewPost(post);
+    };
+
+    const handleClosePreview = () => {
+        setPreviewPost(null);
+    };
+
     const handleSavePost = async () => {
         setLoading(true);
         try {
             const formData = new FormData();
+            const selectedCategory = categories.find((cat) => String(cat.id) === String(postForm.category_id));
+
             formData.append('title', postForm.title);
             formData.append('slug', postForm.slug);
             formData.append('content', postForm.content);
             formData.append('excerpt', postForm.excerpt);
-            formData.append('category_id', postForm.category_id);
-            formData.append('tags', JSON.stringify(postForm.tags));
+            formData.append('category_id', postForm.category_id || '');
+            formData.append('category', selectedCategory?.name || postForm.category_name || '');
             formData.append('author', postForm.author);
             formData.append('status', postForm.status);
             formData.append('is_featured', postForm.is_featured);
@@ -319,27 +333,20 @@ const BlogPostManagement = () => {
 
             if (postForm.image && typeof postForm.image !== 'string') {
                 formData.append('image', postForm.image);
-            } else if (postForm.image && typeof postForm.image === 'string' && !postForm.image.startsWith('http')) {
-                formData.append('image', postForm.image);
             }
 
-            let response;
-            if (dialogMode === 'create') {
-                response = await api.post('/blogPosts', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                showSnackbar('Blog post created successfully!', 'success');
-            } else {
-                // For update, use POST with _method PUT or use PUT request
-                formData.append('_method', 'PUT');
-                response = await api.post(`/blogPosts/${postForm.id}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                showSnackbar('Blog post updated successfully!', 'success');
-            }
+            postForm.tags.forEach((tag, index) => {
+                formData.append(`tags[${index}]`, tag);
+            });
+
+            formData.append('_method', 'PUT');
+            const response = await api.post(`/blogPosts/${postForm.id}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            showSnackbar(response.data?.message || 'Blog post updated successfully!', 'success');
 
             if (response.status === 200 || response.status === 201) {
-                await fetchData(); // Refresh data
+                await fetchData();
                 handleCloseDialog();
             }
         } catch (error) {
@@ -419,10 +426,6 @@ const BlogPostManagement = () => {
         return score;
     };
 
-    const showSnackbar = (message, severity = 'success') => {
-        setSnackbar({ open: true, message, severity });
-    };
-
     const handleCloseSnackbar = () => {
         setSnackbar({ ...snackbar, open: false });
     };
@@ -430,6 +433,7 @@ const BlogPostManagement = () => {
     const getStatusColor = (status) => {
         switch (status) {
             case 'published': return 'success';
+            case 'pending': return 'warning';
             case 'draft': return 'warning';
             case 'scheduled': return 'info';
             default: return 'default';
@@ -472,6 +476,14 @@ const BlogPostManagement = () => {
             icon: <ViewIcon />,
             color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
             change: '+8%',
+            trend: 'up'
+        },
+        {
+            title: 'Pending',
+            value: stats.pending,
+            icon: <ScheduleIcon />,
+            color: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+            change: '+0%',
             trend: 'up'
         },
         {
@@ -525,7 +537,7 @@ const BlogPostManagement = () => {
                     subtitle="Create, edit, and manage all your blog posts in one place."
                     primaryAction={{
                         label: 'Add Blog',
-                        onClick: () => handleOpenDialog('create'),
+                        onClick: () => navigate('/blogs/add'),
                         icon: <AddIcon />
                     }}
                     secondaryActions={[
@@ -645,6 +657,7 @@ const BlogPostManagement = () => {
                                     label="Status"
                                 >
                                     <MenuItem value="all">All Status</MenuItem>
+                                    <MenuItem value="pending">Pending</MenuItem>
                                     <MenuItem value="published">Published</MenuItem>
                                     <MenuItem value="draft">Draft</MenuItem>
                                     <MenuItem value="scheduled">Scheduled</MenuItem>
@@ -720,7 +733,13 @@ const BlogPostManagement = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {paginatedPosts.map((post) => (
+                                    {paginatedPosts.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={7} align="center">
+                                                No blog posts found.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : paginatedPosts.map((post) => (
                                         <TableRow key={post.id} className={post.is_featured ? 'featured-post' : ''}>
                                             <TableCell>
                                                 <Box className="post-image-container">
@@ -848,7 +867,7 @@ const BlogPostManagement = () => {
                                                         <IconButton
                                                             size="small"
                                                             className="action-btn view-btn"
-                                                            onClick={() => navigate(`/blog/${post.id}`)}
+                                                            onClick={() => handleOpenPreview(post)}
                                                         >
                                                             <ViewIcon fontSize="small" />
                                                         </IconButton>
@@ -857,7 +876,7 @@ const BlogPostManagement = () => {
                                                         <IconButton
                                                             size="small"
                                                             className="action-btn edit-btn"
-                                                            onClick={() => handleOpenDialog('edit', post)}
+                                                            onClick={() => handleOpenDialog(post)}
                                                         >
                                                             <EditIcon fontSize="small" />
                                                         </IconButton>
@@ -892,16 +911,115 @@ const BlogPostManagement = () => {
                     </>
                 )}
 
-                {/* Create/Edit Dialog */}
+                {/* Preview Dialog */}
+                <Dialog
+                    open={Boolean(previewPost)}
+                    onClose={handleClosePreview}
+                    maxWidth="md"
+                    fullWidth
+                    className="post-dialog"
+                    sx={{
+                        zIndex: 1601,
+                        '& .MuiDialog-paper': {
+                            mt: { xs: 10, sm: 12 },
+                            mb: 3,
+                            maxHeight: 'calc(100% - 120px)',
+                        },
+                    }}
+                >
+                    <DialogTitle className="blog-dialog-title">
+                        Blog Post Preview
+                    </DialogTitle>
+                    <DialogContent dividers sx={{ background: '#f8fafc' }}>
+                        {previewPost && (
+                            <Box sx={{ background: '#fff', borderRadius: 2, overflow: 'hidden' }}>
+                                {(previewPost.image || previewPost.image_url) && (
+                                    <Box
+                                        component="img"
+                                        src={getImageUrl(previewPost.image || previewPost.image_url)}
+                                        alt={previewPost.title}
+                                        sx={{
+                                            width: '100%',
+                                            height: { xs: 220, md: 360 },
+                                            objectFit: 'cover',
+                                            display: 'block',
+                                        }}
+                                    />
+                                )}
+                                <Box sx={{ p: { xs: 2, md: 4 } }}>
+                                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                                        <Chip label={previewPost.status || 'draft'} color={getStatusColor(previewPost.status)} size="small" />
+                                        {previewPost.category && (
+                                            <Chip label={previewPost.category} size="small" variant="outlined" />
+                                        )}
+                                    </Box>
+
+                                    <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, lineHeight: 1.25 }}>
+                                        {previewPost.title || 'Untitled Post'}
+                                    </Typography>
+
+                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                        {previewPost.author || 'Admin'} | {previewPost.read_time || '5 min read'}
+                                    </Typography>
+
+                                    {previewPost.excerpt && (
+                                        <Typography variant="subtitle1" sx={{ color: 'text.secondary', mb: 3, lineHeight: 1.7 }}>
+                                            {previewPost.excerpt}
+                                        </Typography>
+                                    )}
+
+                                    <Box sx={{ borderTop: '1px solid #e5e7eb', pt: 3 }}>
+                                        <Box
+                                            sx={{
+                                                color: '#1f2937',
+                                                lineHeight: 1.8,
+                                                '& p': { mb: 2 },
+                                                '& img': { maxWidth: '100%', borderRadius: 2 },
+                                                '& blockquote': {
+                                                    borderLeft: '4px solid #667eea',
+                                                    m: '16px 0',
+                                                    pl: 2,
+                                                    color: 'text.secondary',
+                                                },
+                                            }}
+                                            dangerouslySetInnerHTML={{ __html: previewPost.content || '<p>No content available.</p>' }}
+                                        />
+                                    </Box>
+
+                                    {previewPost.tags && previewPost.tags.length > 0 && (
+                                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 3 }}>
+                                            {previewPost.tags.map((tag) => (
+                                                <Chip key={tag} label={`#${tag}`} size="small" />
+                                            ))}
+                                        </Box>
+                                    )}
+                                </Box>
+                            </Box>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClosePreview}>Close</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Edit Dialog */}
                 <Dialog
                     open={openDialog}
                     onClose={handleCloseDialog}
                     maxWidth="md"
                     fullWidth
                     className="post-dialog"
+                    sx={{
+                        zIndex: 1601,
+                        '& .MuiDialog-paper': {
+                            mt: { xs: 10, sm: 12 },
+                            mb: 3,
+                            maxHeight: 'calc(100% - 120px)',
+                        },
+                    }}
                 >
-                    <DialogTitle>
-                        {dialogMode === 'create' ? 'Create New Blog Post' : 'Edit Blog Post'}
+                    <DialogTitle className="blog-dialog-title">
+                        Edit Blog Post
                     </DialogTitle>
                     <DialogContent dividers>
                         <Grid container spacing={3}>
@@ -1006,8 +1124,10 @@ const BlogPostManagement = () => {
                                                 value={postForm.status}
                                                 onChange={(e) => handleInputChange('status', e.target.value)}
                                                 label="Status"
+                                                MenuProps={editSelectMenuProps}
                                             >
                                                 <MenuItem value="draft">Draft</MenuItem>
+                                                <MenuItem value="pending">Pending</MenuItem>
                                                 <MenuItem value="published">Published</MenuItem>
                                                 <MenuItem value="scheduled">Scheduled</MenuItem>
                                             </Select>
@@ -1018,7 +1138,7 @@ const BlogPostManagement = () => {
                                                 label="Schedule Date"
                                                 value={postForm.scheduled_date}
                                                 onChange={(date) => handleInputChange('scheduled_date', date)}
-                                                renderInput={(params) => <TextField {...params} fullWidth margin="dense" />}
+                                                slotProps={editDatePickerSlotProps}
                                             />
                                         )}
 
@@ -1028,6 +1148,7 @@ const BlogPostManagement = () => {
                                                 value={postForm.category_id}
                                                 onChange={(e) => handleInputChange('category_id', e.target.value)}
                                                 label="Category"
+                                                MenuProps={editSelectMenuProps}
                                             >
                                                 {categories.map((cat) => (
                                                     <MenuItem key={cat.id} value={cat.id}>
@@ -1058,6 +1179,7 @@ const BlogPostManagement = () => {
                                                 value={postForm.tags}
                                                 onChange={(e) => handleInputChange('tags', e.target.value)}
                                                 label="Select Tags"
+                                                MenuProps={editSelectMenuProps}
                                                 renderValue={(selected) => (
                                                     <Box className="selected-tags">
                                                         {selected.map((value) => (
@@ -1130,10 +1252,10 @@ const BlogPostManagement = () => {
                             onClick={handleSavePost}
                             variant="contained"
                             disabled={loading}
-                            startIcon={dialogMode === 'create' ? <AddIcon /> : <Save />}
+                            startIcon={<Save />}
                             className="save-button"
                         >
-                            {loading ? 'Saving...' : dialogMode === 'create' ? 'Create Post' : 'Update Post'}
+                            {loading ? 'Saving...' : 'Update Post'}
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -1208,7 +1330,7 @@ const BlogPostManagement = () => {
                     open={snackbar.open}
                     autoHideDuration={6000}
                     onClose={handleCloseSnackbar}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
                     <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} elevation={6} variant="filled">
                         {snackbar.message}

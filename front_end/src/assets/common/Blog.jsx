@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import "../css/Blog.scss";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api/api";
+import { getBlogImageUrl } from "../utils/blogImages";
 
 const Blog = () => {
   const navigate = useNavigate();
@@ -36,7 +37,10 @@ const Blog = () => {
         // Fetch blog posts
         const postsResponse = await api.get("/blogPosts");
         if (postsResponse.status === 200) {
-          const postsData = postsResponse.data.blogPosts || postsResponse.data;
+          const allPosts = postsResponse.data.blogPosts || postsResponse.data || [];
+          const postsData = Array.isArray(allPosts)
+            ? allPosts.filter(post => post.status === 'published')
+            : [];
           setPosts(postsData);
           setFilteredPosts(postsData);
         }
@@ -309,11 +313,7 @@ const Blog = () => {
                   >
                     <div className="card-image-wrapper" onClick={() => handleReadMore(post.id)}>
                       <img
-                        src={
-                          post.image
-                            ? `https://api.ceytripz.com/storage/${post.image}`
-                            : 'https://via.placeholder.com/1200x600?text=No+Image'
-                        }
+                        src={getBlogImageUrl(post)}
                         alt={post.title}
                         className="card-image"
                         loading="lazy"

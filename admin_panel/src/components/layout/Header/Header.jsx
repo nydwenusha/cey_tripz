@@ -14,6 +14,13 @@ import {
     Tooltip,
     Divider,
     Chip,
+    Paper,
+    List,
+    ListSubheader,
+    ListItemButton,
+    ListItemText,
+    CircularProgress,
+    ClickAwayListener,
 } from '@mui/material';
 import {
     Menu as MenuIcon,
@@ -26,8 +33,9 @@ import {
     Brightness4,
     Brightness7,
 } from '@mui/icons-material';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './Header.scss';
-import { AuthContext, useAuth } from '../../../services/auth/AuthContext.jsx';
+import { AuthContext } from '../../../services/auth/AuthContext.jsx';
 import api from '../../../services/api/api.js';
 
 const Header = ({
@@ -36,23 +44,114 @@ const Header = ({
     themeMode = 'light',
     sidebarOpen = true  // Add this prop
 }) => {
-
-    const [totalBookings, setTotalBookings] = useState();
     const [todayBookings, setTodayBookings] = useState();
+    const [totalRevenue, setTotalRevenue] = useState(0);
+    const [searchInput, setSearchInput] = useState('');
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchResults, setSearchResults] = useState({
+        bookings: [],
+        customers: [],
+    });
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
-        api.get('/TotalBookings').then(response => {
-            setTotalBookings(response.data.total_bookings);
-        }).catch(error => {
-            console.error('Error fetching total bookings:', error);
-        });
+        let isActive = true;
 
+        const fetchBookingStats = async () => {
+            try {
+                const [todayResponse, revenueResponse] = await Promise.all([
+                    api.get('/TodayBookings'),
+                    api.get('/PaymentStats'),
+                ]);
 
+                if (!isActive) {
+                    return;
+                }
 
-        api.get('/TodayBookings').then(response => {
-            setTodayBookings(response.data.today_bookings);
-        }).catch(error => { console.error('Error fetching today bookings:', error); });
+                setTodayBookings(todayResponse.data.today_bookings);
+                setTotalRevenue(Number(revenueResponse.data?.stats?.total || 0));
+            } catch (error) {
+                console.error('Error fetching booking stats:', error);
+            }
+        };
+
+        fetchBookingStats();
+
+        const intervalId = window.setInterval(fetchBookingStats, 30000);
+        window.addEventListener('focus', fetchBookingStats);
+
+        return () => {
+            isActive = false;
+            window.clearInterval(intervalId);
+            window.removeEventListener('focus', fetchBookingStats);
+        };
     }, []);
+
+    useEffect(() => {
+        const currentSearch = new URLSearchParams(location.search).get('search') || '';
+        setSearchInput(currentSearch);
+    }, [location.pathname, location.search]);
+
+    useEffect(() => {
+        const query = searchInput.trim();
+
+        if (query.length < 2) {
+            setSearchResults({ bookings: [], customers: [] });
+            setSearchLoading(false);
+            return undefined;
+        }
+
+        let isActive = true;
+
+        const timeoutId = window.setTimeout(async () => {
+            setSearchLoading(true);
+
+            try {
+                const [bookingsResponse, customersResponse] = await Promise.all([
+                    api.get('/GetBookings', {
+                        params: {
+                            page: 1,
+                            per_page: 5,
+                            search: query,
+                        },
+                    }),
+                    api.get('/GetCustomers', {
+                        params: {
+                            search: query,
+                        },
+                    }),
+                ]);
+
+                if (!isActive) {
+                    return;
+                }
+
+                setSearchResults({
+                    bookings: (bookingsResponse.data?.bookings || []).slice(0, 5),
+                    customers: (customersResponse.data?.customers || []).slice(0, 5),
+                });
+                setSearchOpen(true);
+            } catch (error) {
+                if (!isActive) {
+                    return;
+                }
+
+                console.error('Error searching admin data:', error);
+                setSearchResults({ bookings: [], customers: [] });
+            } finally {
+                if (isActive) {
+                    setSearchLoading(false);
+                }
+            }
+        }, 300);
+
+        return () => {
+            isActive = false;
+            window.clearTimeout(timeoutId);
+        };
+    }, [searchInput]);
 
     const { user } = useContext(AuthContext);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -97,6 +196,31 @@ const Header = ({
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
+    const hasSearchResults =
+        searchResults.bookings.length > 0 || searchResults.customers.length > 0;
+
+    const navigateToSearchPage = (path, searchValue) => {
+        const trimmedValue = searchValue.trim();
+
+        navigate(trimmedValue ? `${path}?search=${encodeURIComponent(trimmedValue)}` : path);
+        setSearchOpen(false);
+    };
+
+    const handleSearchSubmit = () => {
+        const trimmedQuery = searchInput.trim();
+
+        if (!trimmedQuery) {
+            return;
+        }
+
+        if (location.pathname.startsWith('/customers')) {
+            navigateToSearchPage('/customers', trimmedQuery);
+            return;
+        }
+
+        navigateToSearchPage('/bookings', trimmedQuery);
+    };
+
 
 
 
@@ -131,25 +255,139 @@ const Header = ({
                 </IconButton>
 
                 <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <TextField
-                        placeholder="Search tours, customers, bookings..."
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                            width: { xs: '100%', sm: sidebarOpen ? 320 : 280 }, // Adjust search width
-                            '& .MuiOutlinedInput-root': {
-                                borderRadius: 20,
-                                backgroundColor: 'background.default',
-                            },
-                        }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon sx={{ color: 'text.secondary' }} />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                    <ClickAwayListener onClickAway={() => setSearchOpen(false)}>
+                        <Box sx={{ position: 'relative', width: { xs: '100%', sm: sidebarOpen ? 320 : 280 } }}>
+                            <TextField
+                                placeholder="Search tours, customers, bookings..."
+                                variant="outlined"
+                                size="small"
+                                value={searchInput}
+                                onChange={(event) => {
+                                    setSearchInput(event.target.value);
+                                    setSearchOpen(true);
+                                }}
+                                onFocus={() => {
+                                    if (searchInput.trim().length >= 2) {
+                                        setSearchOpen(true);
+                                    }
+                                }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault();
+                                        handleSearchSubmit();
+                                    }
+                                }}
+                                sx={{
+                                    width: '100%',
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 20,
+                                        backgroundColor: 'background.default',
+                                    },
+                                }}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon sx={{ color: 'text.secondary' }} />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+
+                            {searchOpen && searchInput.trim().length >= 2 && (
+                                <Paper
+                                    elevation={4}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 'calc(100% + 8px)',
+                                        left: 0,
+                                        right: 0,
+                                        zIndex: 1602,
+                                        borderRadius: 2,
+                                        maxHeight: 420,
+                                        overflowY: 'auto',
+                                        overflowX: 'hidden',
+                                        overscrollBehavior: 'contain',
+                                    }}
+                                >
+                                    {searchLoading ? (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                                            <CircularProgress size={24} />
+                                        </Box>
+                                    ) : (
+                                        <List sx={{ py: 0 }}>
+                                            <ListSubheader sx={{ bgcolor: 'background.paper', fontWeight: 700 }}>
+                                                Quick Search
+                                            </ListSubheader>
+                                            <ListItemButton onClick={() => navigateToSearchPage('/bookings', searchInput)}>
+                                                <ListItemText
+                                                    primary={`Search bookings for "${searchInput.trim()}"`}
+                                                    secondary="View matching booking records"
+                                                />
+                                            </ListItemButton>
+                                            <ListItemButton onClick={() => navigateToSearchPage('/customers', searchInput)}>
+                                                <ListItemText
+                                                    primary={`Search customers for "${searchInput.trim()}"`}
+                                                    secondary="View matching customer records"
+                                                />
+                                            </ListItemButton>
+
+                                            {searchResults.bookings.length > 0 && (
+                                                <ListSubheader sx={{ bgcolor: 'background.paper', fontWeight: 700 }}>
+                                                    Bookings
+                                                </ListSubheader>
+                                            )}
+                                            {searchResults.bookings.map((booking) => (
+                                                <ListItemButton
+                                                    key={`booking-${booking.id}`}
+                                                    onClick={() =>
+                                                        navigateToSearchPage(
+                                                            '/bookings',
+                                                            booking.customer_email || booking.customer_name || searchInput
+                                                        )
+                                                    }
+                                                >
+                                                    <ListItemText
+                                                        primary={`${booking.customer_name} • ${booking.vehicle_type}`}
+                                                        secondary={`#${booking.id} • ${booking.customer_email} • ${booking.pickup_location} to ${booking.drop_location}`}
+                                                    />
+                                                </ListItemButton>
+                                            ))}
+
+                                            {searchResults.customers.length > 0 && (
+                                                <ListSubheader sx={{ bgcolor: 'background.paper', fontWeight: 700 }}>
+                                                    Customers
+                                                </ListSubheader>
+                                            )}
+                                            {searchResults.customers.map((customer) => (
+                                                <ListItemButton
+                                                    key={`customer-${customer.id}`}
+                                                    onClick={() =>
+                                                        navigateToSearchPage(
+                                                            '/customers',
+                                                            customer.customer_email || customer.customer_name || searchInput
+                                                        )
+                                                    }
+                                                >
+                                                    <ListItemText
+                                                        primary={customer.customer_name}
+                                                        secondary={`${customer.customer_email} • ${customer.customer_phone || 'No phone'}`}
+                                                    />
+                                                </ListItemButton>
+                                            ))}
+
+                                            {!hasSearchResults && (
+                                                <Box sx={{ px: 2, py: 2.5 }}>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        No matching customers or bookings found.
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                        </List>
+                                    )}
+                                </Paper>
+                            )}
+                        </Box>
+                    </ClickAwayListener>
 
                     <Box sx={{
                         display: {
@@ -159,7 +397,15 @@ const Header = ({
                         gap: 1
                     }}>
                         <Chip label={`Today: ${todayBookings || 0} Bookings`} size="small" color="primary" variant="outlined" />
-                        <Chip label="Revenue: $12,450" size="small" color="success" variant="outlined" />
+                        <Chip
+                            label={`Revenue: $${totalRevenue.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            })}`}
+                            size="small"
+                            color="success"
+                            variant="outlined"
+                        />
                     </Box>
                 </Box>
 
