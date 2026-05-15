@@ -46,13 +46,13 @@ import {
   Email,
   ErrorOutline,
   Edit,
+  Add,
   MoreVert,
   Payment,
   Pending,
   Print,
   Receipt,
   Refresh,
-  Save,
   Schedule,
   Search,
   TrendingDown,
@@ -409,6 +409,12 @@ const Payments = () => {
       return;
     }
 
+    if (action === 'Mark as Complete') {
+      handleMarkAsComplete(selectedPayment);
+      handleMenuClose();
+      return;
+    }
+
     handleMenuClose();
   };
 
@@ -743,6 +749,48 @@ const Payments = () => {
     }
   };
 
+  const handleMarkAsComplete = async (payment) => {
+    if (!payment?.recordId) {
+      return;
+    }
+
+    if (payment.status === 'completed') {
+      showSnackbar('Payment is already completed.', 'info');
+      return;
+    }
+
+    setSaveLoading(true);
+
+    try {
+      const payload = {
+        amount: Number(payment.amount),
+        payment_method: payment.paymentMethod,
+        status: 'completed',
+        transaction_id: payment.transactionId === 'Not assigned' ? null : payment.transactionId,
+        payment_date: payment.paymentDate || null,
+        due_date: payment.dueDate || null,
+        description: payment.description === 'N/A' ? null : payment.description,
+      };
+
+      const response = await api.put(`/UpdatePayment/${payment.recordId}`, payload);
+      const updatedPayment = mapPayment(response.data.payment);
+
+      if (searchTerm !== '' || filterStatus !== 'all' || filterMethod !== 'all') {
+        await refreshPaymentsPage();
+      } else {
+        syncPaymentState(updatedPayment);
+      }
+
+      await refreshPaymentStats();
+      showSnackbar(response.data.message || 'Payment marked as completed.');
+    } catch (error) {
+      console.error('Error marking payment as complete:', error);
+      showSnackbar(error.response?.data?.message || 'Failed to mark payment as completed.', 'error');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   const getStatusConfig = (status) => {
     switch (status) {
       case 'completed':
@@ -834,9 +882,9 @@ const Payments = () => {
         title="Payment Management"
         subtitle="View and manage all your payments in one place"
         primaryAction={{
-          label: 'Save',
+          label: 'Add',
           onClick: handleOpenSaveDialog,
-          icon: <Save />
+          icon: <Add />
         }}
         secondaryActions={[
           {
@@ -1134,14 +1182,6 @@ const Payments = () => {
         <MenuItem onClick={() => handleAction('View Receipt')}>
           <Receipt fontSize="small" className="menu-icon" />
           View Receipt
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('Process Refund')}>
-          <Refresh fontSize="small" className="menu-icon" />
-          Process Refund
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('Resend Invoice')}>
-          <Payment fontSize="small" className="menu-icon" />
-          Resend Invoice
         </MenuItem>
         <MenuItem onClick={() => handleAction('Mark as Complete')}>
           <CheckCircle fontSize="small" className="menu-icon" />

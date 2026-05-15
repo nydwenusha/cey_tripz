@@ -15,6 +15,13 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 128M
+    php_value memory_limit 256M
+    php_value max_file_uploads 10
+</IfModule>
+
 <IfModule mod_headers.c>
     SetEnvIf Origin "^https://(www\.)?(ceytripz|admin\.ceytripz)\.com$" ORIGIN_OK=$0
     Header always set Access-Control-Allow-Origin "%{ORIGIN_OK}e" env=ORIGIN_OK

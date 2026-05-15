@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './../css/ShareExperience.scss';
 import { Carousel } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,12 @@ const initialFormData = {
   images: [],
 };
 
-const travelerStories = [
+const MAX_IMAGE_SIZE_MB = 10;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+const MAX_IMAGE_COUNT = 10;
+const FALLBACK_STORY_IMAGE = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+
+const fallbackTravelerStories = [
   {
     id: 1,
     name: 'Anika & Joel',
@@ -79,11 +84,88 @@ const travelerStories = [
   }
 ];
 
+const mapReviewToTravelerStory = (review) => {
+  const images = Array.isArray(review.images) ? review.images : [];
+  const coverImage = images.find((image) => image.is_cover) || images[0];
+  const rating = Number(review.rating) || 5;
+
+  return {
+    id: `review-${review.id}`,
+    reviewId: review.id,
+    name: review.customer_name || 'Cey Tripz Traveler',
+    story: review.comment || '',
+    stars: Math.max(1, Math.min(5, Math.round(rating))),
+    location: review.tour_name || 'Sri Lanka',
+    imageUrl: coverImage?.image_url || FALLBACK_STORY_IMAGE,
+    source: 'published-review',
+  };
+};
+
 const ShareExperience = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [publishedStories, setPublishedStories] = useState([]);
   const navigate = useNavigate();
+  const travelerStories = publishedStories.length > 0 ? publishedStories : fallbackTravelerStories;
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchPublishedReviews = async () => {
+      try {
+        const response = await api.get('/reviews', {
+          params: {
+            limit: 8,
+          },
+        });
+        const reviews = Array.isArray(response.data?.reviews) ? response.data.reviews : [];
+        const stories = reviews
+          .filter((review) => review.status === 'published')
+          .map(mapReviewToTravelerStory)
+          .filter((story) => story.story.trim());
+
+        if (isActive) {
+          setPublishedStories(stories);
+        }
+      } catch (error) {
+        console.error('Error loading published traveler stories:', error);
+      }
+    };
+
+    fetchPublishedReviews();
+
+    const intervalId = window.setInterval(fetchPublishedReviews, 30000);
+    window.addEventListener('focus', fetchPublishedReviews);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', fetchPublishedReviews);
+    };
+  }, []);
+
+  const getFeedbackAlertClass = () => {
+    if (feedback.type === 'success') {
+      return 'alert-success';
+    }
+
+    if (feedback.type === 'warning') {
+      return 'alert-warning';
+    }
+
+    return 'alert-danger';
+  };
+
+  const buildImageSizeWarning = (files) => {
+    const fileNames = files.slice(0, 3).map((file) => file.name).join(', ');
+    const remainingCount = files.length - 3;
+    const fileList = fileNames
+      ? ` Remove or resize: ${fileNames}${remainingCount > 0 ? ` and ${remainingCount} more` : ''}.`
+      : '';
+
+    return `Each photo must be less than ${MAX_IMAGE_SIZE_MB} MB.${fileList}`;
+  };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -96,22 +178,44 @@ const ShareExperience = () => {
 
   const handleFilesChange = (event) => {
     const selectedFiles = Array.from(event.target.files || []);
+    const oversizedFiles = selectedFiles.filter((file) => file.size > MAX_IMAGE_SIZE_BYTES);
+    const validFiles = selectedFiles.filter((file) => file.size <= MAX_IMAGE_SIZE_BYTES);
 
-    setFormData((prev) => {
-      const mergedFiles = [...prev.images, ...selectedFiles];
-      const uniqueFiles = mergedFiles.filter((file, index, array) => {
-        return index === array.findIndex((candidate) => (
-          candidate.name === file.name &&
-          candidate.size === file.size &&
-          candidate.lastModified === file.lastModified
-        ));
+    if (oversizedFiles.length > 0) {
+      setFeedback({
+        type: 'warning',
+        message: buildImageSizeWarning(oversizedFiles),
       });
+    } else if (feedback.type === 'warning') {
+      setFeedback({ type: '', message: '' });
+    }
 
-      return {
-        ...prev,
-        images: uniqueFiles,
-      };
+    if (validFiles.length === 0) {
+      event.target.value = '';
+      return;
+    }
+
+    const mergedFiles = [...formData.images, ...validFiles];
+    const uniqueFiles = mergedFiles.filter((file, index, array) => {
+      return index === array.findIndex((candidate) => (
+        candidate.name === file.name &&
+        candidate.size === file.size &&
+        candidate.lastModified === file.lastModified
+      ));
     });
+    const limitedFiles = uniqueFiles.slice(0, MAX_IMAGE_COUNT);
+
+    if (uniqueFiles.length > MAX_IMAGE_COUNT) {
+      setFeedback({
+        type: 'warning',
+        message: `You can upload up to ${MAX_IMAGE_COUNT} photos per review.`,
+      });
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      images: limitedFiles,
+    }));
 
     event.target.value = '';
   };
@@ -138,8 +242,19 @@ const ShareExperience = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setSubmitting(true);
     setFeedback({ type: '', message: '' });
+
+    const oversizedFiles = formData.images.filter((file) => file.size > MAX_IMAGE_SIZE_BYTES);
+
+    if (oversizedFiles.length > 0) {
+      setFeedback({
+        type: 'warning',
+        message: buildImageSizeWarning(oversizedFiles),
+      });
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const payload = new FormData();
@@ -168,10 +283,13 @@ const ShareExperience = () => {
 
       const backendErrors = error.response?.data?.errors || {};
       const firstErrorMessage = Object.values(backendErrors).flat().find(Boolean);
+      const requestTooLargeMessage = error.response?.status === 413
+        ? `Your selected photos are too large together. Each photo must be less than ${MAX_IMAGE_SIZE_MB} MB.`
+        : '';
 
       setFeedback({
         type: 'error',
-        message: firstErrorMessage || error.response?.data?.message || 'Unable to submit your review right now.',
+        message: firstErrorMessage || requestTooLargeMessage || error.response?.data?.message || 'Unable to submit your review right now.',
       });
     } finally {
       setSubmitting(false);
@@ -206,7 +324,7 @@ const ShareExperience = () => {
               </p>
 
               {feedback.message && (
-                <div className={`alert ${feedback.type === 'success' ? 'alert-success' : 'alert-danger'} mb-4`}>
+                <div className={`alert ${getFeedbackAlertClass()} mb-4`}>
                   {feedback.message}
                 </div>
               )}
@@ -297,6 +415,9 @@ const ShareExperience = () => {
                           : 'No files chosen'}
                       </span>
                     </div>
+                    <p className="file-size-warning">
+                      Photos must be less than {MAX_IMAGE_SIZE_MB} MB each.
+                    </p>
                     {formData.images.length > 0 && (
                       <div className="selected-files-list">
                         {formData.images.map((file) => (
@@ -362,7 +483,7 @@ const ShareExperience = () => {
                             className="story-image"
                             onError={(event) => {
                               event.target.onerror = null;
-                              event.target.src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+                              event.target.src = FALLBACK_STORY_IMAGE;
                             }}
                           />
                           <div className="story-image-overlay">

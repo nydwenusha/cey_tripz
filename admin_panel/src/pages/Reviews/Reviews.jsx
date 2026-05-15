@@ -1,5 +1,5 @@
 ﻿// Reviews.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Paper,
   Table,
@@ -44,7 +44,6 @@ import {
   Divider,
   Input,
   FormHelperText,
-  Stack,
   Card,
   CardMedia,
   CardContent,
@@ -62,14 +61,12 @@ import {
   ThumbUp,
   ThumbDown,
   Flag,
-  Reply,
   CheckCircle,
   Block,
   Refresh,
   Download,
   Print,
   Email,
-  Person,
   CalendarToday,
   ChatBubble,
   AutoAwesome,
@@ -91,10 +88,8 @@ import {
   Image,
   StarRate,
   DeleteForever,
-  Photo,
   RemoveCircle,
-  Report,
-  Security
+  Report
 } from '@mui/icons-material';
 import './Reviews.scss';
 import MainLayout from '../../MainLayout';
@@ -215,16 +210,6 @@ const Reviews = () => {
     images: []
   });
   const [bookingOptions, setBookingOptions] = useState([]);
-  const [stats] = useState({
-    total: 125,
-    published: 98,
-    pending: 15,
-    reported: 12,
-    averageRating: 4.2,
-    responseRate: 78,
-    thisMonth: 24,
-    lastMonth: 31
-  });
 
   useEffect(() => {
     let isActive = true;
@@ -423,6 +408,24 @@ const Reviews = () => {
     }
   };
 
+  const normalizeReviewStatus = (status) => (status === 'reported' ? 'rejected' : status);
+
+  const buildReviewUpdatePayload = (review, status = review.status) => {
+    const customerEmail = review.customer.email && review.customer.email !== 'Not provided'
+      ? review.customer.email.trim()
+      : null;
+
+    return {
+      booking_id: review.bookingId || null,
+      customer_name: review.customer.name.trim(),
+      customer_email: customerEmail,
+      tour_name: (review.tourName || review.tour?.name || '').trim(),
+      rating: Math.max(1, Math.min(5, Math.round(review.rating || 0))),
+      comment: review.comment.trim(),
+      status: normalizeReviewStatus(status),
+    };
+  };
+
   // Handle edit form submit
   const handleEditSubmit = async () => {
     if (!selectedReview) return;
@@ -435,7 +438,7 @@ const Reviews = () => {
         tour_name: editForm.tourName.trim(),
         rating: Math.max(1, Math.min(5, Math.round(editForm.rating || 0))),
         comment: editForm.comment.trim(),
-        status: editForm.status === 'reported' ? 'rejected' : editForm.status,
+        status: normalizeReviewStatus(editForm.status),
       };
 
       const response = await api.put(`/UpdateReview/${selectedReview.recordId}`, payload);
@@ -552,11 +555,6 @@ const Reviews = () => {
         handleViewImages(selectedReview);
         shouldClearSelectedReview = false;
         break;
-      case 'manage-images':
-        setDialogType('manage-images');
-        setOpenDialog(true);
-        shouldClearSelectedReview = false;
-        break;
       case 'publish':
         updateReviewStatus(selectedReview.id, 'published');
         break;
@@ -567,11 +565,6 @@ const Reviews = () => {
         if (window.confirm('Are you sure you want to delete this review?')) {
           setReviews(reviews.filter(r => r.id !== selectedReview.id));
         }
-        break;
-      case 'reply':
-        setDialogType('reply');
-        setOpenDialog(true);
-        shouldClearSelectedReview = false;
         break;
       case 'report':
         handleReportReview(selectedReview.id);
@@ -606,10 +599,26 @@ const Reviews = () => {
     setSelectedImageIndex(0);
   };
 
-  const updateReviewStatus = (id, status) => {
-    setReviews(reviews.map(review =>
-      review.id === id ? { ...review, status } : review
-    ));
+  const updateReviewStatus = async (id, status) => {
+    const reviewToUpdate = reviews.find((review) => review.id === id);
+
+    if (!reviewToUpdate) return;
+
+    try {
+      const response = await api.put(
+        `/UpdateReview/${reviewToUpdate.recordId}`,
+        buildReviewUpdatePayload(reviewToUpdate, status)
+      );
+      const updatedReview = mapReviewFromApi(response.data.review);
+
+      setReviews((prev) => prev.map((review) => (
+        review.id === id ? updatedReview : review
+      )));
+      showSnackbar(response.data?.message || 'Review status updated successfully.');
+    } catch (error) {
+      console.error('Failed to update review status:', error);
+      showSnackbar(error.response?.data?.message || 'Unable to update review status right now.', 'error');
+    }
   };
 
   const handleReportReview = (id) => {
@@ -663,6 +672,33 @@ const Reviews = () => {
     const total = helpful + notHelpful;
     return total > 0 ? Math.round((helpful / total) * 100) : 0;
   };
+
+  const stats = useMemo(() => {
+    const validRatings = reviews
+      .map((review) => Number(review.rating))
+      .filter((rating) => Number.isFinite(rating) && rating > 0);
+    const ratingTotal = validRatings.reduce((sum, rating) => sum + rating, 0);
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    return {
+      total: reviews.length,
+      published: reviews.filter((review) => review.status === 'published').length,
+      pending: reviews.filter((review) => review.status === 'pending').length,
+      reported: reviews.filter((review) => review.status === 'reported').length,
+      averageRating: validRatings.length > 0 ? Number((ratingTotal / validRatings.length).toFixed(1)) : 0,
+      responseRate: 78,
+      thisMonth: reviews.filter((review) => {
+        const reviewDate = new Date(review.date);
+        return !Number.isNaN(reviewDate.getTime()) && reviewDate >= thisMonthStart;
+      }).length,
+      lastMonth: reviews.filter((review) => {
+        const reviewDate = new Date(review.date);
+        return !Number.isNaN(reviewDate.getTime()) && reviewDate >= lastMonthStart && reviewDate < thisMonthStart;
+      }).length
+    };
+  }, [reviews]);
 
   // Stats data
   const statCards = [
@@ -1027,24 +1063,14 @@ const Reviews = () => {
             View Details
           </MenuItem>
           {selectedReview?.images && selectedReview.images.length > 0 && (
-            <>
-              <MenuItem onClick={() => handleAction('view-images')}>
-                <PhotoLibrary fontSize="small" className="menu-icon" />
-                View Images ({selectedReview.images.length})
-              </MenuItem>
-              <MenuItem onClick={() => handleAction('manage-images')}>
-                <Security fontSize="small" className="menu-icon" />
-                Manage Customer Photos
-              </MenuItem>
-            </>
+            <MenuItem onClick={() => handleAction('view-images')}>
+              <PhotoLibrary fontSize="small" className="menu-icon" />
+              View Images ({selectedReview.images.length})
+            </MenuItem>
           )}
           <MenuItem onClick={() => handleAction('edit')}>
             <Edit fontSize="small" className="menu-icon" />
             Edit Review
-          </MenuItem>
-          <MenuItem onClick={() => handleAction('reply')}>
-            <Reply fontSize="small" className="menu-icon" />
-            Reply to Review
           </MenuItem>
           {selectedReview?.status === 'pending' && (
             <MenuItem onClick={() => handleAction('publish')}>
@@ -1447,146 +1473,12 @@ const Reviews = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Manage Customer Photos Dialog */}
-        <Dialog open={openDialog && dialogType === 'manage-images'} onClose={() => setOpenDialog(false)} maxWidth="lg" fullWidth>
-          <DialogTitle>
-            <Security className="dialog-icon" />
-            Manage Customer Photos
-            {selectedReview && (
-              <Typography variant="caption" color="textSecondary" display="block" mt={1}>
-                Review: {selectedReview.id} â€¢ Customer: {selectedReview.customer.name}
-              </Typography>
-            )}
-          </DialogTitle>
-          <DialogContent>
-            {selectedReview && (
-              <Box sx={{ mt: 2 }}>
-                <Alert severity="warning" sx={{ mb: 3 }}>
-                  <Typography variant="body2">
-                    <strong>Warning:</strong> Deleting customer photos is permanent. Customers may have uploaded these photos as part of their review experience. Consider whether deletion is necessary.
-                  </Typography>
-                </Alert>
-
-                <Typography variant="h6" gutterBottom>
-                  Customer Uploaded Photos ({selectedReview.images.filter(img => img.isCustomerUploaded).length})
-                </Typography>
-                
-                {selectedReview.images.filter(img => img.isCustomerUploaded).length > 0 ? (
-                  <Grid container spacing={2}>
-                    {selectedReview.images.filter(img => img.isCustomerUploaded).map((image) => (
-                      <Grid item xs={12} sm={6} md={4} key={image.id}>
-                        <Card variant="outlined" sx={{ position: 'relative' }}>
-                          <CardMedia
-                            component="img"
-                            height="160"
-                            image={image.url}
-                            alt={image.title}
-                            sx={{ objectFit: 'cover' }}
-                          />
-                          <CardContent sx={{ p: 2 }}>
-                            <Typography variant="subtitle1" fontWeight="medium">
-                              {image.title}
-                            </Typography>
-                            <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                              <Chip
-                                label="Customer Upload"
-                                size="small"
-                                color="primary"
-                                variant="outlined"
-                                icon={<Person fontSize="small" />}
-                              />
-                              <Chip
-                                label={formatDate(image.uploadDate)}
-                                size="small"
-                                variant="outlined"
-                                icon={<CalendarToday fontSize="small" />}
-                              />
-                            </Stack>
-                          </CardContent>
-                          <CardActions sx={{ p: 2, pt: 0 }}>
-                            <Button
-                              fullWidth
-                              variant="contained"
-                              color="error"
-                              startIcon={<DeleteForever />}
-                              onClick={() => handleOpenDeleteImageDialog(image)}
-                            >
-                              Delete Photo
-                            </Button>
-                          </CardActions>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Alert severity="info" icon={<Photo />}>
-                    No customer uploaded photos found for this review.
-                  </Alert>
-                )}
-
-                <Divider sx={{ my: 3 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  Photo Management Guidelines
-                </Typography>
-                <Alert severity="info">
-                  <Typography variant="body2">
-                    <strong>When to delete customer photos:</strong>
-                  </Typography>
-                  <ul style={{ marginTop: 8, marginBottom: 0, paddingLeft: 20 }}>
-                    <li>Inappropriate or offensive content</li>
-                    <li>Violation of community guidelines</li>
-                    <li>Poor quality or irrelevant images</li>
-                    <li>Copyright infringement concerns</li>
-                  </ul>
-                </Alert>
-              </Box>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseViewDialog}>Close</Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Reply Dialog */}
-        <Dialog open={openDialog && dialogType === 'reply'} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-          <DialogTitle>
-            <Reply className="dialog-icon" />
-            Reply to Review
-          </DialogTitle>
-          <DialogContent>
-            {selectedReview && (
-              <div className="reply-form">
-                <Typography variant="body1" paragraph>
-                  Replying to review by {selectedReview.customer.name}
-                </Typography>
-                <Typography variant="body2" color="textSecondary" paragraph>
-                  Original Review: "{selectedReview.comment.substring(0, 100)}..."
-                </Typography>
-                <TextField
-                  multiline
-                  rows={6}
-                  fullWidth
-                  label="Your Response"
-                  variant="outlined"
-                  defaultValue={selectedReview.response || ''}
-                />
-              </div>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseEditDialog}>Cancel</Button>
-            <Button variant="contained" onClick={() => {
-              console.log('Reply sent');
-              setOpenDialog(false);
-            }}>
-              Send Response
-            </Button>
-          </DialogActions>
-        </Dialog>
-
         {/* Delete Image Confirmation Dialog */}
-        <Dialog open={openDeleteImageDialog} onClose={handleCloseDeleteImageDialog}>
+        <Dialog
+          open={openDeleteImageDialog}
+          onClose={handleCloseDeleteImageDialog}
+          sx={{ zIndex: 2400 }}
+        >
           <DialogTitle>
             <DeleteForever className="dialog-icon" color="error" />
             Delete Customer Photo
@@ -1643,196 +1535,119 @@ const Reviews = () => {
         <Modal
           open={openImageGallery}
           onClose={handleCloseImageGallery}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            p: 2
-          }}
+          className="review-image-gallery-modal"
         >
-          <Box sx={{
-            position: 'relative',
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            boxShadow: 24,
-            maxWidth: '90vw',
-            maxHeight: '90vh',
-            overflow: 'hidden'
-          }}>
-            {/* Close button */}
-            <IconButton
-              onClick={handleCloseImageGallery}
-              sx={{
-                position: 'absolute',
-                top: 16,
-                right: 16,
-                bgcolor: 'rgba(0,0,0,0.5)',
-                color: 'white',
-                zIndex: 1,
-                '&:hover': {
-                  bgcolor: 'rgba(0,0,0,0.7)'
-                }
-              }}
-            >
-              <Close />
-            </IconButton>
-
-            {/* Delete button for customer photos */}
-            {selectedReviewImages[selectedImageIndex]?.isCustomerUploaded && (
-              <IconButton
-                onClick={() => handleOpenDeleteImageDialog(selectedReviewImages[selectedImageIndex])}
-                sx={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 60,
-                  bgcolor: 'rgba(220, 53, 69, 0.8)',
-                  color: 'white',
-                  zIndex: 1,
-                  '&:hover': {
-                    bgcolor: 'rgba(220, 53, 69, 1)'
-                  }
-                }}
-              >
-                <DeleteForever />
-              </IconButton>
-            )}
-
-            {/* Navigation buttons */}
-            {selectedReviewImages.length > 1 && (
-              <>
-                <IconButton
-                  onClick={handlePrevImage}
-                  sx={{
-                    position: 'absolute',
-                    left: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    bgcolor: 'rgba(0,0,0,0.5)',
-                    color: 'white',
-                    zIndex: 1,
-                    '&:hover': {
-                      bgcolor: 'rgba(0,0,0,0.7)'
-                    }
-                  }}
-                >
-                  <ArrowBack />
-                </IconButton>
-                <IconButton
-                  onClick={handleNextImage}
-                  sx={{
-                    position: 'absolute',
-                    right: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    bgcolor: 'rgba(0,0,0,0.5)',
-                    color: 'white',
-                    zIndex: 1,
-                    '&:hover': {
-                      bgcolor: 'rgba(0,0,0,0.7)'
-                    }
-                  }}
-                >
-                  <ArrowForward />
-                </IconButton>
-              </>
-            )}
-
-            {/* Current image */}
+          <Box
+            className="review-image-gallery"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Review image gallery"
+          >
             {selectedReviewImages[selectedImageIndex] && (
               <>
-                <img
-                  src={selectedReviewImages[selectedImageIndex].url}
-                  alt={selectedReviewImages[selectedImageIndex].title}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '80vh',
-                    display: 'block',
-                    margin: '0 auto'
-                  }}
-                />
-                
-                {/* Image info */}
-                <Box sx={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  bgcolor: 'rgba(0,0,0,0.7)',
-                  color: 'white',
-                  p: 2
-                }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="h6">
-                        {selectedReviewImages[selectedImageIndex].title}
-                      </Typography>
-                      <Typography variant="body2">
-                        Uploaded by: {selectedReviewImages[selectedImageIndex].uploadedBy}
-                        {selectedReviewImages[selectedImageIndex].isCustomerUploaded && (
-                          <Chip
-                            label="Customer Photo"
-                            size="small"
-                            color="primary"
-                            sx={{ ml: 1 }}
-                          />
-                        )}
-                      </Typography>
-                    </Box>
-                    <Typography variant="caption">
-                      Image {selectedImageIndex + 1} of {selectedReviewImages.length}
+                <Box className="gallery-toolbar">
+                  <Box className="gallery-title-group">
+                    <Typography className="gallery-title" component="h2">
+                      {selectedReviewImages[selectedImageIndex].title}
                     </Typography>
+                    <Box className="gallery-meta">
+                      <Typography component="span">
+                        Uploaded by {selectedReviewImages[selectedImageIndex].uploadedBy}
+                      </Typography>
+                      {selectedReviewImages[selectedImageIndex].isCustomerUploaded && (
+                        <Chip
+                          label="Customer Photo"
+                          size="small"
+                          className="gallery-chip"
+                        />
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Box className="gallery-actions">
+                    {selectedReviewImages[selectedImageIndex].isCustomerUploaded && (
+                      <Tooltip title="Delete customer photo">
+                        <IconButton
+                          onClick={() => handleOpenDeleteImageDialog(selectedReviewImages[selectedImageIndex])}
+                          className="gallery-icon-button gallery-delete-button"
+                          size="small"
+                          aria-label="Delete customer photo"
+                        >
+                          <DeleteForever />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    <Tooltip title="Close gallery">
+                      <IconButton
+                        onClick={handleCloseImageGallery}
+                        className="gallery-icon-button"
+                        size="small"
+                        aria-label="Close gallery"
+                      >
+                        <Close />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                 </Box>
 
-                {/* Thumbnail strip */}
-                {selectedReviewImages.length > 1 && (
-                  <Box sx={{
-                    display: 'flex',
-                    gap: 1,
-                    p: 2,
-                    overflowX: 'auto',
-                    bgcolor: 'background.default'
-                  }}>
-                    {selectedReviewImages.map((image, index) => (
-                      <Box key={image.id} sx={{ position: 'relative' }}>
-                        <img
-                          src={image.url}
-                          alt={image.title}
+                <Box className="gallery-stage">
+                  {selectedReviewImages.length > 1 && (
+                    <>
+                      <IconButton
+                        onClick={handlePrevImage}
+                        className="gallery-nav gallery-nav-prev"
+                        aria-label="Previous image"
+                      >
+                        <ArrowBack />
+                      </IconButton>
+                      <IconButton
+                        onClick={handleNextImage}
+                        className="gallery-nav gallery-nav-next"
+                        aria-label="Next image"
+                      >
+                        <ArrowForward />
+                      </IconButton>
+                    </>
+                  )}
+
+                  <img
+                    src={selectedReviewImages[selectedImageIndex].url}
+                    alt={selectedReviewImages[selectedImageIndex].title}
+                    className="gallery-main-image"
+                  />
+                </Box>
+
+                <Box className="gallery-footer">
+                  <Typography className="gallery-counter">
+                    Image {selectedImageIndex + 1} of {selectedReviewImages.length}
+                  </Typography>
+
+                  {selectedReviewImages.length > 1 && (
+                    <Box className="gallery-thumbnails" aria-label="Image thumbnails">
+                      {selectedReviewImages.map((image, index) => (
+                        <Box
+                          key={image.id}
+                          component="button"
+                          type="button"
+                          className={`gallery-thumbnail${index === selectedImageIndex ? ' is-active' : ''}`}
                           onClick={() => setSelectedImageIndex(index)}
-                          style={{
-                            width: 80,
-                            height: 60,
-                            objectFit: 'cover',
-                            cursor: 'pointer',
-                            opacity: index === selectedImageIndex ? 1 : 0.5,
-                            border: index === selectedImageIndex ? '2px solid #1976d2' : 'none',
-                            borderRadius: 4
-                          }}
-                        />
-                        {image.isCustomerUploaded && (
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              top: 2,
-                              right: 2,
-                              bgcolor: 'primary.main',
-                              color: 'white',
-                              borderRadius: '50%',
-                              width: 16,
-                              height: 16,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '10px'
-                            }}
-                          >
-                            C
-                          </Box>
-                        )}
-                      </Box>
-                    ))}
-                  </Box>
-                )}
+                          aria-label={`View image ${index + 1}`}
+                          aria-current={index === selectedImageIndex ? 'true' : undefined}
+                        >
+                          <img
+                            src={image.url}
+                            alt={image.title}
+                          />
+                          {image.isCustomerUploaded && (
+                            <Box className="thumbnail-badge">
+                              C
+                            </Box>
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
               </>
             )}
           </Box>

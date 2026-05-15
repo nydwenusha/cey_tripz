@@ -1,0 +1,30 @@
+CREATE TABLE IF NOT EXISTS `vehicles` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `type` VARCHAR(100) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+  `category` VARCHAR(100) NOT NULL,
+  `daily_rate` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `weekly_rate` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `monthly_rate` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `fuel_type` VARCHAR(50) NOT NULL,
+  `transmission` VARCHAR(50) NOT NULL,
+  `year` SMALLINT UNSIGNED DEFAULT NULL,
+  `color` VARCHAR(100) DEFAULT NULL,
+  `mileage` VARCHAR(50) DEFAULT NULL,
+  `engine` VARCHAR(50) NOT NULL,
+  `capacity` INT UNSIGNED NOT NULL DEFAULT 1,
+  `tags` JSON DEFAULT NULL,
+  `featured` TINYINT(1) NOT NULL DEFAULT 0,
+  `images` JSON DEFAULT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `vehicles_status_index` (`status`),
+  KEY `vehicles_featured_index` (`featured`),
+  KEY `vehicles_type_index` (`type`),
+  KEY `vehicles_category_index` (`category`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
