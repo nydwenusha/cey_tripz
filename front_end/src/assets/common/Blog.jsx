@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import "../css/Blog.scss";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api/api";
+import { getBlogImageUrl } from "../utils/blogImages";
 
 const Blog = () => {
   const navigate = useNavigate();
@@ -309,11 +310,7 @@ const Blog = () => {
                   >
                     <div className="card-image-wrapper" onClick={() => handleReadMore(post.id)}>
                       <img
-                        src={
-                          post.image
-                            ? `https://api.ceytripz.com/storage/${post.image}`
-                            : 'https://via.placeholder.com/1200x600?text=No+Image'
-                        }
+                        src={getBlogImageUrl(post)}
                         alt={post.title}
                         className="card-image"
                         loading="lazy"

@@ -30,6 +30,25 @@ class ReviewController extends Controller
         ]);
     }
 
+    public function publicIndex(Request $request): JsonResponse
+    {
+        $limit = min(max((int) $request->query('limit', 8), 1), 24);
+
+        $reviews = Review::with('images')
+            ->where('status', 'published')
+            ->orderByDesc('updated_at')
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'reviews' => $reviews->map(function (Review $review) {
+                return $this->transformReview($review);
+            })->values(),
+        ]);
+    }
+
     public function bookingOptions(): JsonResponse
     {
         $bookings = Booking::query()

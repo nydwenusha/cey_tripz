@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './../css/ShareExperience.scss';
 import { Carousel } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -15,8 +15,9 @@ const initialFormData = {
 const MAX_IMAGE_SIZE_MB = 10;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 const MAX_IMAGE_COUNT = 10;
+const FALLBACK_STORY_IMAGE = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
 
-const travelerStories = [
+const fallbackTravelerStories = [
   {
     id: 1,
     name: 'Anika & Joel',
@@ -83,11 +84,66 @@ const travelerStories = [
   }
 ];
 
+const mapReviewToTravelerStory = (review) => {
+  const images = Array.isArray(review.images) ? review.images : [];
+  const coverImage = images.find((image) => image.is_cover) || images[0];
+  const rating = Number(review.rating) || 5;
+
+  return {
+    id: `review-${review.id}`,
+    reviewId: review.id,
+    name: review.customer_name || 'Cey Tripz Traveler',
+    story: review.comment || '',
+    stars: Math.max(1, Math.min(5, Math.round(rating))),
+    location: review.tour_name || 'Sri Lanka',
+    imageUrl: coverImage?.image_url || FALLBACK_STORY_IMAGE,
+    source: 'published-review',
+  };
+};
+
 const ShareExperience = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [publishedStories, setPublishedStories] = useState([]);
   const navigate = useNavigate();
+  const travelerStories = publishedStories.length > 0 ? publishedStories : fallbackTravelerStories;
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchPublishedReviews = async () => {
+      try {
+        const response = await api.get('/reviews', {
+          params: {
+            limit: 8,
+          },
+        });
+        const reviews = Array.isArray(response.data?.reviews) ? response.data.reviews : [];
+        const stories = reviews
+          .filter((review) => review.status === 'published')
+          .map(mapReviewToTravelerStory)
+          .filter((story) => story.story.trim());
+
+        if (isActive) {
+          setPublishedStories(stories);
+        }
+      } catch (error) {
+        console.error('Error loading published traveler stories:', error);
+      }
+    };
+
+    fetchPublishedReviews();
+
+    const intervalId = window.setInterval(fetchPublishedReviews, 30000);
+    window.addEventListener('focus', fetchPublishedReviews);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', fetchPublishedReviews);
+    };
+  }, []);
 
   const getFeedbackAlertClass = () => {
     if (feedback.type === 'success') {
@@ -427,7 +483,7 @@ const ShareExperience = () => {
                             className="story-image"
                             onError={(event) => {
                               event.target.onerror = null;
-                              event.target.src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+                              event.target.src = FALLBACK_STORY_IMAGE;
                             }}
                           />
                           <div className="story-image-overlay">

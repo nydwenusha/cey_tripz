@@ -39,6 +39,7 @@ Route::get('/blogPosts', [BlogPostController::class, 'index']);
 Route::get('/blogPosts/{id}', [BlogPostController::class, 'show']);
 
 // Reviews
+Route::get('/reviews', [ReviewController::class, 'publicIndex']);
 Route::post('/reviews', [ReviewController::class, 'store']);
 
 // Vehicles
@@ -95,7 +96,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/blogPosts/{id}', [BlogPostController::class, 'update']);
     Route::delete('/blogPostDelete/{id}', [BlogPostController::class, 'destroy']);
 });
-
 
 
 
