@@ -40,7 +40,7 @@ const BlogPost = () => {
 
           console.log("Post data:", postData);
 
-          if (postData && postData.id) {
+          if (postData && postData.id && postData.status === 'published') {
             setPost(postData);
             setLikesCount(postData.likes || 0);
 
@@ -59,7 +59,7 @@ const BlogPost = () => {
                 if (relatedResponse.status === 200) {
                   let relatedData = relatedResponse.data.blogPosts || relatedResponse.data.data || relatedResponse.data;
                   if (Array.isArray(relatedData)) {
-                    const filtered = relatedData.filter(p => p.id !== parseInt(id));
+                    const filtered = relatedData.filter(p => p.id !== parseInt(id) && p.status === 'published');
                     setRelatedPosts(filtered.slice(0, 3));
                   }
                 }

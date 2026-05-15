@@ -37,7 +37,10 @@ const Blog = () => {
         // Fetch blog posts
         const postsResponse = await api.get("/blogPosts");
         if (postsResponse.status === 200) {
-          const postsData = postsResponse.data.blogPosts || postsResponse.data;
+          const allPosts = postsResponse.data.blogPosts || postsResponse.data || [];
+          const postsData = Array.isArray(allPosts)
+            ? allPosts.filter(post => post.status === 'published')
+            : [];
           setPosts(postsData);
           setFilteredPosts(postsData);
         }

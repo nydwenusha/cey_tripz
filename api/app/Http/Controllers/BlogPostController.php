@@ -203,7 +203,7 @@ class BlogPostController extends Controller
             'excerpt' => 'nullable|string|max:255',
             'category' => 'nullable|string|max:255',
             'category_id' => 'nullable|integer|exists:blog_post_categories,id',
-            'status' => 'nullable|string|in:draft,published,scheduled',
+            'status' => 'nullable|string|in:pending,draft,published,scheduled',
             'scheduled_date' => 'nullable|date',
             'is_featured' => 'nullable|boolean',
             'meta_title' => 'nullable|string|max:255',
@@ -227,7 +227,7 @@ class BlogPostController extends Controller
         $normalizedInput['excerpt'] = trim((string) ($normalizedInput['excerpt'] ?? ''));
         $normalizedInput['category'] = trim((string) ($normalizedInput['category'] ?? ''));
         $normalizedInput['category_id'] = ($normalizedInput['category_id'] ?? '') !== '' ? ($normalizedInput['category_id'] ?? null) : null;
-        $normalizedInput['status'] = trim((string) ($normalizedInput['status'] ?? 'published')) ?: 'published';
+        $normalizedInput['status'] = trim((string) ($normalizedInput['status'] ?? 'pending')) ?: 'pending';
         $normalizedInput['scheduled_date'] = $normalizedInput['scheduled_date'] ?? null;
         $normalizedInput['is_featured'] = filter_var($normalizedInput['is_featured'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $normalizedInput['meta_title'] = trim((string) ($normalizedInput['meta_title'] ?? ''));

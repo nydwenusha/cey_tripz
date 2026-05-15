@@ -220,7 +220,7 @@ CREATE TABLE `blog_posts` (
   `excerpt` VARCHAR(255) DEFAULT NULL,
   `content` LONGTEXT NOT NULL,
   `category_id` BIGINT UNSIGNED DEFAULT NULL,
-  `status` ENUM('draft', 'published', 'scheduled') NOT NULL DEFAULT 'draft',
+  `status` ENUM('pending', 'draft', 'published', 'scheduled') NOT NULL DEFAULT 'draft',
   `scheduled_date` DATETIME DEFAULT NULL,
   `is_featured` TINYINT(1) NOT NULL DEFAULT 0,
   `meta_title` VARCHAR(255) DEFAULT NULL,

@@ -33,7 +33,6 @@ import {
 } from '@mui/material';
 import {
   Save as SaveIcon,
-  Publish as PublishIcon,
   Image as ImageIcon,
   Delete as DeleteIcon,
   AddPhotoAlternate as AddPhotoIcon,
@@ -410,7 +409,7 @@ const AddBlogPost = () => {
     }
   };
 
-  const handleSubmit = async (targetStatus = 'published') => {
+  const handleSubmit = async (targetStatus = 'pending') => {
     try {
       setLoading(true);
       setError('');
@@ -476,7 +475,7 @@ const AddBlogPost = () => {
   };
 
   const handleSaveDraft = () => handleSubmit('draft');
-  const handlePublish = () => handleSubmit('published');
+  const handleSavePending = () => handleSubmit('pending');
 
   const textEditorTools = [
     { icon: <UndoIcon />, action: handleUndo, title: 'Undo (Ctrl+Z)' },
@@ -511,7 +510,7 @@ const AddBlogPost = () => {
         className="blog-form"
         onSubmit={(event) => {
           event.preventDefault();
-          handleSubmit();
+          handleSubmit('pending');
         }}
       >
 
@@ -537,9 +536,9 @@ const AddBlogPost = () => {
               },
             ]}
             primaryAction={{
-              label: 'Publish',
-              onClick: handlePublish,
-              icon: <PublishIcon />,
+              label: 'Save',
+              onClick: handleSavePending,
+              icon: <SaveIcon />,
             }}
             variant="gradient"
           />
@@ -1033,7 +1032,7 @@ const AddBlogPost = () => {
           </DialogContent>
           <DialogActions className="preview-actions">
             <Button onClick={() => setPreviewOpen(false)}>Close</Button>
-            <Button type="button" variant="contained" onClick={handlePublish}>Publish Now</Button>
+            <Button type="button" variant="contained" onClick={handleSavePending}>Save</Button>
           </DialogActions>
         </Dialog>
 

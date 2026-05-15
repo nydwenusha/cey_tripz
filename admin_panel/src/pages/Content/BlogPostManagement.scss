@@ -6,14 +6,15 @@
     display: flex;
     align-items: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
+    color: #0f172a !important;
     padding: 20px 24px !important;
 
     .MuiTypography-root {
-      color: #fff !important;
+      color: #0f172a !important;
       font-weight: 800 !important;
       font-size: 1.2rem !important;
       line-height: 1.3;
+      text-shadow: none;
       margin: 0;
     }
   }
@@ -720,4 +721,21 @@
 
 .featured-post {
   animation: pulse 2s infinite;
+}
+
+.blog-dialog-title {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #0f172a !important;
+  padding: 20px 24px !important;
+
+  .MuiTypography-root {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    font-size: 1.2rem !important;
+    line-height: 1.3;
+    text-shadow: none;
+    margin: 0;
+  }
 }
