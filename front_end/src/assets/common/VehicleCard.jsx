@@ -107,7 +107,7 @@ function VehicleCards() {
                         <Card.Text className="text-primary fw-semibold">
                           {v.price}
                         </Card.Text>
-                        <Card.Text className="text-muted small">
+                        <Card.Text className="text-muted small vehicle-description">
                           {v.shortDesc}
                         </Card.Text>
                       </div>
