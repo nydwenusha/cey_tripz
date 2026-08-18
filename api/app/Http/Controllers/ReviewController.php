@@ -32,13 +32,23 @@ class ReviewController extends Controller
 
     public function publicIndex(Request $request): JsonResponse
     {
-        $limit = min(max((int) $request->query('limit', 8), 1), 24);
+        $perPage = min(
+            max((int) $request->query('per_page', $request->query('limit', 8)), 1),
+            100
+        );
+        $requestedPage = max((int) $request->query('page', 1), 1);
 
-        $reviews = Review::with('images')
+        $query = Review::with('images')
             ->where('status', 'published')
             ->orderByDesc('updated_at')
-            ->orderByDesc('created_at')
-            ->limit($limit)
+            ->orderByDesc('created_at');
+
+        $total = (clone $query)->count();
+        $lastPage = max((int) ceil($total / $perPage), 1);
+        $currentPage = min($requestedPage, $lastPage);
+
+        $reviews = $query
+            ->forPage($currentPage, $perPage)
             ->get();
 
         return response()->json([
@@ -46,6 +56,12 @@ class ReviewController extends Controller
             'reviews' => $reviews->map(function (Review $review) {
                 return $this->transformReview($review);
             })->values(),
+            'pagination' => [
+                'total' => $total,
+                'per_page' => $perPage,
+                'current_page' => $currentPage,
+                'last_page' => $lastPage,
+            ],
         ]);
     }
 

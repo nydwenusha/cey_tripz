@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider, } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider, } from "react-router-dom";
 import Home from "./assets/pages/Home";
 import VehicleDetails from "./assets/pages/VehicleDetails";
 import Vehicles from "./assets/pages/Vehicles";
@@ -11,7 +11,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./assets/index.scss";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import TravelerStoryDetail from "./assets/pages/TravelerStoryDetail";
-import AllStoriesPage from "./assets/pages/AllStoriesPage";
+import AllReviewsPage from "./assets/pages/AllReviewsPage";
 import BlogPost from "./assets/pages/BlogPost";
 import ShareExperiencePage from "./assets/pages/ShareExperiencePage";
 
@@ -27,7 +27,8 @@ const router = createBrowserRouter([
   { path: "/booking", element: <Booking /> },
   { path: "/share-experience", element: <ShareExperiencePage /> },
   { path: "/story/:id", element: <TravelerStoryDetail /> },
-  {path:"/stories", element: <AllStoriesPage />},
+  { path: "/reviews", element: <AllReviewsPage /> },
+  { path: "/stories", element: <Navigate to="/reviews" replace /> },
   { path: "/blog/:id", element: <BlogPost /> },
 
 ]);

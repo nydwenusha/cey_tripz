@@ -17,73 +17,6 @@ const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 const MAX_IMAGE_COUNT = 10;
 const FALLBACK_STORY_IMAGE = 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
 
-const fallbackTravelerStories = [
-  {
-    id: 1,
-    name: 'Anika & Joel',
-    story: 'Sunrise at Sigiriya and whale watching in Mirissa made our trip unforgettable.',
-    stars: 5,
-    location: 'Sigiriya & Mirissa',
-    imageUrl: 'https://images.unsplash.com/photo-1602758164098-7b1b1d1f1b1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 2,
-    name: 'Sahan P.',
-    story: 'Loved the tea trails and misty mornings in Ella. Smooth transport and friendly guides!',
-    stars: 4,
-    location: 'Ella',
-    imageUrl: 'https://images.unsplash.com/photo-1548013146-72479768bada?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 3,
-    name: 'Maria Chen',
-    story: 'The ancient temples of Polonnaruwa took our breath away. So much history in one place!',
-    stars: 5,
-    location: 'Polonnaruwa',
-    imageUrl: 'https://images.unsplash.com/photo-1593693399740-5e67a1f7a6f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 4,
-    name: 'James & Liam',
-    story: 'Beach hopping along the south coast was paradise. Great food and even better sunsets.',
-    stars: 4,
-    location: 'Southern Coast',
-    imageUrl: 'https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 5,
-    name: 'Priya N.',
-    story: 'Yala National Park safari was the highlight of our trip. Saw leopards and so much wildlife!',
-    stars: 5,
-    location: 'Yala',
-    imageUrl: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 6,
-    name: 'Thomas & Family',
-    story: 'The train ride from Kandy to Ella was magical. Scenery we will never forget!',
-    stars: 5,
-    location: 'Kandy to Ella',
-    imageUrl: 'https://images.unsplash.com/photo-1523480717984-24cba35ae1eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 7,
-    name: 'Fatima R.',
-    story: 'Local markets in Colombo offered incredible food experiences. The hospitality was heartwarming.',
-    stars: 4,
-    location: 'Colombo',
-    imageUrl: 'https://images.unsplash.com/photo-1523480717984-24cba35ae1eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
-  },
-  {
-    id: 8,
-    name: 'Kenji Tanaka',
-    story: 'Climbing Adam\'s Peak at night to witness the sunrise was a spiritual journey.',
-    stars: 5,
-    location: 'Adam\'s Peak',
-    imageUrl: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'
-  }
-];
-
 const mapReviewToTravelerStory = (review) => {
   const images = Array.isArray(review.images) ? review.images : [];
   const coverImage = images.find((image) => image.is_cover) || images[0];
@@ -106,8 +39,10 @@ const ShareExperience = () => {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [publishedStories, setPublishedStories] = useState([]);
+  const [publishedReviewTotal, setPublishedReviewTotal] = useState(0);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const navigate = useNavigate();
-  const travelerStories = publishedStories.length > 0 ? publishedStories : fallbackTravelerStories;
+  const travelerStories = publishedStories;
 
   useEffect(() => {
     let isActive = true;
@@ -127,9 +62,14 @@ const ShareExperience = () => {
 
         if (isActive) {
           setPublishedStories(stories);
+          setPublishedReviewTotal(Number(response.data?.pagination?.total) || stories.length);
         }
       } catch (error) {
         console.error('Error loading published traveler stories:', error);
+      } finally {
+        if (isActive) {
+          setReviewsLoading(false);
+        }
       }
     };
 
@@ -305,11 +245,7 @@ const ShareExperience = () => {
   };
 
   const handleViewMoreClick = () => {
-    navigate('/stories');
-  };
-
-  const handleViewDetails = (storyId) => {
-    navigate(`/story/${storyId}`);
+    navigate('/reviews');
   };
 
   return (
@@ -451,77 +387,88 @@ const ShareExperience = () => {
           <div className="col-lg-6">
             <div className="traveler-stories-section p-4 h-100 d-flex flex-column">
               <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="section-title mb-0">Recent Traveler Stories</h2>
+                <h2 className="section-title mb-0">Recent Ratings &amp; Reviews</h2>
                 <div className="carousel-indicator">
-                  <span className="carousel-subtitle">Real moments from the Beauty of Sri Lanka gallery.</span>
+                  <span className="carousel-subtitle">Published feedback from Cey Tripz travelers.</span>
                 </div>
               </div>
 
               <div className="traveler-carousel-wrapper flex-grow-1">
-                <Carousel
-                  indicators={false}
-                  interval={5000}
-                  className="traveler-carousel"
-                  prevIcon={
-                    <span className="carousel-control-prev-custom" aria-hidden="true">
-                      <i className="bi bi-chevron-left"></i>
-                    </span>
-                  }
-                  nextIcon={
-                    <span className="carousel-control-next-custom" aria-hidden="true">
-                      <i className="bi bi-chevron-right"></i>
-                    </span>
-                  }
-                >
-                  {travelerStories.slice(0, 4).map((story, index) => (
-                    <Carousel.Item key={story.id}>
-                      <div className="traveler-story-card p-0 rounded shadow overflow-hidden">
-                        <div className="story-image-container">
-                          <img
-                            src={story.imageUrl}
-                            alt={story.location}
-                            className="story-image"
-                            onError={(event) => {
-                              event.target.onerror = null;
-                              event.target.src = FALLBACK_STORY_IMAGE;
-                            }}
-                          />
-                          <div className="story-image-overlay">
-                            <span className="location-badge">
-                              <i className="bi bi-geo-alt me-1"></i> {story.location}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="story-content p-4">
-                          <div className="d-flex justify-content-between align-items-start mb-3">
-                            <h3 className="traveler-name mb-0">{story.name}</h3>
-                            <div className="story-stars">{renderStars(story.stars)}</div>
-                          </div>
-                          <p className="traveler-story mb-4">{story.story}</p>
-                          <div className="story-footer d-flex justify-content-between align-items-center">
-                            <div className="story-index">
-                              {String(index + 1).padStart(2, '0')}/{String(Math.min(travelerStories.length, 4)).padStart(2, '0')}
+                {reviewsLoading && (
+                  <div className="h-100 d-flex align-items-center justify-content-center text-light" role="status">
+                    <span className="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    Loading reviews...
+                  </div>
+                )}
+
+                {!reviewsLoading && travelerStories.length === 0 && (
+                  <div className="h-100 d-flex flex-column align-items-center justify-content-center text-center text-light p-4">
+                    <i className="bi bi-chat-heart fs-1 mb-3" aria-hidden="true"></i>
+                    <h3 className="h5">No published reviews yet</h3>
+                    <p className="mb-0 opacity-75">Be the first traveler to share an experience.</p>
+                  </div>
+                )}
+
+                {!reviewsLoading && travelerStories.length > 0 && (
+                  <Carousel
+                    indicators={false}
+                    interval={5000}
+                    className="traveler-carousel"
+                    prevIcon={
+                      <span className="carousel-control-prev-custom" aria-hidden="true">
+                        <i className="bi bi-chevron-left"></i>
+                      </span>
+                    }
+                    nextIcon={
+                      <span className="carousel-control-next-custom" aria-hidden="true">
+                        <i className="bi bi-chevron-right"></i>
+                      </span>
+                    }
+                  >
+                    {travelerStories.slice(0, 4).map((story, index) => (
+                      <Carousel.Item key={story.id}>
+                        <div className="traveler-story-card p-0 rounded shadow overflow-hidden">
+                          <div className="story-image-container">
+                            <img
+                              src={story.imageUrl}
+                              alt={story.location}
+                              className="story-image"
+                              onError={(event) => {
+                                event.target.onerror = null;
+                                event.target.src = FALLBACK_STORY_IMAGE;
+                              }}
+                            />
+                            <div className="story-image-overlay">
+                              <span className="location-badge">
+                                <i className="bi bi-geo-alt me-1"></i> {story.location}
+                              </span>
                             </div>
-                            <button
-                              className="btn-view-details"
-                              onClick={() => handleViewDetails(story.id)}
-                            >
-                              View More <i className="bi bi-arrow-right ms-1"></i>
-                            </button>
+                          </div>
+                          <div className="story-content p-4">
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                              <h3 className="traveler-name mb-0">{story.name}</h3>
+                              <div className="story-stars">{renderStars(story.stars)}</div>
+                            </div>
+                            <p className="traveler-story mb-4">{story.story}</p>
+                            <div className="story-footer d-flex justify-content-end align-items-center">
+                              <div className="story-index">
+                                {String(index + 1).padStart(2, '0')}/{String(Math.min(travelerStories.length, 4)).padStart(2, '0')}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Carousel.Item>
-                  ))}
-                </Carousel>
+                      </Carousel.Item>
+                    ))}
+                  </Carousel>
+                )}
               </div>
 
               <div className="text-center mt-4 pt-3">
                 <button className="btn btn-outline-light view-more-btn" onClick={handleViewMoreClick}>
-                  View More Stories <i className="bi bi-arrow-right ms-2"></i>
+                  View All Ratings &amp; Reviews <i className="bi bi-arrow-right ms-2"></i>
                 </button>
                 <p className="text-light opacity-75 mt-2 mb-0 small">
-                  Showing {Math.min(travelerStories.length, 4)} of {travelerStories.length} stories
+                  Showing {Math.min(travelerStories.length, 4)} of {publishedReviewTotal} published reviews
                 </p>
               </div>
             </div>

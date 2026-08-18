@@ -141,7 +141,7 @@ const TravelerStoryDetail = () => {
             setRelatedStories(related);
         } else {
             // Redirect if story not found
-            navigate('/stories');
+            navigate('/reviews');
         }
 
         setLoading(false);
