@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -19,11 +20,13 @@ import {
   Paper,
   InputAdornment,
   Alert,
+  Autocomplete,
   Snackbar,
   Stepper,
   Step,
   StepLabel,
-  FormHelperText
+  FormHelperText,
+  CircularProgress
 } from '@mui/material';
 import {
   Save,
@@ -39,15 +42,45 @@ import {
   LocationOn,
   Category,
   Star,
-  Download,
   Email,
   Print
 } from '@mui/icons-material';
 import './TourEdit.scss';
-import MainLayout from '../../MainLayout';
 import PageHeader from '../../components/layout/PageHeader/PageHeader';
+import api from '../../services/api/api';
+
+const defaultDestinations = [
+  'Sigiriya',
+  'Hikkaduwa',
+  'Anuradhapura',
+  'Colombo',
+  'Kandy',
+  'Galle',
+  'Ella',
+  'Mirissa',
+  'Yala',
+  'Polonnaruwa',
+  'Bentota',
+  'Nuwara Eliya'
+];
+
+const mergeDestinationOptions = (...groups) => {
+  const uniqueDestinations = new Map();
+
+  groups.flat().forEach((destination) => {
+    const normalizedDestination = String(destination || '').trim();
+    const key = normalizedDestination.toLocaleLowerCase();
+
+    if (normalizedDestination && !uniqueDestinations.has(key)) {
+      uniqueDestinations.set(key, normalizedDestination);
+    }
+  });
+
+  return Array.from(uniqueDestinations.values());
+};
 
 const TourEdit = ({ initialData = null, onSave, onCancel }) => {
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     id: initialData?.id || '',
@@ -64,35 +97,27 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
     exclusions: initialData?.exclusions || ['Personal Expenses', 'Tips'],
     tags: initialData?.tags || [],
     featured: initialData?.featured || false,
-    highlights: initialData?.highlights || [''],
+    highlights: initialData?.highlights || [],
     meetingPoint: initialData?.meetingPoint || '',
     requirements: initialData?.requirements || '',
-    cancellationPolicy: initialData?.cancellationPolicy || 'standard'
+    cancellationPolicy: initialData?.cancellationPolicy || 'standard',
+    photoUrl: initialData?.photoUrl || '',
+    photoPath: initialData?.photoPath || ''
   });
 
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [saving, setSaving] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [newHighlight, setNewHighlight] = useState('');
   const [newInclusion, setNewInclusion] = useState('');
   const [newExclusion, setNewExclusion] = useState('');
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(initialData?.photoUrl || '');
+  const [destinationOptions, setDestinationOptions] = useState(defaultDestinations);
 
   const steps = ['Basic Information', 'Details & Pricing', 'Additional Info'];
-
-  const destinations = [
-    'Sigiriya',
-    'Hikkaduwa',
-    'Anuradhapura',
-    'Colombo',
-    'Kandy',
-    'Galle',
-    'Ella',
-    'Mirissa',
-    'Yala',
-    'Polonnaruwa',
-    'Bentota',
-    'Nuwara Eliya'
-  ];
 
   const categories = [
     'Adventure',
@@ -104,7 +129,8 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
     'Family',
     'Luxury',
     'Hiking',
-    'Photography'
+    'Photography',
+    'Other'
   ];
 
   const difficultyLevels = ['Easy', 'Medium', 'Difficult', 'Challenging'];
@@ -115,14 +141,55 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
     { value: 'non-refundable', label: 'Non-refundable' }
   ];
 
+  const selectMenuProps = {
+    PaperProps: {
+      className: 'tour-edit-select-menu'
+    }
+  };
+
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
+      setPhotoPreview(initialData.photoUrl || '');
+      setPhotoFile(null);
     }
   }, [initialData]);
 
-  const handleChange = (field) => (event) => {
-    const value = event.target.value;
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadSavedDestinations = async () => {
+      try {
+        const response = await api.get('/GetTours', { signal: controller.signal });
+        const toursData = response.data?.tours || response.data?.data || response.data || [];
+        const savedDestinations = Array.isArray(toursData)
+          ? toursData.map((tour) => tour.destination)
+          : [];
+
+        setDestinationOptions(mergeDestinationOptions(defaultDestinations, savedDestinations));
+      } catch (error) {
+        if (error.code !== 'ERR_CANCELED') {
+          console.error('Failed to load destination suggestions:', error);
+        }
+      }
+    };
+
+    loadSavedDestinations();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!photoFile) {
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(photoFile);
+    setPhotoPreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [photoFile]);
+
+  const updateFieldValue = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -137,11 +204,87 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
     }
   };
 
+  const handleChange = (field) => (event) => {
+    updateFieldValue(field, event.target.value);
+  };
+
   const handleSwitchChange = (field) => (event) => {
     setFormData(prev => ({
       ...prev,
       [field]: event.target.checked
     }));
+  };
+
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setErrors(prev => ({ ...prev, photo: 'Please select a valid image file' }));
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, photo: 'Photo must be 5MB or smaller' }));
+      return;
+    }
+
+    setErrors(prev => ({ ...prev, photo: '' }));
+    setPhotoFile(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview(formData.photoUrl || '');
+  };
+
+  const appendArray = (payload, key, values) => {
+    values.forEach((value) => payload.append(`${key}[]`, value));
+  };
+
+  const buildSubmitPayload = (finalData) => {
+    const payload = {
+      name: finalData.name.trim(),
+      destination: finalData.destination,
+      price: finalData.price,
+      status: String(finalData.status || 'Active').toLowerCase(),
+      category: finalData.category,
+      description: finalData.description.trim(),
+      duration: finalData.duration,
+      max_participants: finalData.maxParticipants,
+      difficulty: finalData.difficulty,
+      inclusions: finalData.inclusions,
+      exclusions: finalData.exclusions,
+      tags: finalData.tags,
+      featured: finalData.featured,
+      highlights: finalData.highlights.filter((highlight) => highlight.trim()),
+      meeting_point: finalData.meetingPoint,
+      requirements: finalData.requirements,
+      cancellation_policy: finalData.cancellationPolicy,
+    };
+
+    if (!photoFile) {
+      return payload;
+    }
+
+    const formPayload = new FormData();
+
+    Object.entries(payload).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        appendArray(formPayload, key, value);
+      } else if (typeof value === 'boolean') {
+        formPayload.append(key, value ? '1' : '0');
+      } else {
+        formPayload.append(key, value ?? '');
+      }
+    });
+
+    formPayload.append('photo', photoFile);
+
+    return formPayload;
   };
 
   const validateStep = (step) => {
@@ -164,6 +307,31 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
     }
 
     setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) newErrors.name = 'Tour name is required';
+    if (!formData.destination) newErrors.destination = 'Destination is required';
+    if (!formData.category) newErrors.category = 'Category is required';
+    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
+    if (!formData.duration) newErrors.duration = 'Duration is required';
+    if (!formData.maxParticipants || formData.maxParticipants <= 0) {
+      newErrors.maxParticipants = 'Valid participant count is required';
+    }
+    if (!formData.difficulty) newErrors.difficulty = 'Difficulty level is required';
+
+    setErrors(newErrors);
+
+    if (newErrors.name || newErrors.destination || newErrors.category || newErrors.description) {
+      setActiveStep(0);
+    } else if (newErrors.price || newErrors.duration || newErrors.maxParticipants || newErrors.difficulty) {
+      setActiveStep(1);
+    }
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -245,16 +413,39 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
     }));
   };
 
-  const handleSubmit = () => {
-    if (validateStep(activeStep)) {
+  const handleSubmit = async () => {
+    if (validateForm()) {
       const finalData = {
         ...formData,
         price: Number(formData.price),
         maxParticipants: Number(formData.maxParticipants)
       };
 
-      onSave(finalData);
-      setSuccessMessage(initialData ? 'Tour updated successfully!' : 'Tour created successfully!');
+      setSaving(true);
+      setErrorMessage('');
+
+      try {
+        const payload = buildSubmitPayload(finalData);
+
+        const response = initialData?.id
+          ? await api.post(`/UpdateTour/${initialData.id}`, payload)
+          : await api.post('/AddTour', payload);
+
+        if (onSave) {
+          onSave(response.data?.tour || finalData);
+        }
+
+        setSuccessMessage(response.data?.message || (initialData ? 'Tour updated successfully!' : 'Tour created successfully!'));
+
+        setTimeout(() => {
+          navigate('/tours');
+        }, 900);
+      } catch (error) {
+        console.error('Error saving tour:', error);
+        setErrorMessage(error.response?.data?.message || 'Failed to save tour');
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -270,22 +461,24 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
       <Box className="tour-edit">
         {/* Page Header */}
         <PageHeader
-          title="Add New Tour "
-          subtitle="You can add new tours here"
+          title={initialData ? 'Edit Tour' : 'Add New Tour'}
+          subtitle="Create a tour package and publish it to the tours table."
+          showBackButton
+          onBackClick={() => (onCancel ? onCancel() : navigate('/tours'))}
           primaryAction={{
-            label: 'Export',
-            onClick: () => handleExport(),
-            icon: <Download />
+            label: saving ? 'Saving...' : 'Save Tour',
+            onClick: handleSubmit,
+            icon: saving ? <CircularProgress size={18} /> : <Save />
           }}
           secondaryActions={[
             {
               label: 'Print All',
-              onClick: () => handlePrintAll(),
+              onClick: () => window.print(),
               icon: <Print />
             },
             {
               label: 'Email All',
-              onClick: () => handleEmailAll(),
+              onClick: () => console.log('Email tours'),
               icon: <Email />
             }
           ]}
@@ -303,15 +496,15 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
         <Card className="form-card">
           <CardContent>
             {activeStep === 0 && (
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
+              <Grid container spacing={3} className="tour-form-grid basic-info-grid">
+                <Grid size={{ xs: 12 }}>
                   <Typography variant="h6" className="section-title">
                     Basic Information
                   </Typography>
                   <Divider sx={{ mb: 3 }} />
                 </Grid>
 
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                   <TextField
                     fullWidth
                     label="Tour Name"
@@ -324,13 +517,14 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, sm: 6, md: 3, lg: 2 }}>
                   <FormControl fullWidth error={!!errors.status}>
                     <InputLabel>Status</InputLabel>
                     <Select
                       value={formData.status}
                       onChange={handleChange('status')}
                       label="Status"
+                      MenuProps={selectMenuProps}
                     >
                       <MenuItem value="Active">Active</MenuItem>
                       <MenuItem value="Inactive">Inactive</MenuItem>
@@ -340,31 +534,38 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth error={!!errors.destination} required>
-                    <InputLabel>Destination</InputLabel>
-                    <Select
-                      value={formData.destination}
-                      onChange={handleChange('destination')}
-                      label="Destination"
-                    >
-                      {destinations.map((dest) => (
-                        <MenuItem key={dest} value={dest}>
-                          {dest}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errors.destination && <FormHelperText>{errors.destination}</FormHelperText>}
-                  </FormControl>
+                <Grid size={{ xs: 12, sm: 6, md: 3, lg: 3 }}>
+                  <Autocomplete
+                    freeSolo
+                    autoHighlight
+                    selectOnFocus
+                    clearOnBlur={false}
+                    options={destinationOptions}
+                    value={formData.destination || ''}
+                    inputValue={formData.destination || ''}
+                    onChange={(_event, value) => updateFieldValue('destination', value || '')}
+                    onInputChange={(_event, value) => updateFieldValue('destination', value)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Destination"
+                        placeholder="Type or select a destination"
+                        error={!!errors.destination}
+                        helperText={errors.destination || 'Select a suggestion or enter a new destination'}
+                        required
+                      />
+                    )}
+                  />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, md: 3, lg: 3 }}>
                   <FormControl fullWidth error={!!errors.category} required>
                     <InputLabel>Category</InputLabel>
                     <Select
                       value={formData.category}
                       onChange={handleChange('category')}
                       label="Category"
+                      MenuProps={selectMenuProps}
                     >
                       {categories.map((cat) => (
                         <MenuItem key={cat} value={cat}>
@@ -376,7 +577,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12, md: 7, lg: 8 }}>
                   <TextField
                     fullWidth
                     label="Description"
@@ -398,7 +599,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12, md: 5, lg: 4 }} className="tour-side-stack">
                   <Typography variant="subtitle1" gutterBottom>
                     Tags
                   </Typography>
@@ -431,20 +632,59 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                       ))}
                     </Box>
                   </Box>
+
+                  <Box className="photo-section">
+                    <Typography variant="subtitle1" gutterBottom>
+                      Tour Photo
+                    </Typography>
+                    <Paper className={`photo-upload-card ${photoPreview ? 'has-photo' : ''}`}>
+                      {photoPreview ? (
+                        <Box className="photo-preview">
+                          <img src={photoPreview} alt="Tour preview" />
+                          <Box className="photo-overlay">
+                            <Button
+                              component="label"
+                              variant="contained"
+                              startIcon={<PhotoCamera />}
+                              className="photo-action"
+                            >
+                              Change
+                              <input hidden accept="image/*" type="file" onChange={handlePhotoChange} />
+                            </Button>
+                            {photoFile && (
+                              <IconButton className="photo-remove" onClick={handleRemovePhoto} aria-label="Remove selected photo">
+                                <Delete />
+                              </IconButton>
+                            )}
+                          </Box>
+                        </Box>
+                      ) : (
+                        <Button
+                          component="label"
+                          className="photo-empty-button"
+                          startIcon={<PhotoCamera />}
+                        >
+                          Upload tour photo
+                          <input hidden accept="image/*" type="file" onChange={handlePhotoChange} />
+                        </Button>
+                      )}
+                    </Paper>
+                    {errors.photo && <FormHelperText error>{errors.photo}</FormHelperText>}
+                  </Box>
                 </Grid>
               </Grid>
             )}
 
             {activeStep === 1 && (
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
+              <Grid container spacing={3} className="tour-form-grid pricing-grid">
+                <Grid size={{ xs: 12 }}>
                   <Typography variant="h6" className="section-title">
                     Pricing & Details
                   </Typography>
                   <Divider sx={{ mb: 3 }} />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <TextField
                     fullWidth
                     label="Price (USD)"
@@ -464,7 +704,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <TextField
                     fullWidth
                     label="Duration"
@@ -484,7 +724,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <TextField
                     fullWidth
                     label="Maximum Participants"
@@ -504,13 +744,14 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <FormControl fullWidth error={!!errors.difficulty} required>
                     <InputLabel>Difficulty Level</InputLabel>
                     <Select
                       value={formData.difficulty}
                       onChange={handleChange('difficulty')}
                       label="Difficulty Level"
+                      MenuProps={selectMenuProps}
                     >
                       {difficultyLevels.map((level) => (
                         <MenuItem key={level} value={level}>
@@ -522,7 +763,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Paper className="inclusions-paper">
                     <Typography variant="subtitle1" gutterBottom>
                       Inclusions
@@ -556,7 +797,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Paper className="exclusions-paper">
                     <Typography variant="subtitle1" gutterBottom>
                       Exclusions
@@ -593,15 +834,15 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
             )}
 
             {activeStep === 2 && (
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
+              <Grid container spacing={3} className="tour-form-grid additional-info-grid">
+                <Grid size={{ xs: 12 }}>
                   <Typography variant="h6" className="section-title">
                     Additional Information
                   </Typography>
                   <Divider sx={{ mb: 3 }} />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12, md: 5 }}>
                   <Typography variant="subtitle1" gutterBottom>
                     Tour Highlights
                   </Typography>
@@ -637,7 +878,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   </Paper>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
                     fullWidth
                     label="Meeting Point"
@@ -654,13 +895,14 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <FormControl fullWidth>
                     <InputLabel>Cancellation Policy</InputLabel>
                     <Select
                       value={formData.cancellationPolicy}
                       onChange={handleChange('cancellationPolicy')}
                       label="Cancellation Policy"
+                      MenuProps={selectMenuProps}
                     >
                       {cancellationPolicies.map((policy) => (
                         <MenuItem key={policy.value} value={policy.value}>
@@ -671,7 +913,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     fullWidth
                     label="Requirements & Notes"
@@ -683,7 +925,7 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Paper className="featured-section">
                     <Box className="featured-content">
                       <Star className="featured-icon" />
@@ -722,8 +964,10 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
                   variant="contained"
                   onClick={handleSubmit}
                   className="submit-button"
+                  disabled={saving}
+                  startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Save />}
                 >
-                  {initialData ? 'Update Tour' : 'Create Tour'}
+                  {saving ? 'Saving...' : initialData ? 'Update Tour' : 'Create Tour'}
                 </Button>
               ) : (
                 <Button
@@ -746,6 +990,16 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
         >
           <Alert severity="success" className="success-alert">
             {successMessage}
+          </Alert>
+        </Snackbar>
+        <Snackbar
+          open={!!errorMessage}
+          autoHideDuration={5000}
+          onClose={() => setErrorMessage('')}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert severity="error" onClose={() => setErrorMessage('')}>
+            {errorMessage}
           </Alert>
         </Snackbar>
       </Box>

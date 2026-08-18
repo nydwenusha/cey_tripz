@@ -8,6 +8,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\TourController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -46,6 +47,10 @@ Route::post('/reviews', [ReviewController::class, 'store']);
 Route::get('/vehicles', [VehicleController::class, 'publicIndex']);
 Route::get('/vehicles/{id}', [VehicleController::class, 'publicShow']);
 
+// Tours
+Route::get('/tours', [TourController::class, 'publicIndex']);
+Route::get('/tours/{id}', [TourController::class, 'publicShow']);
+
 // Protected routes
 Route::middleware('auth:api')->group(function () {
     // Auth
@@ -70,6 +75,15 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/AddVehicleImage/{id}', [VehicleController::class, 'addImage']);
     Route::delete('/DeleteVehicleImage/{id}', [VehicleController::class, 'removeImage']);
     Route::delete('/DeleteVehicle/{id}', [VehicleController::class, 'destroy']);
+
+    // Tours
+    Route::get('/GetTours', [TourController::class, 'index']);
+    Route::post('/AddTour', [TourController::class, 'store']);
+    Route::put('/UpdateTour/{id}', [TourController::class, 'update']);
+    Route::post('/UpdateTour/{id}', [TourController::class, 'update']);
+    Route::put('/UpdateTourStatus/{id}', [TourController::class, 'updateStatus']);
+    Route::put('/UpdateTourFeatured/{id}', [TourController::class, 'updateFeatured']);
+    Route::delete('/DeleteTour/{id}', [TourController::class, 'destroy']);
 
     // Customers
     Route::get('/GetCustomers', [CustomerController::class, 'index']);
@@ -96,8 +110,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/blogPosts/{id}', [BlogPostController::class, 'update']);
     Route::delete('/blogPostDelete/{id}', [BlogPostController::class, 'destroy']);
 });
-
-
 
 
 

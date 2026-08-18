@@ -20,7 +20,6 @@ import Reports from './pages/Reports/Reports';
 import Settings from './pages/Settings/Settings';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
-import Categories from './pages/Tours/Categories.jsx';
 import Vehicles from './pages/Tours/Vehicles.jsx';
 import AddVehicles from './pages/Tours/AddVehicles.jsx';
 import BlogPostManagement from './pages/Content/BlogPostManagement.jsx';
@@ -82,7 +81,7 @@ function App() {
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/tours" element={<ToursList />} />
                             <Route path="/addtours" element={<TourEdit />} />
-                            <Route path="/categories" element={<Categories />} />
+                            <Route path="/categories" element={<Navigate to="/tours" replace />} />
                             <Route path="/vehicles" element={<Vehicles />} />
                             <Route path="/AddVehicles" element={<AddVehicles />} />
                             <Route path="/bookings" element={<Booking />} />

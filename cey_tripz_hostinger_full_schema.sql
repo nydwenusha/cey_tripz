@@ -33,6 +33,8 @@ DROP TABLE IF EXISTS `customers`;
 
 DROP TABLE IF EXISTS `vehicles`;
 
+DROP TABLE IF EXISTS `tours`;
+
 DROP TABLE IF EXISTS `migrations`;
 
 DROP TABLE IF EXISTS `blog_post_tag`;
@@ -221,6 +223,35 @@ CREATE TABLE `vehicles` (
     KEY `vehicles_category_index` (`category`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `tours` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `destination` VARCHAR(191) NOT NULL,
+    `price` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    `status` ENUM('active', 'inactive', 'draft') NOT NULL DEFAULT 'active',
+    `category` VARCHAR(191) NOT NULL,
+    `photo_path` VARCHAR(255) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    `duration` VARCHAR(100) DEFAULT NULL,
+    `max_participants` INT UNSIGNED NOT NULL DEFAULT 1,
+    `difficulty` VARCHAR(50) NOT NULL DEFAULT 'Medium',
+    `inclusions` JSON DEFAULT NULL,
+    `exclusions` JSON DEFAULT NULL,
+    `tags` JSON DEFAULT NULL,
+    `featured` TINYINT(1) NOT NULL DEFAULT 0,
+    `highlights` JSON DEFAULT NULL,
+    `meeting_point` VARCHAR(255) DEFAULT NULL,
+    `requirements` TEXT DEFAULT NULL,
+    `cancellation_policy` VARCHAR(80) NOT NULL DEFAULT 'standard',
+    `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `tours_status_index` (`status`),
+    KEY `tours_featured_index` (`featured`),
+    KEY `tours_destination_index` (`destination`),
+    KEY `tours_category_index` (`category`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 CREATE TABLE `blog_post_categories` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
@@ -406,6 +437,8 @@ VALUES
     ('2026_05_02_120000_create_payments_table', 1),
     ('2026_05_09_100000_create_reviews_table', 1),
     ('2026_05_09_100100_create_review_images_table', 1),
+    ('2026_05_29_000001_create_tours_table', 1),
+    ('2026_06_16_000001_add_photo_path_to_tours_table', 1),
     ('2026_05_15_000001_add_pending_status_to_blog_posts_table', 1);
 
 -- Seed two active admin accounts for CeyTripz.
