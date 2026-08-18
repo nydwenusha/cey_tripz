@@ -1,10 +1,32 @@
 .about-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 100vh;
-  background:
-    linear-gradient(rgba(4, 20, 38, 0.45)),
-    url("../image/aboutBG.jpg") center/cover fixed no-repeat;
+  background: #071827;
   color: #f8fafc;
   padding: 4rem 0;
+}
+
+.about-page::before,
+.about-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.about-page::before {
+  z-index: -2;
+  inset: -10px;
+  background: url("../image/aboutBG.jpg") center/cover fixed no-repeat;
+  filter: blur(3px) saturate(0.78) brightness(0.72);
+  transform: scale(1.025);
+}
+
+.about-page::after {
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(3, 15, 27, 0.7), rgba(3, 18, 31, 0.82));
 }
 
 .about-content {
@@ -14,8 +36,15 @@
 }
 
 .about-hero {
-  max-width: 780px;
+  max-width: 920px;
   margin: 0 auto 3rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  background: rgba(3, 18, 31, 0.66);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .eyebrow {
@@ -27,13 +56,20 @@
 
 .about-title {
   color: #ffffff;
-  text-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  text-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
   margin-bottom: 1rem;
 }
 
 .hero-copy {
-  color: rgba(255, 255, 255, 0.85);
+  max-width: 820px;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.94);
   font-size: 1.05rem;
+  line-height: 1.78;
 }
 
 .about-cta {
@@ -53,15 +89,20 @@
 } 
 
 .about-card {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 22px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
   color: #0f172a;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   padding: 2rem 1.5rem;
-  transition: box-shadow 0.3s, border 0.3s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 54px rgba(3, 18, 31, 0.24);
 }
 
 
@@ -275,8 +316,8 @@
 }
 
 .team-card {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(3, 18, 31, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 20px;
   padding: 0;
   backdrop-filter: blur(10px);
@@ -320,10 +361,10 @@
 }
 
 .team-card:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(5, 29, 49, 0.88);
   border: 1.5px solid rgba(244, 178, 35, 0.4);
   box-shadow: 0 12px 40px rgba(244, 178, 35, 0.2);
-  transform: translateY(-8px);
+  transform: translateY(-5px);
 }
 
 .team-image-placeholder {
@@ -448,7 +489,7 @@
 
 .photo-item {
   position: relative;
-  border-radius: 15%;
+  border-radius: 20px;
   overflow: hidden;
   height: 220px;
   transition: border-radius 0.3s;
@@ -484,5 +525,21 @@
 
   .about-page {
     padding: 3rem 1rem;
+  }
+
+  .about-page::before {
+    background-attachment: scroll;
+  }
+}
+
+@media (max-width: 575px) {
+  .about-hero {
+    padding: 1.35rem;
+    border-radius: 18px;
+  }
+
+  .hero-copy {
+    font-size: 0.98rem;
+    line-height: 1.68;
   }
 }

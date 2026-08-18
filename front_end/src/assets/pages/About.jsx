@@ -1,5 +1,5 @@
 
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
 import { motion } from "framer-motion";
 import "../css/About.scss";
 import Layout from "../../Layout";
@@ -16,13 +16,19 @@ import PRO1 from "../image/Pro1.jpeg";
 import PRO2 from "../image/Pro2.jpeg";
 import PRO3 from "../image/Pro3.jpeg";
 
+const MotionDiv = motion.div;
 
 function About() {
 	return (
 		<Layout>
 			<div className="about-page">
 				<Container className="about-content">
-					<div className="about-hero text-center">
+					<MotionDiv
+						className="about-hero text-center"
+						initial={{ opacity: 0, y: 24 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.65, ease: "easeOut" }}
+					>
 						{/* <div className="eyebrow mb-2">About Us</div> */}
 						<h1 className="about-title">Ayubowan....!<br/>WELCOME TO SRI LANKA</h1>
 						<p className="hero-copy">
@@ -30,10 +36,16 @@ function About() {
 							We take pride in being able to provide a high-quality rental car service in Sri Lanka that is efficient, reliable, responsible, and safe, catering to your needs in a way that perfectly suits your travel requirements.<br/>
 							We are committed to safely and reliably transporting you, whether you are a resident of Sri Lanka or visiting the country to experience its beauty, to any destination in Sri Lanka. This is done using well-maintained vehicles driven by our highly experienced and disciplined drivers, at reasonable prices, ensuring a convenient and efficient journey.
 						</p>
-					</div>
+					</MotionDiv>
 
 					{/* Team Section */}
-					<div className="team-section mb-5">
+					<MotionDiv
+						className="team-section mb-5"
+						initial={{ opacity: 0, y: 28 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.65, ease: "easeOut" }}
+						viewport={{ once: true, amount: 0.12 }}
+					>
 						<div className="team-header text-center mb-5">
 							<h2 className="team-title">Our Leadership Team</h2>
 							<p className="team-subtitle">Meet the dedicated professionals behind CEYTRIPZ</p>
@@ -84,7 +96,7 @@ function About() {
 								</div>
 							</Col>
 						</Row>
-					</div>
+					</MotionDiv>
 					<Row className="about-highlight mb-5">
 						<Col md={7}>
 							<Card className="about-card mb-4">

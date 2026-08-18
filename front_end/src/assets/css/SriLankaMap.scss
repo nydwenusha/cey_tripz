@@ -5,7 +5,7 @@
 }
 
 .map-title {
-  color: #007bff;
+  color: var(--brand-primary);
   font-weight: 700;
   text-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
 }
@@ -15,7 +15,8 @@
   margin: 0 auto;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.15);
+  border: 1px solid rgba(14, 74, 123, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .leaflet-container {
@@ -40,7 +41,7 @@
 }
 
 .map-link {
-  background-color: #007bff;
+  background-color: var(--brand-primary);
   color: #fff;
   padding: 6px 12px;
   border-radius: 6px;
@@ -50,5 +51,5 @@
 }
 
 .map-link:hover {
-  background-color: #0056b3;
+  background-color: var(--brand-primary-dark);
 }

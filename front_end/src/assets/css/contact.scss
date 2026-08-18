@@ -1,18 +1,61 @@
 .contact-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 100vh;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.45), rgba(220, 233, 255, 0.42)),
-    url("../image/contactBG.jpg") center/cover fixed no-repeat;
+  background: #eaf2f7;
   color: #0b1320;
   padding: 4rem 0;
+}
+
+.contact-page::before,
+.contact-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.contact-page::before {
+  z-index: -2;
+  background: url("../image/contactBG.jpg") center top/cover fixed no-repeat;
+  opacity: 0.3;
+  filter: saturate(0.72) contrast(0.9);
+}
+
+.contact-page::after {
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(3, 18, 31, 0.86) 0,
+    rgba(5, 31, 52, 0.78) 24rem,
+    rgba(234, 242, 247, 0.9) 43rem,
+    rgba(234, 242, 247, 0.96) 100%
+  );
 }
 
 .contact-wrapper {
   max-width: 1200px;
 }
 
+.contact-hero {
+  max-width: 920px;
+  margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  background: rgba(3, 18, 31, 0.66);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
 .contact-hero h1 {
   font-size: clamp(2.1rem, 3vw, 3.1rem);
+  color: #ffffff;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
   margin-bottom: 1rem;
 }
 
@@ -20,16 +63,16 @@
   text-transform: uppercase;
   letter-spacing: 0.4em;
   font-size: 1rem;
-  color: rgba(14, 74, 123, 0.8);
+  color: var(--brand-accent);
   margin-bottom: 0.75rem;
   font-weight: bold;
 }
 
 .contact-lede {
   max-width: 820px;
-  font-weight: bold;
+  line-height: 1.75;
   margin: 0 auto;
-  color: rgb(0, 0, 0);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .contact-highlight-row {
@@ -38,19 +81,42 @@
 }
 
 .contact-info-card {
-  background:transparent!important;
+  background: rgba(255, 255, 255, 0.9) !important;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(14, 74, 123, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 22px;
   font-weight: bold;
   padding: 1.8rem;
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
   color: #0b1320;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.contact-info-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: 0 24px 52px rgba(15, 23, 42, 0.16);
 }
 
 .contact-info-card h4 {
   margin-top: 1rem;
   margin-bottom: 0.6rem;
+}
+
+.contact-info-card p {
+  color: #526174;
+  font-weight: 500;
+  line-height: 1.65;
+}
+
+.contact-info-card a {
+  color: var(--brand-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.contact-info-card a:hover {
+  color: #b77800;
 }
 
 .contact-info-card span {
@@ -74,7 +140,7 @@
 }
 
 .contact-form-card {
-  background:transparent!important;
+  background: rgba(255, 255, 255, 0.92) !important;
   backdrop-filter: blur(15px);
   border: 1px solid rgba(14, 74, 123, 0.12);
   border-radius: 26px;
@@ -111,9 +177,9 @@
 }
 
 .contact-send-btn {
-  background: linear-gradient(135deg, #f4b223, #0e4a7b);
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
   border: none;
-  color: #050d18;
+  color: #ffffff;
   font-weight: 600;
   padding: 0.85rem 2.8rem;
   border-radius: 999px;
@@ -122,12 +188,16 @@
 }
 
 .contact-send-btn:hover {
+  background: linear-gradient(135deg, #d99a11, var(--brand-accent));
+  color: #ffffff;
   transform: translateY(-2px);
   box-shadow: 0 20px 45px rgba(14, 74, 123, 0.5);
 }
 
 .contact-meta-card {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-radius: 24px;
   padding: 1.8rem;
   border: 1px solid rgba(14, 74, 123, 0.12);
@@ -216,6 +286,10 @@
     padding: 3rem 0;
   }
 
+  .contact-page::before {
+    background-attachment: scroll;
+  }
+
   .contact-form-card,
   .contact-meta-card {
     padding: 1.6rem;
@@ -223,6 +297,11 @@
 }
 
 @media (max-width: 575px) {
+  .contact-hero {
+    padding: 1.35rem;
+    border-radius: 18px;
+  }
+
   .contact-info-card {
     text-align: center;
   }

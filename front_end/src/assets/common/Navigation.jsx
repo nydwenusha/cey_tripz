@@ -1,13 +1,20 @@
 import { useEffect, useState, useRef } from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import "../css/navigation.scss";
+
+const MotionDiv = motion.div;
 
 function NavbarComp() {
   const [scrolled, setScrolled] = useState(false);
   const navRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getNavLinkClass = (path) => (
+    `nav-link-animated ${location.pathname === path ? 'active' : ''}`
+  );
 
   const handleBookNow = () => {
     navigate('/booking');
@@ -26,6 +33,7 @@ function NavbarComp() {
     <Navbar
       expand="lg"
       variant="dark"
+      collapseOnSelect
       className={`navbar-transparent fixed-top py-3 ${scrolled ? 'scrolled' : ''}`}
       ref={navRef}
     >
@@ -38,35 +46,35 @@ function NavbarComp() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto align-items-center">
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              <Nav.Link as={Link} to="/" className="nav-link-animated">Home</Nav.Link>
-            </motion.div>
-            <motion.div
+              <Nav.Link as={Link} to="/" className={getNavLinkClass('/')} aria-current={location.pathname === '/' ? 'page' : undefined}>Home</Nav.Link>
+            </MotionDiv>
+            <MotionDiv
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.15 }}
             >
-              <Nav.Link as={Link} to="/about" className="nav-link-animated">About</Nav.Link>
-            </motion.div>
-            <motion.div
+              <Nav.Link as={Link} to="/about" className={getNavLinkClass('/about')} aria-current={location.pathname === '/about' ? 'page' : undefined}>About</Nav.Link>
+            </MotionDiv>
+            <MotionDiv
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <Nav.Link as={Link} to="/vehicles" className="nav-link-animated">Vehicles</Nav.Link>
-            </motion.div>
-            <motion.div
+              <Nav.Link as={Link} to="/vehicles" className={getNavLinkClass('/vehicles')} aria-current={location.pathname === '/vehicles' ? 'page' : undefined}>Vehicles</Nav.Link>
+            </MotionDiv>
+            <MotionDiv
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
             >
-              <Nav.Link as={Link} to="/contact" className="nav-link-animated">Contact</Nav.Link>
-            </motion.div>
-            <motion.div
+              <Nav.Link as={Link} to="/contact" className={getNavLinkClass('/contact')} aria-current={location.pathname === '/contact' ? 'page' : undefined}>Contact</Nav.Link>
+            </MotionDiv>
+            <MotionDiv
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3, delay: 0.5 }}
@@ -77,9 +85,9 @@ function NavbarComp() {
                 className="nav-book-btn"
                 onClick={handleBookNow}
               >
-                <i class="fa-solid fa-car"></i> Book Now
+                <i className="fa-solid fa-car" aria-hidden="true"></i> Book Now
               </Button>
-            </motion.div>
+            </MotionDiv>
           </Nav>
         </Navbar.Collapse>
       </Container>

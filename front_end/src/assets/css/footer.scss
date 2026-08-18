@@ -1,16 +1,45 @@
 .footer-section {
-  background-color: #0c2340; // navy blue
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #061827;
   color: #fff;
   padding: 60px 0 0;
-  font-family: "Poppins", sans-serif;
+  font-family: inherit;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &::before {
+    z-index: -2;
+    background: url("../image/aboutBG.jpg") center 58%/cover no-repeat;
+    opacity: 0.1;
+    filter: saturate(0.65);
+  }
+
+  &::after {
+    z-index: -1;
+    background: linear-gradient(135deg, rgba(3, 18, 31, 0.9), rgba(8, 47, 79, 0.94));
+  }
+
+  > .container,
+  .footer-bottom {
+    position: relative;
+    z-index: 1;
+  }
 
   .footer-col {
     margin-bottom: 30px;
   }
 
   .footer-title {
-    color: #ff8c00; // orange
-    font-weight: 600;
+    color: var(--brand-accent);
+    font-weight: 700;
     font-size: 1.2rem;
     margin-bottom: 20px;
   }
@@ -23,13 +52,14 @@
       margin-bottom: 10px;
 
       a {
-        color: rgb(221, 221, 221);
+        color: rgba(255, 255, 255, 0.82);
         text-decoration: none;
-        transition: 0.3s;
+        transition: color 0.25s ease, transform 0.25s ease;
+        display: inline-block;
 
         &:hover {
-          color: rgb(221, 221, 221);
-          text-decoration: underline;
+          color: var(--brand-accent);
+          transform: translateX(4px);
         }
       }
     }
@@ -52,7 +82,7 @@
       }
 
       i {
-        color: #ff8c00;
+        color: var(--brand-accent);
         margin-right: 10px;
       }
     }
@@ -63,7 +93,7 @@
     gap: 15px;
 
     .social-icon {
-      background-color: #ff8c00;
+      background-color: rgba(255, 255, 255, 0.1);
       color: #fff;
       font-size: 1.2rem;
       width: 42px;
@@ -72,11 +102,13 @@
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      transition: 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
 
       &:hover {
-        background-color: #ffae42;
         transform: translateY(-3px);
+        filter: brightness(1.08);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
       }
     }
 
@@ -94,7 +126,7 @@
   }
 
   .footer-bottom {
-    background-color: #0c2340;
+    background: rgba(2, 12, 22, 0.34);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
     padding: 20px 0;
@@ -107,7 +139,7 @@
       margin-bottom: 10px;
 
       span {
-        color: #ff8c00;
+        color: var(--brand-accent);
       }
     }
 
@@ -120,9 +152,30 @@
       color: #bbb;
       font-size: 13px !important;
       a{
-        color: rgb(221, 221, 221);
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--brand-accent);
+        }
         
       }
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .footer-section {
+    padding-top: 48px;
+    text-align: center;
+
+    .footer-contact li,
+    .footer-social {
+      justify-content: center;
+    }
+
+    .footer-col {
+      margin-bottom: 24px;
     }
   }
 }

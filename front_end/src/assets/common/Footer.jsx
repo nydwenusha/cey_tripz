@@ -13,6 +13,7 @@ function Footer() {
             <ul className="footer-links">
               <li><Link to="/">Home</Link></li>
               <li><Link to="/about">About Us</Link></li>
+              <li><Link to="/vehicles">Vehicles</Link></li>
               <li><Link to="/contact">Contact</Link></li>
             </ul>
           </Col>
@@ -64,8 +65,8 @@ function Footer() {
       <div className="footer-bottom">
         <Container className="text-center">
           <h5 className="footer-logo">Cey<span>Tripz</span></h5>
-          <p sx={{mb:0}}>Copyright © {new Date().getFullYear()} CeyTripz. All Rights Reserved</p>
-          <small sx={{fontSize:'8px !important'}}><a href="https://theanzwer.com" target="_blank" >Design & Developed by 
+          <p>Copyright © {new Date().getFullYear()} CeyTripz. All Rights Reserved</p>
+          <small><a href="https://theanzwer.com" target="_blank" rel="noreferrer">Designed & Developed by
             The Anzwer IT Solutions
           </a></small>
 

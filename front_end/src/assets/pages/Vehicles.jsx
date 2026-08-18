@@ -4,7 +4,9 @@ import VehicleCards from "../common/VehicleCard";
 function Vehicles() {
   return (
     <Layout>
-      <VehicleCards />
+      <div className="vehicles-page">
+        <VehicleCards />
+      </div>
     </Layout>
   );
 }

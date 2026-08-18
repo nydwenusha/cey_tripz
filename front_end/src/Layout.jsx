@@ -14,10 +14,9 @@ function Layout({children}) {
   }, [location.pathname]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div className="app-shell">
       <Navigation />
-      {/* Add top padding to avoid content being hidden under the fixed navbar */}
-      <main style={{ flex: 1 }}>{children}</main>
+      <main className="app-main" key={location.pathname}>{children}</main>
       <Footer />
       <WhatsAppPopup />
       <ScrollToTopButton />

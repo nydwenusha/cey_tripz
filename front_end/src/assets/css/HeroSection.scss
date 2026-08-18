@@ -1,4 +1,5 @@
 .hero-container {
+  position: relative;
   min-height: 100vh;
   background-size: cover;
   background-position: center center;
@@ -14,7 +15,7 @@
   content: "";
   position: absolute;
   inset: 0;
-//   background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.55));
+  background: linear-gradient(180deg, rgba(3, 18, 31, 0.3), rgba(3, 18, 31, 0.58));
   z-index: 0;
 }
 .hero-container > * {
@@ -22,19 +23,28 @@
   z-index: 1;
 }
 .hero-overlay {
-  background: rgba(0,0,0,0.5);
+  width: min(760px, calc(100% - 2rem));
+  background: rgba(3, 18, 31, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   text-align: center;
-  padding: 40px;
-  border-radius: 20px;
+  padding: clamp(1.75rem, 5vw, 3rem);
+  border-radius: 24px;
   margin: 10px;
+  box-shadow: 0 28px 70px rgba(3, 18, 31, 0.3);
 }
 .hero-title {
-  font-size: 3rem;
-  font-weight: 700;
+  font-size: clamp(2.25rem, 6vw, 4.25rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
 }
 .hero-desc {
-  font-size: 1.3rem;
-  margin-bottom: 20px;
+  max-width: 600px;
+  margin: 0 auto 24px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(1rem, 2vw, 1.25rem);
 }
 
 .hero-book-btn {
@@ -51,4 +61,11 @@
   transform: translateY(-2px);
   box-shadow: 0 14px 32px rgba(244, 178, 35, 0.4);
   background-color:#f4b223 !important;
+}
+
+@media (max-width: 991px) {
+  .hero-container {
+    min-height: calc(100svh - 72px);
+    background-attachment: scroll;
+  }
 }

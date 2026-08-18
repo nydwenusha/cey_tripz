@@ -5,7 +5,7 @@
 }
 
 .gallery-title {
-  color: #007bff;
+  color: var(--brand-primary);
   font-weight: 700;
   text-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
 }
@@ -21,15 +21,15 @@
   overflow: hidden;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   backdrop-filter: blur(12px);
   cursor: pointer;
   transition: all 0.4s ease;
 }
 
 .gallery-item:hover {
-  transform: translateY(-5px) scale(1.03);
-  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
 }
 
 .gallery-image-wrapper {

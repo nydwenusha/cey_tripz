@@ -3,27 +3,29 @@ import { motion } from "framer-motion";
 import Layout from "../../Layout";
 import "../css/contact.scss";
 
+const MotionDiv = motion.div;
+
 function Contact() {
   const contactHighlights = [
     {
       title: "Travel Concierge",
       copy: "Curated itineraries, multi-day tours, and bespoke experiences crafted in under 24 hours.",
-      target: "callto:",
-      detail: "+94717191657",
+      href: "tel:+94717191657",
+      detail: "+94 71 719 1657",
       icon: "🌍",
     },
     {
       title: "Fleet Hotline",
       copy: "Real-time vehicle tracking, chauffeur briefings, and last-minute swaps handled instantly.",
-      target: "callto:",
-      detail: "+94758793281",
+      href: "tel:+94758793281",
+      detail: "+94 75 879 3281",
       icon: "🚐",
     },
     {
       title: "WhatsApp Desk",
       copy: "Share pins, voice notes, or docs on the go — we reply in minutes around the clock.",
-      target:"",
-      detail: "https://wa.me/94710877100",
+      href: "https://wa.me/94710877100",
+      detail: "Chat on WhatsApp",
       icon: "💬",
     },
   ];
@@ -38,7 +40,7 @@ function Contact() {
     <Layout>
       <section className="contact-page">
         <Container className="contact-wrapper py-5">
-          <motion.div
+          <MotionDiv
             className="contact-hero text-center"
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -50,12 +52,12 @@ function Contact() {
               From boutique hotel transfers to cross-country expeditions, our operations desk pairs you with
               verified chauffeurs, live support, and detailed route intel.
             </p>
-          </motion.div>
+          </MotionDiv>
 
           <Row className="g-4 contact-highlight-row">
             {contactHighlights.map((item, index) => (
               <Col md={4} key={item.title}>
-                <motion.div
+                <MotionDiv
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -65,16 +67,16 @@ function Contact() {
                     <div className="contact-icon">{item.icon}</div>
                     <h4>{item.title}</h4>
                     <p>{item.copy}</p>
-                    <a href={`${item.target}.${item.detail}`} target="_blank" rel="noopener noreferrer">{item.detail}</a>
+                    <a href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}>{item.detail}</a>
                   </Card>
-                </motion.div>
+                </MotionDiv>
               </Col>
             ))}
           </Row>
 
           <Row className="g-4 align-items-stretch contact-main">
             <Col lg={7}>
-              <motion.div
+              <MotionDiv
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
@@ -120,10 +122,10 @@ function Contact() {
                     </div>
                   </Form>
                 </Card>
-              </motion.div>
+              </MotionDiv>
             </Col>
             <Col lg={5}>
-              <motion.div
+              <MotionDiv
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
@@ -161,7 +163,7 @@ function Contact() {
                     allowFullScreen
                   ></iframe>
                 </div>
-              </motion.div>
+              </MotionDiv>
              
             </Col>
           </Row>
