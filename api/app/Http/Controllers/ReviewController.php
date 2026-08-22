@@ -224,7 +224,7 @@ class ReviewController extends Controller
                 return [
                     'id' => $image->id,
                     'image_path' => $image->image_path,
-                    'image_url' => asset('storage/' . ltrim($image->image_path, '/')),
+                    'image_url' => $this->normalizeImagePath($image->image_path),
                     'image_title' => $image->image_title,
                     'sort_order' => $image->sort_order,
                     'is_cover' => $image->is_cover,
@@ -232,6 +232,21 @@ class ReviewController extends Controller
                 ];
             })->values(),
         ];
+    }
+
+    protected function normalizeImagePath(?string $imagePath): ?string
+    {
+        $trimmedPath = trim((string) $imagePath);
+
+        if ($trimmedPath === '') {
+            return null;
+        }
+
+        if (preg_match('/^https?:\/\//i', $trimmedPath)) {
+            return $trimmedPath;
+        }
+
+        return asset('storage/' . ltrim($trimmedPath, '/'));
     }
 
     protected function storeImage(UploadedFile $image, int $reviewId, int $index): string

@@ -148,6 +148,10 @@ const BlogPost = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleBackToBlog = () => {
+    navigate('/#blog');
+  };
+
   const getAuthorInitial = (name) => {
     if (!name) return 'A';
     return name.charAt(0).toUpperCase();
@@ -186,7 +190,7 @@ const BlogPost = () => {
             >
               <h2>Story Not Found</h2>
               <p>{error || "The travel story you're looking for doesn't exist."}</p>
-              <button onClick={() => navigate('/blog')} className="back-to-blog-btn">
+              <button onClick={handleBackToBlog} className="back-to-blog-btn">
                 ← Back to Blog
               </button>
             </motion.div>
@@ -201,6 +205,13 @@ const BlogPost = () => {
       <div className="blog-post-wrapper">
         {/* Hero Banner */}
         <div className="post-hero-banner">
+          <div className="post-hero-navigation">
+            <Container>
+              <button onClick={handleBackToBlog} className="nav-back-btn">
+                ← Back to Blog
+              </button>
+            </Container>
+          </div>
           <div className="hero-image-wrapper">
             <img
               src={getBlogImageUrl(post)}
@@ -364,9 +375,6 @@ const BlogPost = () => {
           </Row>
 
           <div className="post-navigation-buttons">
-            <button onClick={() => navigate('/blog')} className="nav-back-btn">
-              ← Back to Blog
-            </button>
             <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="nav-top-btn">
               Back to Top ↑
             </button>

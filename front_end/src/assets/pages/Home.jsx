@@ -12,9 +12,11 @@ import Layout from "../../Layout";
 import ShareExperience from "../common/ShareExperience";
 import Blog from "../common/Blog";
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import api from "../services/api/api";
 
 function Home() {
+  const location = useLocation();
   const [hasPosts, setHasPosts] = useState(false);
   useEffect(() => {
     api.get("/blogPosts")
@@ -27,6 +29,17 @@ function Home() {
         }
       })
   }, []);
+
+  useEffect(() => {
+    if (hasPosts && location.hash === "#blog") {
+      requestAnimationFrame(() => {
+        document.getElementById("blog")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    }
+  }, [hasPosts, location.hash]);
 
   return (
     <Layout>

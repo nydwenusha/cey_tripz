@@ -13,6 +13,9 @@ const normalizeVehicle = (vehicle = {}) => ({
   specs: Array.isArray(vehicle.specs) ? vehicle.specs : [],
   featured: Boolean(vehicle.featured),
   status: vehicle.status || "inactive",
+  capacityValue: Number(vehicle.capacityValue ?? Number.parseInt(vehicle.capacity, 10)) || 0,
+  fuelType: vehicle.fuelType || "",
+  transmission: vehicle.transmission || "",
 });
 
 export async function getVehicles() {

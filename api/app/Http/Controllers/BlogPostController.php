@@ -346,7 +346,7 @@ class BlogPostController extends Controller
             'title' => $post->title,
             'slug' => Str::slug($post->title),
             'image' => $post->image,
-            'image_url' => $post->image ? asset('storage/' . $post->image) : null,
+            'image_url' => $this->normalizeImagePath($post->image),
             'author' => $post->author,
             'author_avatar' => $post->author_avatar,
             'date' => $post->date,
@@ -370,5 +370,20 @@ class BlogPostController extends Controller
             'user_id' => Schema::hasColumn('blog_posts', 'user_id') ? $post->getAttribute('user_id') : null,
             'tags' => $post->tags->pluck('name')->values()->all(),
         ];
+    }
+
+    private function normalizeImagePath(?string $imagePath): ?string
+    {
+        $trimmedPath = trim((string) $imagePath);
+
+        if ($trimmedPath === '') {
+            return null;
+        }
+
+        if (preg_match('/^https?:\/\//i', $trimmedPath)) {
+            return $trimmedPath;
+        }
+
+        return asset('storage/' . ltrim($trimmedPath, '/'));
     }
 }
