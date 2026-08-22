@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../css/HeroSection.scss";
 import heroImg1 from "../image/hero1.jpg";
 import heroImg2 from "../image/hero2.jpg";
@@ -62,6 +62,18 @@ function HeroSection() {
             Book Now
           </Button>
         </div>
+        <Link
+          to="/contact#trip-planner"
+          className="hero-trip-planner-cta"
+          aria-label="Open the custom Sri Lanka trip planner"
+        >
+          <span className="hero-trip-planner-icon"><i className="bi bi-map" aria-hidden="true" /></span>
+          <span className="hero-trip-planner-copy">
+            <small>Custom journey</small>
+            <strong>Plan my trip</strong>
+          </span>
+          <i className="bi bi-arrow-right" aria-hidden="true" />
+        </Link>
       </div>
     </>
   );

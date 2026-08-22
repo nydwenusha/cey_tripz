@@ -100,6 +100,23 @@ function Contact() {
     return () => { isActive = false; };
   }, [vehicleReloadKey]);
 
+  useEffect(() => {
+    if (window.location.hash !== "#trip-planner") return undefined;
+
+    let innerFrame;
+    const outerFrame = window.requestAnimationFrame(() => {
+      innerFrame = window.requestAnimationFrame(() => {
+        plannerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        plannerRef.current?.focus({ preventScroll: true });
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(outerFrame);
+      if (innerFrame) window.cancelAnimationFrame(innerFrame);
+    };
+  }, []);
+
   const updatePlanner = (changes) => {
     setPlanner((previous) => ({ ...previous, ...changes }));
     setStepError("");
@@ -464,7 +481,7 @@ function Contact() {
             </Col>
           </Row>
 
-          <MotionDiv ref={plannerRef} className="custom-trip-planner" initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true, amount: 0.08 }}>
+          <MotionDiv id="trip-planner" ref={plannerRef} tabIndex="-1" className="custom-trip-planner" initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true, amount: 0.08 }}>
             <div className="planner-heading">
               <div className="planner-heading-mark"><i className="bi bi-map" aria-hidden="true" /></div>
               <div className="planner-heading-copy">
