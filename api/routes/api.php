@@ -6,6 +6,7 @@ use App\Http\Controllers\BlogPostCategoryController;
 use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TourController;
@@ -56,6 +57,9 @@ Route::middleware('auth:api')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
+
+    // Dashboard and reports
+    Route::get('/DashboardAnalytics', [DashboardController::class, 'index']);
 
     // Bookings
     Route::get('/GetBookings', [BookingController::class, 'index']);
@@ -110,7 +114,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/blogPosts/{id}', [BlogPostController::class, 'update']);
     Route::delete('/blogPostDelete/{id}', [BlogPostController::class, 'destroy']);
 });
-
 
 
 

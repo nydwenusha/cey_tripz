@@ -1,354 +1,516 @@
-// Dashboard.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-    Box,
-    Grid,
-    Card,
-    CardContent,
-    Typography,
-    Paper,
-    IconButton,
-    LinearProgress,
-    useTheme,
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  FormControl,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
 } from '@mui/material';
 import {
-    TrendingUp,
-    TrendingDown,
-    People,
-    AttachMoney,
-    Tour,
-    ArrowForward,
+  AccountBalanceWallet,
+  ArrowForward,
+  CalendarMonth,
+  DirectionsCar,
+  Download,
+  EventAvailable,
+  Groups,
+  Payments,
+  PendingActions,
+  People,
+  Print,
+  Refresh,
+  Route,
+  Tour,
+  TrendingDown,
+  TrendingUp,
 } from '@mui/icons-material';
-import './Dashboard.scss';
-import MainLayout from '../../MainLayout';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip as ChartTooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import api from '../../services/api/api';
+import './Dashboard.scss';
+
+const rangeOptions = [
+  { value: 7, label: 'Last 7 days' },
+  { value: 30, label: 'Last 30 days' },
+  { value: 90, label: 'Last 90 days' },
+  { value: 365, label: 'Last 12 months' },
+];
+
+const statusConfig = {
+  pending: { color: 'warning', label: 'Pending' },
+  confirmed: { color: 'success', label: 'Confirmed' },
+  completed: { color: 'info', label: 'Completed' },
+  cancelled: { color: 'error', label: 'Cancelled' },
+  failed: { color: 'error', label: 'Failed' },
+  refunded: { color: 'default', label: 'Refunded' },
+};
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(Number(value || 0));
+
+const formatDate = (value) => {
+  if (!value) return '—';
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    .format(new Date(`${value}T00:00:00`));
+};
+
+const escapeCsvCell = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+
+const createReportCsv = (data, rangeLabel) => {
+  const rows = [
+    ['CeyTripz Management Report'],
+    ['Period', `${data.period.start} to ${data.period.end} (${rangeLabel})`],
+    ['Generated', data.generated_at],
+    [],
+    ['OVERVIEW'],
+    ['Metric', 'Value'],
+    ['Bookings', data.overview.bookings.value],
+    ['Collected revenue', data.overview.revenue.value],
+    ['Active tours', data.overview.active_tours.value],
+    ['Active customers', data.overview.active_customers.value],
+    [],
+    ['BOOKING STATUS'],
+    ['Status', 'Bookings'],
+    ...data.booking_statuses.map((item) => [item.status, item.count]),
+    [],
+    ['PAYMENT STATUS'],
+    ['Status', 'Transactions', 'Amount'],
+    ...data.payment_statuses.map((item) => [item.status, item.count, item.amount]),
+    [],
+    ['POPULAR ROUTES'],
+    ['Pickup', 'Drop-off', 'Bookings', 'Booking value'],
+    ...data.popular_routes.map((item) => [item.pickup, item.drop, item.bookings, item.value]),
+    [],
+    ['UPCOMING BOOKINGS'],
+    ['ID', 'Customer', 'Pickup', 'Drop-off', 'Pickup date', 'Vehicle', 'Status', 'Amount'],
+    ...data.upcoming_bookings.map((item) => [
+      item.id,
+      item.customer_name,
+      item.pickup_location,
+      item.drop_location,
+      item.pickup_date,
+      item.vehicle_type,
+      item.status,
+      item.amount,
+    ]),
+  ];
+
+  return rows.map((row) => row.map(escapeCsvCell).join(',')).join('\r\n');
+};
 
 const Dashboard = () => {
-    const theme = useTheme();
-    const [dashboardStats, setDashboardStats] = useState({
-        totalBookings: 0,
-        totalRevenue: 0,
-        activeTours: 0,
-        customers: 0,
-    });
+  const navigate = useNavigate();
+  const [range, setRange] = useState(30);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-    // Booking trends data
-    const bookingTrends = [
-        { month: 'Mar', bookings: 320, revenue: 45000 },
-        { month: 'Jun', bookings: 480, revenue: 68000 },
-        { month: 'Sep', bookings: 520, revenue: 78000 },
-        { month: 'Dec', bookings: 620, revenue: 92500 },
-    ];
+  const rangeLabel = useMemo(
+    () => rangeOptions.find((option) => option.value === range)?.label || 'Selected period',
+    [range],
+  );
 
-    // Top destinations data
-    const destinations = [
-        { name: 'Bali', percentage: 35, color: '#FF6B6B' },
-        { name: 'Thailand', percentage: 25, color: '#4ECDC4' },
-        { name: 'Japan', percentage: 15, color: '#45B7D1' },
-        { name: 'Maldives', percentage: 20, color: '#96CEB4' },
-        { name: 'Europe', percentage: 5, color: '#FFEAA7' },
-    ];
+  const fetchDashboard = useCallback(async () => {
+    setLoading(true);
+    setError('');
 
-    useEffect(() => {
-        let isMounted = true;
+    try {
+      const response = await api.get('/DashboardAnalytics', { params: { range } });
+      setData(response.data);
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Unable to load dashboard analytics.');
+    } finally {
+      setLoading(false);
+    }
+  }, [range]);
 
-        const fetchDashboardStats = async () => {
-            try {
-                const [bookingsResponse, revenueResponse, toursResponse, customersResponse] = await Promise.all([
-                    api.get('/TotalBookings'),
-                    api.get('/PaymentStats'),
-                    api.get('/GetTours'),
-                    api.get('/GetCustomers'),
-                ]);
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
 
-                if (!isMounted) {
-                    return;
-                }
+  const handleDownloadReport = () => {
+    if (!data) return;
 
-                const tours = toursResponse.data?.tours || toursResponse.data?.data || toursResponse.data || [];
+    const blob = new Blob([createReportCsv(data, rangeLabel)], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `ceytripz-report-${data.period.start}-to-${data.period.end}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  };
 
-                setDashboardStats({
-                    totalBookings: Number(bookingsResponse.data?.total_bookings || 0),
-                    totalRevenue: Number(revenueResponse.data?.stats?.total || 0),
-                    activeTours: Array.isArray(tours)
-                        ? tours.filter((tour) =>
-                            String(tour?.statusValue || tour?.status || '').toLowerCase() === 'active'
-                        ).length
-                        : 0,
-                    customers: Array.isArray(customersResponse.data?.customers)
-                        ? customersResponse.data.customers.length
-                        : 0,
-                });
-            } catch {
-                if (!isMounted) {
-                    return;
-                }
+  const overviewCards = data ? [
+    {
+      label: 'Bookings in period',
+      value: data.overview.bookings.value.toLocaleString(),
+      change: data.overview.bookings.change,
+      helper: 'vs previous period',
+      icon: <CalendarMonth />,
+      tone: 'blue',
+    },
+    {
+      label: 'Collected revenue',
+      value: formatCurrency(data.overview.revenue.value),
+      change: data.overview.revenue.change,
+      helper: 'completed payments',
+      icon: <Payments />,
+      tone: 'green',
+    },
+    {
+      label: 'Active tours',
+      value: data.overview.active_tours.value.toLocaleString(),
+      helper: 'currently published',
+      icon: <Tour />,
+      tone: 'orange',
+    },
+    {
+      label: 'Active customers',
+      value: data.overview.active_customers.value.toLocaleString(),
+      helper: 'confirmed customers',
+      icon: <People />,
+      tone: 'purple',
+    },
+  ] : [];
 
-                setDashboardStats({
-                    totalBookings: 0,
-                    totalRevenue: 0,
-                    activeTours: 0,
-                    customers: 0,
-                });
-            }
-        };
+  const operations = data ? [
+    {
+      label: 'Bookings awaiting action',
+      value: data.operations.pending_bookings,
+      icon: <PendingActions />,
+      action: () => navigate('/bookings?status=pending'),
+    },
+    {
+      label: 'Departures in next 7 days',
+      value: data.operations.upcoming_seven_days,
+      icon: <EventAvailable />,
+      action: () => navigate('/bookings'),
+    },
+    {
+      label: 'Pending collections',
+      value: formatCurrency(data.operations.pending_payment_amount),
+      icon: <AccountBalanceWallet />,
+      action: () => navigate('/payments'),
+    },
+    {
+      label: 'Active fleet',
+      value: data.operations.active_vehicles,
+      icon: <DirectionsCar />,
+      action: () => navigate('/vehicles'),
+    },
+  ] : [];
 
-        fetchDashboardStats();
+  const totalStatusBookings = data
+    ? data.booking_statuses.reduce((sum, item) => sum + item.count, 0)
+    : 0;
 
-        return () => {
-            isMounted = false;
-        };
-    }, []);
+  return (
+    <Box className="dashboard">
+      <Box className="dashboard-toolbar">
+        <Box>
+          <Typography variant="h4" className="dashboard-heading">Operations overview</Typography>
+          <Typography color="text.secondary">
+            Live bookings, revenue, fleet activity, and work requiring attention.
+          </Typography>
+        </Box>
 
-    // Stats cards data
-    const statsCards = [
-        {
-            title: 'Total Bookings',
-            value: dashboardStats.totalBookings.toLocaleString(),
-            icon: <Tour sx={{ fontSize: 40, color: theme.palette.primary.main }} />,
-        },
-        {
-            title: 'Total Revenue',
-            value: `$${dashboardStats.totalRevenue.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            })}`,
-            icon: <AttachMoney sx={{ fontSize: 40, color: theme.palette.success.main }} />,
-        },
-        {
-            title: 'Active Tours',
-            value: dashboardStats.activeTours.toLocaleString(),
-            icon: <Tour sx={{ fontSize: 40, color: theme.palette.warning.main }} />,
-        },
-        {
-            title: 'Customers',
-            value: dashboardStats.customers.toLocaleString(),
-            icon: <People sx={{ fontSize: 40, color: theme.palette.info.main }} />,
-        },
-    ];
+        <Box className="dashboard-actions no-print">
+          <FormControl size="small" className="range-control">
+            <Select value={range} onChange={(event) => setRange(Number(event.target.value))}>
+              {rangeOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button variant="outlined" startIcon={<Refresh />} onClick={fetchDashboard} disabled={loading}>
+            Refresh
+          </Button>
+          <Button variant="outlined" startIcon={<Print />} onClick={() => window.print()} disabled={!data}>
+            Print
+          </Button>
+          <Button variant="contained" startIcon={<Download />} onClick={handleDownloadReport} disabled={!data}>
+            Export CSV
+          </Button>
+        </Box>
+      </Box>
 
-    // Performance metrics
-    const metrics = [
-        { label: 'Last 30 days', value: '12.5%', trend: 'up', color: 'success' },
-        { label: 'Year to date', value: '8.2%', trend: 'up', color: 'success' },
-        { label: 'Currently running', value: '-3.2%', trend: 'down', color: 'error' },
-        { label: 'Registered users', value: '15.7%', trend: 'up', color: 'success' },
-    ];
+      {error && (
+        <Alert severity="error" action={<Button color="inherit" onClick={fetchDashboard}>Retry</Button>}>
+          {error}
+        </Alert>
+      )}
 
-    return (
+      {loading && !data ? (
+        <Box className="dashboard-loading">
+          <CircularProgress />
+          <Typography color="text.secondary">Loading live business data…</Typography>
+        </Box>
+      ) : data && (
+        <>
+          <Box className="overview-grid">
+            {overviewCards.map((card) => {
+              const hasChange = card.change !== undefined && card.change !== null;
+              const positive = Number(card.change) >= 0;
 
-            <Box className="dashboard">
+              return (
+                <Card key={card.label} className={`overview-card overview-card--${card.tone}`}>
+                  <CardContent>
+                    <Box className="overview-card__top">
+                      <Box className="overview-card__icon">{card.icon}</Box>
+                      {hasChange && (
+                        <Chip
+                          size="small"
+                          icon={positive ? <TrendingUp /> : <TrendingDown />}
+                          label={`${positive ? '+' : ''}${card.change}%`}
+                          className={positive ? 'change-positive' : 'change-negative'}
+                        />
+                      )}
+                    </Box>
+                    <Typography className="overview-card__value">{card.value}</Typography>
+                    <Typography className="overview-card__label">{card.label}</Typography>
+                    <Typography variant="caption" color="text.secondary">{card.helper}</Typography>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Box>
 
-                {/* Stats Cards - Full Width Grid */}
-                <Grid container spacing={3} className="stats-grid" sx={{ 
-                    width: '100%', 
-                    mx: 0,
-                    marginLeft: '0 !important',
-                    marginRight: '0 !important'
-                }}>
-                    {statsCards.map((card, index) => (
-                        <Grid 
-                            item 
-                            xs={12} 
-                            sm={6} 
-                            md={3} 
-                            key={index}
-                            sx={{ 
-                                display: 'flex',
-                                flex: { 
-                                    xs: '1 1 100%', 
-                                    sm: '1 1 calc(50% - 12px)', 
-                                    md: '1 1 calc(25% - 18px)' 
-                                },
-                                maxWidth: { 
-                                    xs: '100%', 
-                                    sm: 'calc(50% - 12px)', 
-                                    md: 'calc(25% - 18px)' 
-                                },
-                                minWidth: 0
-                            }}
-                        >
-                            <Card className="stat-card" sx={{ width: '100%' }}>
-                                <CardContent className="stat-card-content">
-                                    <Box className="stat-card-header">
-                                        {card.icon}
-                                    </Box>
-                                    <Typography variant="h3" className="stat-value">
-                                        {card.value}
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary" className="stat-title">
-                                        {card.title}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
+          <Card className="section-card operations-card">
+            <CardContent>
+              <Box className="section-heading">
+                <Box>
+                  <Typography variant="h6">Today’s operations pulse</Typography>
+                  <Typography variant="body2" color="text.secondary">Current workload across the business</Typography>
+                </Box>
+              </Box>
+              <Box className="operations-grid">
+                {operations.map((item) => (
+                  <Button key={item.label} className="operation-item" onClick={item.action}>
+                    <Box className="operation-item__icon">{item.icon}</Box>
+                    <Box className="operation-item__copy">
+                      <Typography className="operation-item__value">{item.value}</Typography>
+                      <Typography variant="body2" color="text.secondary">{item.label}</Typography>
+                    </Box>
+                    <ArrowForward className="operation-item__arrow" />
+                  </Button>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
 
-                {/* Main Content Grid */}
-                <Grid container spacing={3} className="content-grid" sx={{ 
-                    width: '100%', 
-                    mx: 0,
-                    marginLeft: '0 !important',
-                    marginRight: '0 !important'
-                }}>
-                    {/* Left Column - Performance Metrics */}
-                    <Grid item xs={12} sx={{width:{lg:'calc(60% - 24px)'}}}>
-                        {/* Performance Metrics */}
-                        <Card className="metrics-card">
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom className="section-title">
-                                    Performance Metrics
-                                </Typography>
-                                <Grid container spacing={2}>
-                                    {metrics.map((metric, index) => (
-                                        <Grid item xs={12} sm={6} key={index}>
-                                            <Paper className="metric-paper" elevation={0}>
-                                                <Box className="metric-content">
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {metric.label}
-                                                    </Typography>
-                                                    <Box className="metric-value-container">
-                                                        <Typography
-                                                            variant="h6"
-                                                            className={`metric-value metric-${metric.color}`}
-                                                        >
-                                                            {metric.value}
-                                                        </Typography>
-                                                        {metric.trend === 'up' ? (
-                                                            <TrendingUp className={`trend-icon trend-${metric.color}`} />
-                                                        ) : (
-                                                            <TrendingDown className={`trend-icon trend-${metric.color}`} />
-                                                        )}
-                                                    </Box>
-                                                </Box>
-                                            </Paper>
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                            </CardContent>
-                        </Card>
+          <Box className="analytics-grid">
+            <Card className="section-card revenue-card">
+              <CardContent>
+                <Box className="section-heading">
+                  <Box>
+                    <Typography variant="h6">Revenue performance</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Completed payments during {rangeLabel.toLowerCase()}
+                    </Typography>
+                  </Box>
+                  <Chip label={formatCurrency(data.overview.revenue.value)} color="success" variant="outlined" />
+                </Box>
+                <Box className="revenue-chart" aria-label="Revenue performance chart">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={data.revenue_trend} margin={{ top: 12, right: 12, left: 4, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#1f9d72" stopOpacity={0.28} />
+                          <stop offset="95%" stopColor="#1f9d72" stopOpacity={0.02} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#e6eaf0" />
+                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#718096', fontSize: 12 }} />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#718096', fontSize: 12 }}
+                        tickFormatter={(value) => `$${Number(value).toLocaleString()}`}
+                        width={72}
+                      />
+                      <ChartTooltip
+                        formatter={(value, name) => [name === 'revenue' ? formatCurrency(value) : value, name === 'revenue' ? 'Revenue' : 'Bookings']}
+                        labelFormatter={(label, payload) => payload?.[0]?.payload
+                          ? `${payload[0].payload.start} – ${payload[0].payload.end}`
+                          : label}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#1f9d72"
+                        strokeWidth={3}
+                        fill="url(#revenueFill)"
+                        activeDot={{ r: 5 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </Box>
+              </CardContent>
+            </Card>
 
-                        {/* Booking Trends */}
-                        <Card className="trends-card">
-                            <CardContent>
-                                <Box className="trends-header">
-                                    <Typography variant="h6" className="section-title">
-                                        Booking Trends
-                                    </Typography>
-                                    <IconButton size="small" className="view-report-btn">
-                                        <Typography variant="body2">View Report</Typography>
-                                        <ArrowForward sx={{ fontSize: 16, ml: 1 }} />
-                                    </IconButton>
-                                </Box>
+            <Card className="section-card status-card">
+              <CardContent>
+                <Box className="section-heading">
+                  <Box>
+                    <Typography variant="h6">Booking pipeline</Typography>
+                    <Typography variant="body2" color="text.secondary">Status mix for the selected period</Typography>
+                  </Box>
+                  <Typography className="status-total">{totalStatusBookings}</Typography>
+                </Box>
+                <Box className="status-list">
+                  {data.booking_statuses.map((item) => {
+                    const percentage = totalStatusBookings ? (item.count / totalStatusBookings) * 100 : 0;
+                    const config = statusConfig[item.status] || { color: 'default', label: item.status };
 
-                                {/* Chart visualization */}
-                                <Box className="chart-container">
-                                    <Box className="chart-bars">
-                                        {bookingTrends.map((trend, index) => (
-                                            <Box key={index} className="chart-column">
-                                                <Box className="bar-container">
-                                                    {/* Bookings Bar */}
-                                                    <Box
-                                                        className="booking-bar"
-                                                        sx={{
-                                                            height: `${(trend.bookings / 700) * 100}%`,
-                                                        }}
-                                                    />
-                                                    {/* Revenue Bar */}
-                                                    <Box
-                                                        className="revenue-bar"
-                                                        sx={{
-                                                            height: `${(trend.revenue / 100000) * 100}%`,
-                                                        }}
-                                                    />
-                                                </Box>
-                                                <Typography variant="caption" className="month-label">
-                                                    {trend.month}
-                                                </Typography>
-                                            </Box>
-                                        ))}
-                                    </Box>
+                    return (
+                      <Box key={item.status} className="status-row">
+                        <Box className="status-row__label">
+                          <Chip size="small" label={config.label} color={config.color} variant="outlined" />
+                          <Typography fontWeight={700}>{item.count}</Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={percentage}
+                          color={config.color === 'default' ? 'primary' : config.color}
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                          {percentage.toFixed(0)}% of bookings
+                        </Typography>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
 
-                                    {/* Legends */}
-                                    <Box className="chart-legends">
-                                        <Box className="legend-item">
-                                            <Box className="legend-color bookings-legend" />
-                                            <Typography variant="caption">Bookings</Typography>
-                                        </Box>
-                                        <Box className="legend-item">
-                                            <Box className="legend-color revenue-legend" />
-                                            <Typography variant="caption">Revenue ($)</Typography>
-                                        </Box>
-                                    </Box>
+          <Box className="activity-grid">
+            <Card className="section-card schedule-card">
+              <CardContent>
+                <Box className="section-heading">
+                  <Box>
+                    <Typography variant="h6">Upcoming trip schedule</Typography>
+                    <Typography variant="body2" color="text.secondary">Next confirmed and pending departures</Typography>
+                  </Box>
+                  <Button endIcon={<ArrowForward />} onClick={() => navigate('/bookings')}>All bookings</Button>
+                </Box>
+                {data.upcoming_bookings.length ? (
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Booking</TableCell>
+                          <TableCell>Route</TableCell>
+                          <TableCell>Pickup</TableCell>
+                          <TableCell>Vehicle</TableCell>
+                          <TableCell>Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {data.upcoming_bookings.map((booking) => {
+                          const config = statusConfig[booking.status] || { color: 'default', label: booking.status };
+                          return (
+                            <TableRow key={booking.id} hover>
+                              <TableCell>
+                                <Typography variant="body2" fontWeight={700}>#{booking.id}</Typography>
+                                <Typography variant="caption" color="text.secondary">{booking.customer_name}</Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="body2">{booking.pickup_location}</Typography>
+                                <Typography variant="caption" color="text.secondary">to {booking.drop_location}</Typography>
+                              </TableCell>
+                              <TableCell>{formatDate(booking.pickup_date)}</TableCell>
+                              <TableCell>{booking.vehicle_type}</TableCell>
+                              <TableCell><Chip size="small" label={config.label} color={config.color} /></TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Box className="empty-state"><EventAvailable /><Typography>No upcoming trips found.</Typography></Box>
+                )}
+              </CardContent>
+            </Card>
 
-                                    {/* Y-axis labels */}
-                                    <Box className="y-axis-labels">
-                                        <Typography variant="caption">600</Typography>
-                                        <Typography variant="caption">450</Typography>
-                                        <Typography variant="caption">300</Typography>
-                                        <Typography variant="caption">150</Typography>
-                                        <Typography variant="caption">0</Typography>
-                                    </Box>
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    </Grid>
+            <Card className="section-card routes-card">
+              <CardContent>
+                <Box className="section-heading">
+                  <Box>
+                    <Typography variant="h6">Popular routes</Typography>
+                    <Typography variant="body2" color="text.secondary">Most-booked routes in this period</Typography>
+                  </Box>
+                  <Route color="primary" />
+                </Box>
+                <Box className="routes-list">
+                  {data.popular_routes.length ? data.popular_routes.map((routeItem, index) => (
+                    <Box key={`${routeItem.pickup}-${routeItem.drop}`} className="route-row">
+                      <Box className="route-rank">{index + 1}</Box>
+                      <Box className="route-copy">
+                        <Typography variant="body2" fontWeight={700}>{routeItem.pickup}</Typography>
+                        <Typography variant="caption" color="text.secondary">to {routeItem.drop}</Typography>
+                      </Box>
+                      <Box className="route-value">
+                        <Typography variant="body2" fontWeight={700}>{routeItem.bookings} bookings</Typography>
+                        <Typography variant="caption" color="text.secondary">{formatCurrency(routeItem.value)}</Typography>
+                      </Box>
+                    </Box>
+                  )) : (
+                    <Box className="empty-state"><Route /><Typography>No route activity for this period.</Typography></Box>
+                  )}
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
 
-                    {/* Right Column - Top Destinations */}
-                    <Grid item xs={12} sx={{width:{lg:'calc(40%)'}}}>
-                        <Card className="destinations-card" sx={{width:'100%'}}>
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom className="section-title">
-                                    Top Destinations
-                                </Typography>
-
-                                {/* Destinations List */}
-                                <Box className="destinations-list">
-                                    {destinations.map((destination, index) => (
-                                        <Box key={index} className="destination-item">
-                                            <Box className="destination-header">
-                                                <Typography variant="body1" className="destination-name">
-                                                    {destination.name}
-                                                </Typography>
-                                                <Typography variant="body1" className="destination-percentage">
-                                                    {destination.percentage}%
-                                                </Typography>
-                                            </Box>
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={destination.percentage}
-                                                className="destination-progress"
-                                                sx={{
-                                                    backgroundColor: 'rgba(0,0,0,0.1)',
-                                                    '& .MuiLinearProgress-bar': {
-                                                        backgroundColor: destination.color,
-                                                    },
-                                                }}
-                                            />
-                                        </Box>
-                                    ))}
-                                </Box>
-
-                                {/* Color Legend */}
-                                <Box className="color-legend">
-                                    {destinations.map((destination, index) => (
-                                        <Box key={index} className="legend-item">
-                                            <Box
-                                                className="legend-color"
-                                                sx={{ backgroundColor: destination.color }}
-                                            />
-                                            <Typography variant="caption">{destination.name}</Typography>
-                                        </Box>
-                                    ))}
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
+          <Box className="report-banner no-print">
+            <Box className="report-banner__icon"><Groups /></Box>
+            <Box className="report-banner__copy">
+              <Typography variant="h6">Need a management report?</Typography>
+              <Typography variant="body2">
+                Open Reports & Analytics for detailed booking, payment, route, and schedule tables.
+              </Typography>
             </Box>
-  
-    );
+            <Button variant="contained" color="inherit" endIcon={<ArrowForward />} onClick={() => navigate('/reports')}>
+              Open reports
+            </Button>
+          </Box>
+
+          <Typography className="generated-time" variant="caption" color="text.secondary">
+            Last refreshed {new Date(data.generated_at).toLocaleString()}
+          </Typography>
+        </>
+      )}
+    </Box>
+  );
 };
 
 export default Dashboard;
