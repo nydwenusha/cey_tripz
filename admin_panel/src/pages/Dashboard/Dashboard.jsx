@@ -28,6 +28,7 @@ const Dashboard = () => {
     const [dashboardStats, setDashboardStats] = useState({
         totalBookings: 0,
         totalRevenue: 0,
+        activeTours: 0,
         customers: 0,
     });
 
@@ -53,9 +54,10 @@ const Dashboard = () => {
 
         const fetchDashboardStats = async () => {
             try {
-                const [bookingsResponse, revenueResponse, customersResponse] = await Promise.all([
+                const [bookingsResponse, revenueResponse, toursResponse, customersResponse] = await Promise.all([
                     api.get('/TotalBookings'),
                     api.get('/PaymentStats'),
+                    api.get('/GetTours'),
                     api.get('/GetCustomers'),
                 ]);
 
@@ -63,9 +65,16 @@ const Dashboard = () => {
                     return;
                 }
 
+                const tours = toursResponse.data?.tours || toursResponse.data?.data || toursResponse.data || [];
+
                 setDashboardStats({
                     totalBookings: Number(bookingsResponse.data?.total_bookings || 0),
                     totalRevenue: Number(revenueResponse.data?.stats?.total || 0),
+                    activeTours: Array.isArray(tours)
+                        ? tours.filter((tour) =>
+                            String(tour?.statusValue || tour?.status || '').toLowerCase() === 'active'
+                        ).length
+                        : 0,
                     customers: Array.isArray(customersResponse.data?.customers)
                         ? customersResponse.data.customers.length
                         : 0,
@@ -78,6 +87,7 @@ const Dashboard = () => {
                 setDashboardStats({
                     totalBookings: 0,
                     totalRevenue: 0,
+                    activeTours: 0,
                     customers: 0,
                 });
             }
@@ -107,7 +117,7 @@ const Dashboard = () => {
         },
         {
             title: 'Active Tours',
-            value: '42',
+            value: dashboardStats.activeTours.toLocaleString(),
             icon: <Tour sx={{ fontSize: 40, color: theme.palette.warning.main }} />,
         },
         {
