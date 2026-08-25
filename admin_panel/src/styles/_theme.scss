@@ -1,0 +1,89 @@
+// Theme Variables
+:root {
+  // Light Theme
+  --primary-color: #{$primary-color};
+  --primary-light: #{$primary-light};
+  --primary-dark: #{$primary-dark};
+  
+  --secondary-color: #{$secondary-color};
+  --secondary-light: #{$secondary-light};
+  --secondary-dark: #{$secondary-dark};
+  
+  --bg-default: #{$bg-default};
+  --bg-paper: #{$bg-paper};
+  
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+  --text-disabled: #{$text-disabled};
+  
+  --border-color: #{$border-color};
+  --divider-color: #{$divider-color};
+  
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
+}
+
+[data-theme='dark'] {
+  // Dark Theme
+  --primary-color: #4dabf5;
+  --primary-light: #80c8ff;
+  --primary-dark: #0081cb;
+  
+  --secondary-color: #ffab91;
+  --secondary-light: #ffddc1;
+  --secondary-dark: #c97b63;
+  
+  --bg-default: #121212;
+  --bg-paper: #1e1e1e;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #b0bec5;
+  --text-disabled: #757575;
+  
+  --border-color: #424242;
+  --divider-color: #303030;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.3);
+}
+
+// Utility classes for theme switching
+.theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.bg-default {
+  background-color: var(--bg-default);
+}
+
+.bg-paper {
+  background-color: var(--bg-paper);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.border-color {
+  border-color: var(--border-color);
+}
+
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}

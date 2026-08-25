@@ -1,0 +1,114 @@
+.popular-gallery-page {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.85));
+  backdrop-filter: blur(10px);
+  min-height: 100vh;
+  color: #333;
+}
+
+.gallery-title {
+  font-weight: 700;
+  color: #007bff;
+  text-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+}
+
+.gallery-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.img-box img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.gallery-card:hover img {
+  transform: scale(1.1);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-card:hover .overlay {
+  opacity: 1;
+}
+
+.overlay-content {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  color: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.overlay-content h5 {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+}
+
+.overlay-content p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.book-now-btn {
+  background-color: #007bff;
+  border: none;
+  margin-top: 8px;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.book-now-btn:hover {
+  background-color: #0056b3;
+}
+
+/* === Feedback Section === */
+
+.feedback-title {
+  font-weight: 600;
+  color: #007bff;
+}
+
+.feedback-card {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.15);
+}
+
+.feedback-photo {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.feedback-place {
+  font-weight: 500;
+  color: #007bff;
+  margin-bottom: 6px;
+}
+
+.feedback-comment {
+  font-style: italic;
+  color: #555;
+}

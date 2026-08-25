@@ -1,0 +1,55 @@
+//map
+.map-section {
+  background: linear-gradient(180deg, #ffffff, #f0f8ff);
+  padding: 80px 0;
+}
+
+.map-title {
+  color: var(--brand-primary);
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+}
+
+.map-container {
+  width: 90%;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(14, 74, 123, 0.1);
+  box-shadow: var(--shadow-md);
+}
+
+.leaflet-container {
+  border-radius: 16px;
+}
+
+.popup-content {
+  text-align: center;
+  color: #333;
+}
+
+.popup-content h5 {
+  color: #007bff;
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.popup-content p {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.map-link {
+  background-color: var(--brand-primary);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.map-link:hover {
+  background-color: var(--brand-primary-dark);
+}

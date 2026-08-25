@@ -1,0 +1,818 @@
+// Booking.scss - Vehicle Booking Management Styling
+.booking-container {
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  border-radius: 16px;
+  min-height: calc(100vh - 48px);
+
+  // Page Header
+  .page-header {
+    margin-bottom: 28px;
+
+    .MuiTypography-h4 {
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+  }
+
+  // Controls Section
+  .booking-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .MuiTextField-root {
+      background: white;
+      border-radius: 12px;
+
+      .MuiOutlinedInput-root {
+        border-radius: 12px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        &.Mui-focused {
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+      }
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+
+      .MuiFormControl-root {
+        background: white;
+        border-radius: 8px;
+        min-width: 150px;
+
+        .MuiOutlinedInput-root {
+          border-radius: 8px;
+        }
+      }
+
+      .MuiChip-root {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 1px solid transparent;
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        &.MuiChip-colorPrimary {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+      }
+
+      .MuiIconButton-root {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+
+        &:hover {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+      }
+    }
+  }
+
+  // Table Container
+  .booking-table-container {
+    border-radius: 16px;
+    overflow-y: auto !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    background: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .booking-table {
+      .table-head {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+
+        .table-header-cell {
+          color: black;
+          font-weight: 600;
+          font-size: 0.875rem;
+          letter-spacing: 0.5px;
+          border-bottom: none;
+          padding: 16px;
+          white-space: nowrap;
+
+          &:first-child {
+            border-radius: 16px 0 0 0;
+          }
+
+          &:last-child {
+            border-radius: 0 16px 0 0;
+          }
+        }
+      }
+
+      .table-row {
+        transition: all 0.2s ease;
+        background: white;
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(102, 126, 234, 0.04) 0%,
+            rgba(118, 75, 162, 0.04) 100%
+          );
+          transform: scale(1.001);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+
+          .action-buttons {
+            opacity: 1;
+          }
+        }
+
+        td {
+          padding: 16px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+          vertical-align: middle;
+        }
+
+        // Customer Cell
+        .customer-cell {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          .customer-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+
+            .MuiSvgIcon-root {
+              font-size: 20px;
+            }
+          }
+        }
+
+        // Location Cells
+        .location-cell {
+          display: flex;
+          align-items: center;
+          font-weight: 500;
+          color: #2c3e50;
+
+          .MuiSvgIcon-root {
+            color: #667eea;
+            font-size: 18px;
+          }
+        }
+
+        // Vehicle Cell
+        .vehicle-cell {
+          display: flex;
+          align-items: center;
+
+          .MuiChip-root {
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #2c3e50;
+            font-weight: 500;
+
+            .MuiChip-label {
+              padding: 4px 12px;
+            }
+          }
+
+          .MuiSvgIcon-root {
+            color: #667eea;
+          }
+        }
+
+        // Date Cell
+        .date-cell {
+          display: flex;
+          align-items: center;
+          color: #2c3e50;
+          font-weight: 500;
+
+          .MuiSvgIcon-root {
+            color: #667eea;
+            font-size: 18px;
+          }
+        }
+
+        // Amount Cell
+        .MuiTypography-root {
+          &.MuiTypography-colorPrimary {
+            color: #667eea;
+            font-weight: 700;
+          }
+        }
+
+        // Action Buttons
+        .action-buttons {
+          display: flex;
+          gap: 6px;
+          opacity: 0.7;
+          transition: opacity 0.2s ease;
+
+          .MuiIconButton-root {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(102, 126, 234, 0.08);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: rgba(102, 126, 234, 0.15);
+              transform: translateY(-2px);
+              border-color: rgba(102, 126, 234, 0.3);
+            }
+
+            .MuiSvgIcon-root {
+              font-size: 18px;
+            }
+
+            // Color variants
+            &.MuiIconButton-colorInfo {
+              background: rgba(33, 150, 243, 0.08);
+              color: #2196f3;
+              &:hover {
+                background: rgba(33, 150, 243, 0.15);
+              }
+            }
+
+            &.MuiIconButton-colorPrimary {
+              background: rgba(102, 126, 234, 0.08);
+              color: #667eea;
+              &:hover {
+                background: rgba(102, 126, 234, 0.15);
+              }
+            }
+
+            &.MuiIconButton-colorSuccess {
+              background: rgba(76, 175, 80, 0.08);
+              color: #4caf50;
+              &:hover {
+                background: rgba(76, 175, 80, 0.15);
+              }
+            }
+
+            &.MuiIconButton-colorWarning {
+              background: rgba(255, 152, 0, 0.08);
+              color: #ff9800;
+              &:hover {
+                background: rgba(255, 152, 0, 0.15);
+              }
+            }
+
+            &.MuiIconButton-colorError {
+              background: rgba(244, 67, 54, 0.08);
+              color: #f44336;
+              &:hover {
+                background: rgba(244, 67, 54, 0.15);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Table Footer
+  .booking-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding: 16px 8px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+
+    .MuiTablePagination-root {
+      padding: 0;
+
+      .MuiTablePagination-selectLabel,
+      .MuiTablePagination-displayedRows {
+        font-weight: 500;
+        color: #2c3e50;
+      }
+
+      .MuiTablePagination-actions {
+        .MuiIconButton-root {
+          border-radius: 8px;
+
+          &:hover {
+            background: rgba(102, 126, 234, 0.08);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Booking Details Dialog
+.booking-details {
+  padding: 8px 0;
+
+  .MuiTypography-subtitle2 {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    color: #667eea;
+  }
+
+  .MuiTypography-h6 {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 4px;
+  }
+
+  .MuiTypography-body1 {
+    font-weight: 500;
+    color: #2c3e50;
+  }
+
+  .MuiTypography-body2 {
+    color: #666;
+  }
+
+  .MuiGrid-item {
+    .MuiBox-root {
+      padding: 12px;
+      background: rgba(102, 126, 234, 0.04);
+      border-radius: 12px;
+      border: 1px solid rgba(102, 126, 234, 0.1);
+
+      .MuiSvgIcon-root {
+        color: #667eea;
+      }
+    }
+  }
+}
+
+// Status Chips
+.MuiChip-root {
+  &.MuiChip-colorSuccess {
+    background: rgba(76, 175, 80, 0.1);
+    color: #2e7d32;
+    border-color: #4caf50;
+
+    .MuiSvgIcon-root {
+      color: #2e7d32;
+    }
+  }
+
+  &.MuiChip-colorWarning {
+    background: rgba(255, 152, 0, 0.1);
+    color: #f57c00;
+    border-color: #ff9800;
+
+    .MuiSvgIcon-root {
+      color: #f57c00;
+    }
+  }
+
+  &.MuiChip-colorError {
+    background: rgba(244, 67, 54, 0.1);
+    color: #d32f2f;
+    border-color: #f44336;
+
+    .MuiSvgIcon-root {
+      color: #d32f2f;
+    }
+  }
+}
+
+// Dialog Styling
+.MuiDialog-paper {
+  border-radius: 20px !important;
+  overflow: hidden;
+
+  .MuiDialogTitle-root {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 700;
+    padding: 20px 24px;
+  }
+
+  .MuiDialogContent-root {
+    padding: 24px;
+  }
+
+  .MuiDialogActions-root {
+    padding: 16px 24px;
+    background: #f8f9fa;
+
+    .MuiButton-root {
+      border-radius: 10px;
+      padding: 8px 24px;
+      font-weight: 600;
+      text-transform: none;
+
+      &.MuiButton-contained {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+
+        &:hover {
+          background: linear-gradient(135deg, #5a6fd6 0%, #6a4292 100%);
+        }
+      }
+    }
+  }
+}
+
+.booking-dialog-title {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #0f172a !important;
+  padding: 20px 24px !important;
+
+  .MuiTypography-root {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    font-size: 1.2rem !important;
+    line-height: 1.3;
+    text-shadow: none;
+    margin: 0;
+  }
+}
+
+// Snackbar Styling
+.MuiSnackbar-root {
+  z-index: 2000 !important;
+
+  .MuiAlert-root {
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    font-weight: 500;
+
+    &.MuiAlert-standardSuccess {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      color: white;
+
+      .MuiAlert-icon {
+        color: white;
+      }
+    }
+
+    &.MuiAlert-standardInfo {
+      background: linear-gradient(135deg, #2196f3 0%, #1e88e5 100%);
+      color: white;
+
+      .MuiAlert-icon {
+        color: white;
+      }
+    }
+
+    &.MuiAlert-standardWarning {
+      background: linear-gradient(135deg, #ff9800 0%, #fb8c00 100%);
+      color: white;
+
+      .MuiAlert-icon {
+        color: white;
+      }
+    }
+
+    &.MuiAlert-standardError {
+      background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+      color: white;
+
+      .MuiAlert-icon {
+        color: white;
+      }
+    }
+  }
+}
+
+// Menu Styling
+.MuiMenu-paper {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin-top: 8px;
+
+  .MuiMenuItem-root {
+    padding: 12px 16px;
+    gap: 12px;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.08);
+    }
+
+    .MuiListItemIcon-root {
+      min-width: 32px;
+
+      .MuiSvgIcon-root {
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .booking-container {
+    .booking-table-container {
+      overflow-x: auto;
+
+      .booking-table {
+        min-width: 1200px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-container {
+    padding: 16px;
+
+    .booking-controls {
+      flex-direction: column;
+      align-items: stretch;
+
+      .MuiTextField-root {
+        width: 100% !important;
+      }
+
+      .filter-buttons {
+        justify-content: flex-start;
+
+        .MuiFormControl-root {
+          min-width: 100%;
+        }
+      }
+    }
+
+    .booking-footer {
+      flex-direction: column;
+      gap: 16px;
+      align-items: stretch;
+
+      .MuiTablePagination-root {
+        display: flex;
+        justify-content: center;
+      }
+    }
+  }
+
+  .booking-table-container {
+    .booking-table {
+      .table-row {
+        .action-buttons {
+          opacity: 1;
+
+          .MuiIconButton-root {
+            width: 36px;
+            height: 36px;
+          }
+        }
+
+        td {
+          padding: 12px;
+        }
+      }
+    }
+  }
+}
+
+// Print Styles
+@media print {
+  .booking-container {
+    background: white;
+    padding: 0;
+
+    .booking-controls,
+    .booking-footer,
+    .action-buttons {
+      display: none !important;
+    }
+
+    .booking-table-container {
+      box-shadow: none;
+
+      .table-head {
+        background: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+
+        .table-header-cell {
+          color: black !important;
+        }
+      }
+    }
+  }
+}
+
+// Dark Mode Support
+@media (prefers-color-scheme: dark) {
+  .booking-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+
+    .booking-controls {
+      .MuiTextField-root {
+        background: #0f3460;
+
+        .MuiOutlinedInput-root {
+          color: #e0e0e0;
+
+          .MuiOutlinedInput-notchedOutline {
+            border-color: rgba(255, 255, 255, 0.1);
+          }
+
+          &:hover .MuiOutlinedInput-notchedOutline {
+            border-color: rgba(102, 126, 234, 0.5);
+          }
+        }
+      }
+
+      .filter-buttons {
+        .MuiFormControl-root {
+          background: #0f3460;
+
+          .MuiSelect-root {
+            color: #e0e0e0;
+          }
+        }
+
+        .MuiIconButton-root {
+          background: #0f3460;
+          border-color: rgba(255, 255, 255, 0.1);
+          color: #e0e0e0;
+        }
+      }
+    }
+
+    .booking-table-container {
+      background: #0f3460;
+      border-color: rgba(255, 255, 255, 0.1);
+
+      .booking-table {
+        .table-head {
+          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .table-row {
+          background: #0f3460;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.05);
+          }
+
+          td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e0e0e0;
+          }
+
+          .customer-cell {
+            .customer-avatar {
+              background: rgba(102, 126, 234, 0.2);
+              color: #90a4ff;
+            }
+          }
+
+          .location-cell,
+          .date-cell {
+            color: #e0e0e0;
+          }
+
+          .vehicle-cell {
+            .MuiChip-root {
+              background: rgba(102, 126, 234, 0.2);
+              color: #e0e0e0;
+              border-color: rgba(102, 126, 234, 0.5);
+            }
+          }
+        }
+      }
+    }
+
+    .booking-footer {
+      background: #0f3460;
+
+      .MuiTablePagination-root {
+        color: #e0e0e0;
+      }
+    }
+  }
+
+  .booking-details {
+    .MuiTypography-subtitle2 {
+      color: #90a4ff;
+    }
+
+    .MuiTypography-h6,
+    .MuiTypography-body1 {
+      color: #e0e0e0;
+    }
+
+    .MuiGrid-item .MuiBox-root {
+      background: rgba(102, 126, 234, 0.1);
+      border-color: rgba(102, 126, 234, 0.2);
+    }
+  }
+
+  .MuiDialog-paper {
+    background: #0f3460;
+
+    .MuiDialogTitle-root {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+
+    .MuiDialogContent-root {
+      color: #e0e0e0;
+    }
+
+    .MuiDialogActions-root {
+      background: #16213e;
+    }
+  }
+
+  .booking-dialog-title {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+
+    .MuiTypography-root {
+      color: #fff !important;
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.booking-container {
+  animation: fadeIn 0.4s ease-out;
+
+  .table-row {
+    animation: fadeIn 0.4s ease-out;
+    animation-fill-mode: both;
+
+    @for $i from 1 through 20 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.05}s;
+      }
+    }
+  }
+}
+
+.booking-container {
+  > .MuiBox-root:first-of-type {
+    background: white;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  > .MuiTableContainer-root {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    background: white;
+  }
+
+  > .MuiTableContainer-root .MuiTableRow-root {
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(102, 126, 234, 0.04);
+    }
+  }
+
+  > .MuiTableContainer-root .MuiTableCell-head {
+    font-weight: 600;
+    background-color: #f8f9fa;
+  }
+
+  > .MuiTableContainer-root + .MuiBox-root {
+    background: white;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+}

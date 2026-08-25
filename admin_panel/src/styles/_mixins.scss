@@ -1,0 +1,191 @@
+// Responsive Mixins
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'xs' {
+    @media (max-width: #{$breakpoint-sm - 1px}) {
+      @content;
+    }
+  } @else if $breakpoint == 'sm' {
+    @media (min-width: #{$breakpoint-sm}) {
+      @content;
+    }
+  } @else if $breakpoint == 'md' {
+    @media (min-width: #{$breakpoint-md}) {
+      @content;
+    }
+  } @else if $breakpoint == 'lg' {
+    @media (min-width: #{$breakpoint-lg}) {
+      @content;
+    }
+  } @else if $breakpoint == 'xl' {
+    @media (min-width: #{$breakpoint-xl}) {
+      @content;
+    }
+  } @else if $breakpoint == 'sm-down' {
+    @media (max-width: #{$breakpoint-md - 1px}) {
+      @content;
+    }
+  } @else if $breakpoint == 'md-down' {
+    @media (max-width: #{$breakpoint-lg - 1px}) {
+      @content;
+    }
+  } @else if $breakpoint == 'lg-down' {
+    @media (max-width: #{$breakpoint-xl - 1px}) {
+      @content;
+    }
+  }
+}
+
+// Flexbox Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+// Text Mixins
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin multiline-ellipsis($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Card Mixins
+@mixin card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+@mixin card-shadow {
+  box-shadow: $shadow-md;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+}
+
+// Button Mixins
+@mixin button-variant($color, $background, $border) {
+  color: $color;
+  background-color: $background;
+  border-color: $border;
+  
+  &:hover {
+    background-color: darken($background, 10%);
+    border-color: darken($border, 12%);
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba($background, 0.5);
+  }
+  
+  &:disabled {
+    opacity: 0.65;
+    background-color: $background;
+    border-color: $border;
+  }
+}
+
+// Animation Mixins
+@mixin fade-in($duration: 0.3s) {
+  animation: fadeIn $duration ease-in-out;
+}
+
+@mixin slide-up($duration: 0.3s) {
+  animation: slideUp $duration ease-in-out;
+}
+
+@mixin scale-in($duration: 0.2s) {
+  animation: scaleIn $duration ease-in-out;
+}
+
+// Keyframes
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Gradient Mixins
+@mixin gradient-primary {
+  background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+}
+
+@mixin gradient-secondary {
+  background: linear-gradient(135deg, $secondary-color 0%, $secondary-light 100%);
+}
+
+@mixin gradient-dark {
+  background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
+}
+
+// Border Mixins
+@mixin border-top-radius($radius) {
+  border-top-left-radius: $radius;
+  border-top-right-radius: $radius;
+}
+
+@mixin border-bottom-radius($radius) {
+  border-bottom-left-radius: $radius;
+  border-bottom-right-radius: $radius;
+}
+
+@mixin border-left-radius($radius) {
+  border-top-left-radius: $radius;
+  border-bottom-left-radius: $radius;
+}
+
+@mixin border-right-radius($radius) {
+  border-top-right-radius: $radius;
+  border-bottom-right-radius: $radius;
+}

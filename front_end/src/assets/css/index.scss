@@ -1,0 +1,50 @@
+:root{
+  /* Light theme variables */
+  --bg-00: #ffffff;
+  --bg-01: #f6f9fc; /* page background */
+  --surface-01: #ffffff; /* card / surface background */
+  --muted: #6b7280; /* muted text */
+  --accent: #2563eb; /* blue-600 */
+  --text: #06111a; /* primary text dark */
+}
+
+
+
+body {
+  background-color: var(--bg-01);
+  color: var(--text);
+  font-family: 'Poppins', sans-serif;
+  background-image: radial-gradient(circle at 10% 10%, rgba(2,6,23,0.02) 0px, transparent 40px),
+                    radial-gradient(circle at 90% 90%, rgba(2,6,23,0.01) 0px, transparent 80px),
+                    linear-gradient(180deg, rgba(2,6,23,0.01), transparent 200px);
+  background-attachment: fixed;
+}
+/* global fixes to avoid horizontal overflow when elements use 100vw */
+html, body {
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+/* space to ensure fixed navbar doesn't cover content */
+@media (min-width: 0px) {
+  body { padding-top: 72px; }
+}
+h2 {
+  font-weight: 600;
+  color: var(--text);
+}
+.btn-primary {
+  background-color: var(--accent);
+  border: none;
+  color: #ffffff;
+  transition: 0.24s ease;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.08);
+}
+.btn-primary:hover {
+  /* use runtime color-mix instead of darken on CSS variables */
+  background: color-mix(in srgb, var(--accent) 92%, black 8%);
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(37,99,235,0.12);
+}

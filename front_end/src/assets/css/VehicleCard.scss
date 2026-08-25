@@ -1,0 +1,212 @@
+//vehicle section styles
+.vehicles-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #edf4f8;
+}
+
+.vehicles-page::before,
+.vehicles-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.vehicles-page::before {
+  z-index: -2;
+  background: url("../image/VCBG.jpg") center/cover fixed no-repeat;
+  opacity: 0.2;
+  filter: saturate(0.72) contrast(0.88);
+}
+
+.vehicles-page::after {
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(237, 244, 248, 0.82), rgba(247, 250, 252, 0.94));
+}
+
+.vehicles-page .vehicle-section {
+  background: transparent;
+}
+
+.vehicle-section {
+  width: 100%;
+  min-height: 100vh;
+  transition: background-image 1s ease-in-out;
+  background: linear-gradient(360deg, #f5f5f58a, #ffffff);
+  padding: 60px 0;
+}
+
+.hero-animated-text {
+  width: 100%;
+  background: transparent;
+  padding: 10px 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.vehicles-page .hero-animated-text {
+  border-block: 1px solid rgba(14, 74, 123, 0.1);
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.hero-animated-text span {
+  font-size: clamp(3.25rem, 9vw, 7rem);
+  font-weight: 900;
+  color: #0e4a7b;
+  white-space: nowrap;
+  animation: none;
+  padding: 0 1rem;
+  transform: translateX(100%);
+}
+
+.hero-animated-text.animate span {
+  animation: slideLeft 24s linear infinite;
+  animation-delay: 0s;
+}
+
+@keyframes slideLeft {
+  0% {
+    transform: translateX(20%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.vehicle-section h2 {
+  color: var(--brand-primary);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  text-shadow: 0 8px 24px rgba(255, 255, 255, 0.8);
+}
+
+.vehicle-card {
+  background: linear-gradient(180deg, var(--surface-01), var(--surface-01));
+  border-radius: 22px;
+  border: 1px solid rgba(14, 74, 123, 0.1);
+  overflow: hidden;
+  transition: transform 350ms cubic-bezier(.2,.8,.2,1), box-shadow 350ms, background 350ms;
+  color: var(--text);
+  animation: cardFadeUp 550ms ease both;
+  box-shadow: var(--shadow-sm);
+}
+
+.vehicle-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+}
+
+.vehicle-card img {
+  height: 220px;
+  object-fit: cover;
+  transition: transform 450ms ease, filter 350ms ease;
+  width: 100%;
+}
+
+.vehicle-card:hover img {
+  transform: scale(1.06);
+  filter: brightness(0.98);
+}
+
+.vehicle-card .card-body {
+  padding: 1.25rem;
+  background: transparent;
+}
+
+.vehicle-card .card-title {
+  font-weight: 700;
+  color: #0b2f50;
+  margin-bottom: 0.5rem;
+}
+
+.vehicle-category {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f4b223;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+  display: inline-block;
+  background: rgba(244, 178, 35, 0.1);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(244, 178, 35, 0.3);
+}
+
+
+//   color: var(--text);
+// }
+
+.vehicle-card .card-text {
+  color: rgba(6,17,26,0.7);
+}
+
+.vehicle-card .vehicle-description {
+  display: -webkit-box;
+  min-height: calc(1.5em * 3);
+  line-height: 1.5;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.vehicle-card .btn {
+  transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+  border: 1px solid transparent;
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-animated-text span,
+  .hero-animated-text.animate span {
+    animation: none !important;
+    transform: none;
+  }
+}
+
+.vehicle-card .btn:hover {
+  background: linear-gradient(135deg, #d99a11, var(--brand-accent));
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(7, 44, 74, 0.3);
+}
+
+.vehicle-card .btn:active {
+  transform: translateY(1px);
+}
+
+@keyframes cardFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 991px) {
+  .vehicles-page::before {
+    background-attachment: scroll;
+  }
+}
+
+@media (max-width: 575px) {
+  .vehicle-section {
+    padding: 42px 0;
+  }
+
+  .hero-animated-text span {
+    font-size: clamp(2.6rem, 15vw, 4.5rem);
+  }
+}

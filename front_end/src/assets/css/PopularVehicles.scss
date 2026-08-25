@@ -1,0 +1,72 @@
+.popular-vehicles-section {
+  background-color: var(--bg-01);
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+}
+
+.vehicles-title {
+  color: #0d6efd;
+  text-shadow: 0 0 8px rgba(13, 110, 253, 0.35);
+  font-weight: bold;
+}
+
+.vehicle-card {
+  background-color: var(--surface-01);
+  border: 1px solid rgba(15, 75, 214, 0.06);
+  border-radius: 40px;
+  transition: all 0.4s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.vehicle-card:hover {
+  box-shadow: 0 8px 26px rgba(2,6,23,0.06);
+}
+
+.vehicle-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  transition: transform 0.4s ease-in-out;
+}
+
+.vehicle-card:hover .vehicle-image {
+  transform: scale(1.05);
+}
+
+.vehicle-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.vehicle-desc {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.vehicle-price {
+  color: color-mix(in srgb, var(--accent) 60%, black 40%);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.book-btn {
+  background-color: #d61313;
+  border-color: #d61313;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(214, 19, 19, 0.25);
+}
+
+.book-btn:hover {
+  background-color: #9f0b0b;
+  border-color: #9f0b0b;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(159, 11, 11, 0.35);
+}
+
+.vehicle-card-wrapper {
+  perspective: 1000px;
+}

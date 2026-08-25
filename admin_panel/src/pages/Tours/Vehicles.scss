@@ -1,0 +1,1510 @@
+// Vehicles.scss
+.vehicles-management {
+  padding: 24px;
+  background: #f8f9fa;
+  min-height: 100vh;
+
+  .vehicle-upload-previews {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .vehicle-upload-preview-card {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #d9e2ec;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    background: #fff;
+
+    .vehicle-upload-preview-image {
+      height: 130px;
+      object-fit: cover;
+    }
+
+    .vehicle-upload-preview-meta {
+      padding: 10px 12px 12px;
+
+      .file-name {
+        font-weight: 600;
+        color: #1e293b;
+        word-break: break-word;
+      }
+    }
+
+    .vehicle-upload-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+
+      &:hover {
+        background: #fff;
+      }
+    }
+  }
+
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+
+    .page-title {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      color: #666;
+      max-width: 600px;
+    }
+
+    .add-vehicle-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-weight: 600;
+      text-transform: none;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+    }
+  }
+
+  .stats-section {
+    margin-bottom: 32px;
+
+    .stat-card {
+      height: 100%;
+      border-radius: 16px;
+      border: none;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      overflow: hidden;
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      }
+
+      .stat-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+
+        .stat-icon-wrapper {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+
+          &.success {
+            background: linear-gradient(135deg, #4caf5020 0%, #8bc34a20 100%);
+          }
+
+          &.warning {
+            background: linear-gradient(135deg, #ff980020 0%, #ffc10720 100%);
+          }
+
+          &.primary {
+            background: linear-gradient(135deg, #2196f320 0%, #21cbf320 100%);
+          }
+
+          .stat-icon {
+            color: #667eea;
+            font-size: 24px;
+
+            &.success {
+              color: #4caf50;
+            }
+
+            &.warning {
+              color: #ff9800;
+            }
+          }
+        }
+      }
+
+      .stat-value {
+        font-weight: 800;
+        font-size: 2.5rem;
+        margin-bottom: 8px;
+
+        &.success {
+          color: #4caf50;
+        }
+
+        &.warning {
+          color: #ff9800;
+        }
+
+        &.primary {
+          color: #2196f3;
+        }
+      }
+
+      .stat-trend {
+        font-size: 0.85rem;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .tabs-section {
+    margin-bottom: 24px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+    .MuiTabs-indicator {
+      height: 3px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .MuiTab-root {
+      text-transform: none;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 16px 24px;
+      min-height: 64px;
+
+      &.Mui-selected {
+        color: #667eea;
+      }
+
+      .MuiTab-iconWrapper {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .categories-section {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+    .section-subtitle {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+      }
+    }
+
+    .filter-chip {
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  /* Gallery View Styles with FIXED WIDTH */
+  .gallery-view {
+    margin-bottom: 32px;
+
+    .gallery-title {
+      margin: 24px 0;
+      color: #2c3e50;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+      }
+    }
+
+    .gallery-card {
+      width: 380px; /* FIXED WIDTH */
+      height: 580px; /* FIXED HEIGHT */
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      background: white;
+      display: flex;
+      flex-direction: column;
+
+      &:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .vehicle-gallery {
+        .main-image-container {
+          position: relative;
+          height: 250px;
+          overflow: hidden;
+
+          .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            cursor: pointer;
+
+            &:hover {
+              transform: scale(1.05);
+            }
+          }
+
+          .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+
+            &:hover {
+              background: white;
+              box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            &.prev-btn {
+              left: 16px;
+            }
+
+            &.next-btn {
+              right: 16px;
+            }
+          }
+
+          &:hover {
+            .nav-btn {
+              opacity: 1;
+            }
+          }
+
+          .image-counter {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+          }
+        }
+
+        .thumbnail-container {
+          display: flex;
+          gap: 8px;
+          padding: 12px;
+          background: #f8f9fa;
+
+          .thumbnail {
+            flex: 1;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+
+            &.active {
+              border-color: #667eea;
+              transform: scale(1.05);
+            }
+
+            .thumbnail-image {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            &.more-images {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              font-weight: 600;
+              font-size: 0.9rem;
+            }
+          }
+        }
+      }
+
+      .gallery-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+
+        .gallery-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 12px;
+
+          .gallery-vehicle-name {
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            .featured-star {
+              color: #ff9800;
+            }
+          }
+
+          .gallery-vehicle-type {
+            font-size: 0.875rem;
+            color: #666;
+          }
+        }
+
+        .gallery-description {
+          color: #666;
+          margin-bottom: 16px;
+          line-height: 1.5;
+          flex: 1;
+          min-height: 60px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+        }
+
+        .gallery-specs {
+          margin-bottom: 16px;
+
+          .spec-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+
+            &:hover {
+              background: #e9ecef;
+            }
+          }
+        }
+
+        .gallery-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 16px;
+          border-top: 1px solid #e0e0e0;
+
+          .gallery-price {
+            font-weight: 700;
+          }
+
+          .gallery-actions {
+            display: flex;
+            gap: 8px;
+
+            .MuiIconButton-root {
+              border-radius: 8px;
+              background: #f8f9fa;
+              transition: all 0.2s ease;
+
+              &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* Table View with Image Gallery */
+  .table-view {
+    margin-bottom: 32px;
+
+    .vehicles-table {
+      border-radius: 16px;
+      overflow-y: auto !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      background: white;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+
+      .table-head {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+
+        .table-header-cell {
+          color: black;
+          font-weight: 600;
+          font-size: 0.875rem;
+          letter-spacing: 0.5px;
+          padding: 16px;
+          border-bottom: none;
+          white-space: nowrap;
+
+          &:first-child {
+            border-radius: 16px 0 0 0;
+          }
+
+          &:last-child {
+            border-radius: 0 16px 0 0;
+          }
+        }
+      }
+
+      .table-row {
+        transition: all 0.2s ease;
+        background: white;
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(102, 126, 234, 0.04) 0%,
+            rgba(118, 75, 162, 0.04) 100%
+          );
+          transform: scale(1.001);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+
+          .table-actions {
+            opacity: 1;
+          }
+        }
+
+        &.active {
+          background: rgba(76, 175, 80, 0.02);
+        }
+
+        &.inactive {
+          background: rgba(244, 67, 54, 0.02);
+        }
+
+        td {
+          padding: 16px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+          vertical-align: middle;
+        }
+
+        .table-image-gallery {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+
+          .main-table-image {
+            width: 80px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: default;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+          }
+
+          .table-thumbnails {
+            display: flex;
+            gap: 4px;
+
+            .table-thumbnail {
+              width: 24px;
+              height: 24px;
+              border-radius: 4px;
+              cursor: default;
+              border: 1px solid #e0e0e0;
+            }
+
+            .more-images-badge {
+              width: 24px;
+              height: 24px;
+              border-radius: 4px;
+              background: #667eea;
+              color: white;
+              font-size: 0.7rem;
+              font-weight: 600;
+              cursor: default;
+            }
+          }
+        }
+
+        .vehicle-info {
+          .table-tags {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+
+            .table-tag {
+              border-radius: 6px;
+              font-size: 0.75rem;
+              height: 20px;
+            }
+          }
+        }
+
+        .specs-list {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .spec-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+        }
+
+        .price-cell {
+          font-size: 1.1rem;
+        }
+
+        .performance-metrics {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .MuiRating-root {
+            color: #ff9800;
+          }
+        }
+
+        .table-actions {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+          opacity: 0.7;
+          transition: opacity 0.2s ease;
+
+          .MuiIconButton-root {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            padding: 8px;
+            background: rgba(102, 126, 234, 0.08);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: rgba(102, 126, 234, 0.15);
+              transform: translateY(-2px);
+              border-color: rgba(102, 126, 234, 0.3);
+            }
+
+            .MuiSvgIcon-root {
+              font-size: 18px;
+            }
+
+            &.MuiIconButton-colorInfo {
+              background: rgba(33, 150, 243, 0.08);
+              color: #2196f3;
+
+              &:hover {
+                background: rgba(33, 150, 243, 0.15);
+              }
+            }
+
+            &.MuiIconButton-colorPrimary {
+              background: rgba(102, 126, 234, 0.08);
+              color: #667eea;
+
+              &:hover {
+                background: rgba(102, 126, 234, 0.15);
+              }
+            }
+
+            &.MuiIconButton-colorWarning {
+              background: rgba(255, 152, 0, 0.08);
+              color: #ff9800;
+
+              &:hover {
+                background: rgba(255, 152, 0, 0.15);
+              }
+            }
+
+            &.MuiIconButton-colorError {
+              background: rgba(244, 67, 54, 0.08);
+              color: #f44336;
+
+              &:hover {
+                background: rgba(244, 67, 54, 0.15);
+              }
+            }
+          }
+        }
+      }
+
+      .MuiTableCell-body {
+        padding: 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      }
+    }
+  }
+
+  /* Card View */
+  .card-view {
+    margin-bottom: 32px;
+
+    > .MuiGrid-root {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
+      gap: 20px !important;
+      align-items: stretch;
+      justify-content: flex-start;
+      width: 100%;
+      margin: 0;
+    }
+
+    > .MuiGrid-root > .MuiGrid-root,
+    .MuiGrid-item {
+      display: flex !important;
+      width: auto !important;
+      max-width: none !important;
+      flex-basis: auto !important;
+      min-width: 0;
+      padding: 0 !important;
+    }
+
+    .vehicle-card {
+      width: 100%;
+      max-width: 320px;
+      min-height: 0;
+      border-radius: 16px;
+      border: 1px solid #e0e0e0;
+      transition: all 0.4s ease;
+      overflow: hidden;
+      background: white;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+
+      &:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: transparent;
+      }
+
+      .vehicle-gallery.compact {
+        .main-image-container {
+          position: relative;
+          height: 150px;
+          overflow: hidden;
+
+          .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+          }
+
+          .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+
+            &:hover {
+              background: white;
+            }
+
+            &.prev-btn {
+              left: 8px;
+            }
+
+            &.next-btn {
+              right: 8px;
+            }
+          }
+
+          &:hover {
+            .nav-btn {
+              opacity: 1;
+            }
+          }
+
+          .image-counter {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+          }
+        }
+      }
+
+      .MuiCardContent-root {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 14px;
+
+        .vehicle-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 10px;
+          margin-bottom: 8px;
+
+          .vehicle-name {
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            line-height: 1.25;
+            min-width: 0;
+            word-break: break-word;
+
+            .featured-star {
+              color: #ff9800;
+              font-size: 18px;
+              flex: 0 0 auto;
+            }
+          }
+
+          .vehicle-type {
+            font-size: 0.8rem;
+            color: #666;
+            flex: 0 0 auto;
+            line-height: 1.4;
+            text-align: right;
+            white-space: nowrap;
+          }
+        }
+
+        .vehicle-description {
+          color: #666;
+          margin-bottom: 10px;
+          line-height: 1.4;
+          font-size: 0.85rem;
+          min-height: 38px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+
+        .vehicle-specs {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          margin: 10px 0;
+          padding: 10px;
+          background: #f8f9fa;
+          border-radius: 10px;
+
+          .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 8px;
+            background: white;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            min-width: 0;
+
+            .MuiSvgIcon-root {
+              flex: 0 0 auto;
+            }
+
+            .MuiTypography-root {
+              min-width: 0;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+          }
+        }
+
+        .vehicle-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin: 10px 0;
+          min-height: 26px;
+          max-height: 28px;
+          overflow: hidden;
+          align-content: flex-start;
+
+          .tag-chip {
+            border-radius: 8px;
+            font-size: 0.7rem;
+            height: 22px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s ease;
+
+            &:hover {
+              border-color: #667eea;
+              background: #667eea10;
+            }
+          }
+        }
+
+        .vehicle-metrics {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px;
+          background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+          border: 1px solid #e8edf3;
+          border-radius: 12px;
+          margin: 10px 0 12px;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+          .rating-section {
+            display: grid;
+            gap: 4px;
+            min-width: 0;
+
+            .MuiRating-root {
+              font-size: 0.92rem;
+              max-width: 100%;
+            }
+
+            .booking-count {
+              color: #475569;
+              font-size: 0.78rem;
+              line-height: 1.2;
+              margin-left: 0;
+              white-space: nowrap;
+            }
+          }
+
+          .price {
+            font-weight: 700;
+            font-size: 1.05rem;
+            line-height: 1.2;
+            text-align: right;
+            white-space: nowrap;
+          }
+        }
+
+        .vehicle-actions {
+          margin-top: auto;
+
+          .view-details-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 9px;
+            text-transform: none;
+            font-weight: 600;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+          }
+
+          .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+
+            .MuiIconButton-root {
+              border-radius: 10px;
+              padding: 7px;
+              background: #f8f9fa;
+              transition: all 0.3s ease;
+
+              &:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+              }
+            }
+
+            .MuiSwitch-root {
+              margin-left: auto;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* Image Dialog Styles */
+  .image-dialog-content {
+    padding: 14px 18px 12px;
+    background: #f8fafc;
+
+    .main-image-display {
+      position: relative;
+      height: clamp(260px, 44vh, 390px);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid #d8e1ec;
+      background:
+        linear-gradient(45deg, #eef2f7 25%, transparent 25%),
+        linear-gradient(-45deg, #eef2f7 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #eef2f7 75%),
+        linear-gradient(-45deg, transparent 75%, #eef2f7 75%);
+      background-color: #ffffff;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      background-size: 16px 16px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+
+      .dialog-main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .dialog-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.92);
+        color: #1d4f91;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.16);
+
+        &:hover {
+          background: white;
+          color: #0f172a;
+        }
+
+        &.prev {
+          left: 12px;
+        }
+
+        &.next {
+          right: 12px;
+        }
+      }
+
+      .image-counter {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background: rgba(15, 23, 42, 0.82);
+        color: white;
+        padding: 5px 11px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.78rem;
+        letter-spacing: 0;
+      }
+    }
+
+    .image-grid {
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      background: #ffffff;
+
+      .image-grid-title {
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+      }
+
+      .grid-image-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #d9e2ec;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: none;
+        background: #f8fafc;
+
+        &.active {
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.16);
+        }
+
+        &:hover {
+          border-color: #667eea;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+
+          .grid-image-actions {
+            opacity: 1;
+          }
+        }
+
+        .grid-image {
+          width: 100%;
+          height: 82px;
+          object-fit: cover;
+          display: block;
+        }
+
+        .grid-image-actions {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+
+          .MuiIconButton-root {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+
+            &:hover {
+              background: #ffffff;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* Vehicle Categories - FIXED WIDTH, LEFT ALIGNED */
+  .categories-card {
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-top: 32px;
+    border: none;
+
+    .section-subtitle {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+      }
+    }
+
+    .vehicle-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: flex-start;
+
+      .category-card {
+        width: 180px; /* FIXED WIDTH */
+        min-height: 140px; /* FIXED HEIGHT */
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px 16px;
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+          border-color: #667eea;
+        }
+
+        .category-icon {
+          font-size: 2.5rem;
+          margin-bottom: 12px;
+          line-height: 1;
+        }
+
+        .category-label {
+          font-weight: 600;
+          color: #2c3e50;
+          margin-bottom: 4px;
+          font-size: 1rem;
+        }
+
+        .category-count {
+          font-size: 0.875rem;
+          color: #666;
+          margin-top: 4px;
+        }
+      }
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .gallery-view .gallery-card {
+      width: 100%;
+      min-height: 560px;
+    }
+
+    .card-view .vehicle-card {
+      width: 100%;
+      min-height: 0;
+    }
+
+    .vehicle-categories .category-card {
+      width: 170px !important;
+      min-height: 135px !important;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .card-view > .MuiGrid-root {
+      grid-template-columns: repeat(auto-fill, minmax(270px, 310px));
+    }
+
+    .gallery-view .gallery-card {
+      width: 100%;
+      min-height: 540px;
+    }
+
+    .card-view .vehicle-card {
+      width: 100%;
+      min-height: 0;
+    }
+
+    .vehicle-categories .category-card {
+      width: 160px !important;
+      min-height: 130px !important;
+      padding: 18px 14px !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .header-section {
+      flex-direction: column;
+      gap: 16px;
+      align-items: stretch;
+
+      .add-vehicle-btn {
+        width: 100%;
+      }
+    }
+
+    .gallery-view .gallery-card {
+      width: 100%;
+      min-height: 520px;
+    }
+
+    .card-view .vehicle-card {
+      width: 100%;
+      min-height: 0;
+    }
+
+    .vehicle-categories .category-card {
+      width: calc(33.333% - 11px) !important; /* 3 per row */
+      min-height: 125px !important;
+    }
+
+    .vehicles-table {
+      overflow-x: auto;
+    }
+
+    .table-actions {
+      flex-direction: column;
+      gap: 4px !important;
+    }
+
+    .vehicle-gallery {
+      .thumbnail-container {
+        .thumbnail {
+          height: 40px !important;
+        }
+      }
+    }
+
+    .image-dialog-content {
+      padding: 12px;
+
+      .main-image-display {
+        height: 280px;
+      }
+
+      .image-grid .grid-image {
+        height: 76px;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    .stats-section .stat-card .stat-value {
+      font-size: 2rem !important;
+    }
+
+    .gallery-view .gallery-card {
+      width: 100%;
+      min-height: 500px;
+    }
+
+    .card-view .vehicle-card {
+      width: 100%;
+      min-height: 0;
+    }
+
+    .vehicle-categories .category-card {
+      width: calc(50% - 8px) !important; /* 2 per row */
+      min-height: 115px !important;
+      padding: 14px 10px !important;
+
+      .category-icon {
+        font-size: 2rem !important;
+        margin-bottom: 8px !important;
+      }
+
+      .category-label {
+        font-size: 0.9rem !important;
+      }
+    }
+
+    .image-gallery-title {
+      padding: 14px 16px !important;
+
+      > .MuiBox-root {
+        align-items: flex-start;
+      }
+
+      .MuiTypography-root {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    .image-dialog-content {
+      .main-image-display {
+        height: 240px !important;
+      }
+
+      .image-grid {
+        padding: 10px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gallery-view .gallery-card {
+      min-height: 480px;
+    }
+
+    .card-view .vehicle-card {
+      min-height: 0;
+    }
+
+    .vehicle-categories .category-card {
+      width: calc(50% - 8px) !important;
+      min-height: 105px !important;
+      padding: 12px 8px !important;
+
+      .category-icon {
+        font-size: 1.8rem !important;
+      }
+
+      .category-label {
+        font-size: 0.85rem !important;
+      }
+    }
+  }
+
+  @media (max-width: 400px) {
+    .vehicle-categories .category-card {
+      width: 100% !important; /* 1 per row */
+      min-height: 100px !important;
+    }
+  }
+}
+
+.vehicle-dialog-title {
+  display: flex;
+  align-items: center;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  padding: 20px 24px !important;
+  border-bottom: 1px solid #d9e2ec;
+
+  .MuiTypography-root {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    font-size: 1.2rem !important;
+    line-height: 1.3;
+    text-shadow: none;
+    margin: 0;
+  }
+}
+
+.image-gallery-title {
+  padding: 16px 20px !important;
+
+  > .MuiBox-root {
+    gap: 16px;
+    width: 100%;
+  }
+
+  .MuiTypography-root {
+    font-size: 1.05rem !important;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .image-gallery-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+
+  .image-gallery-upload-btn {
+    border-radius: 10px;
+    border-color: #9db4e2;
+    color: #1d4f91;
+    text-transform: none;
+    font-weight: 700;
+    padding: 7px 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(29, 79, 145, 0.08);
+
+    &:hover {
+      border-color: #6f8fcb;
+      background: rgba(103, 126, 234, 0.08);
+    }
+  }
+
+  .image-gallery-close-btn {
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px solid #d9e2ec;
+    width: 38px;
+    height: 38px;
+
+    &:hover {
+      background: #eef2f7;
+      color: #0f172a;
+    }
+  }
+}
+
+.image-gallery-dialog-paper {
+  border-radius: 18px !important;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.28) !important;
+
+  .MuiDialogContent-root {
+    padding: 0 !important;
+    border-color: #e2e8f0 !important;
+    background: #f8fafc;
+  }
+
+  .MuiDialogActions-root {
+    min-height: 58px;
+    padding: 10px 20px !important;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0 !important;
+
+    .MuiButton-root {
+      border-radius: 10px;
+      text-transform: none;
+      font-weight: 700;
+      padding: 7px 16px;
+      color: #1d4f91;
+
+      &:hover {
+        background: rgba(29, 79, 145, 0.08);
+      }
+    }
+  }
+}
+
+/* Additional global styles for the dialog */
+.MuiDialog-paper {
+  border-radius: 16px !important;
+  overflow: hidden;
+
+  .MuiDialogTitle-root {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .MuiDialogActions-root {
+    padding: 16px 24px;
+    border-top: 1px solid #e0e0e0;
+  }
+}
+
+/* Fix for avatar overflow */
+.MuiAvatar-root {
+  overflow: hidden;
+}
+
+/* Fix for chip spacing */
+.MuiChip-root {
+  margin: 2px;
+}
+
+/* Fix for table responsiveness */
+@media (max-width: 600px) {
+  .MuiTableCell-root {
+    padding: 8px !important;
+  }
+}

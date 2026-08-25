@@ -1,0 +1,375 @@
+.tour-list {
+  padding: 20px;
+
+  .tour-list-header {
+    background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+    color: white;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+
+      .page-title {
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+
+        .search-field {
+          background: white;
+          border-radius: 4px;
+          width: 300px;
+        }
+
+        .add-button {
+          background: white;
+          color: #1976d2;
+          font-weight: 600;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.9);
+          }
+        }
+      }
+    }
+  }
+
+  .filters-card {
+    margin-top: 20px;
+
+    .filters-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      .filter-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        .MuiChip-root {
+          cursor: pointer;
+        }
+      }
+
+      .tour-search-field {
+        min-width: 240px;
+        max-width: 320px;
+        flex: 1;
+      }
+
+      .bulk-actions-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .selected-count {
+          color: #1976d2;
+          font-weight: 500;
+        }
+
+        .bulk-select-form {
+          min-width: 180px;
+        }
+      }
+    }
+  }
+
+  .stat-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-weight: 700;
+      color: #1976d2;
+    }
+  }
+
+  .table-container {
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .table-header {
+      background-color: #f5f7fa;
+
+      th {
+        font-weight: 600;
+      }
+    }
+
+    .sortable-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        color: #1976d2;
+      }
+
+      .sort-icon {
+        font-size: 16px;
+        opacity: 0.5;
+
+        &.active {
+          opacity: 1;
+          color: #1976d2;
+        }
+
+        &.asc {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .featured-row {
+      background-color: rgba(255, 193, 7, 0.05);
+      border-left: 3px solid #ffc107;
+    }
+
+    .tour-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 260px;
+
+      .tour-thumbnail {
+        width: 56px;
+        height: 42px;
+        flex: 0 0 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 8px;
+        border: 1px solid #d8e1ec;
+        background: #f1f5f9;
+        color: #64748b;
+
+        img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+        }
+      }
+
+      .tour-name-content {
+        min-width: 0;
+      }
+
+      .tour-name-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .tour-name {
+          font-weight: 600;
+          max-width: 240px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .featured-icon {
+          color: #ffc107;
+        }
+      }
+
+      .tags-container {
+        display: flex;
+        gap: 4px;
+        margin-top: 4px;
+
+        .tour-tag {
+          font-size: 0.7rem;
+          height: 20px;
+        }
+      }
+    }
+
+    .destination-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .destination-icon {
+        color: #7f8c8d;
+      }
+    }
+
+    .price-cell {
+      .price-value {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        font-weight: 600;
+      }
+    }
+
+    .bookings-cell {
+      .booking-progress {
+        height: 4px;
+        border-radius: 2px;
+        margin-top: 4px;
+      }
+    }
+
+    .rating-cell {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .star-icon {
+        color: #f1c40f;
+      }
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 4px;
+
+      .action-button {
+        padding: 4px;
+
+        &.edit-button {
+          color: #3498db;
+        }
+
+        &.delete-button {
+          color: #e74c3c;
+        }
+      }
+    }
+  }
+
+  .table-pagination {
+    margin-top: 16px;
+  }
+
+  .tour-list-loading {
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .tour-preview-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+
+    .tour-preview-image {
+      width: 100%;
+      height: 260px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #f1f5f9;
+
+      img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+    }
+
+    .tour-preview-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .tour-preview-title {
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .tour-preview-price {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #1976d2;
+      white-space: nowrap;
+    }
+
+    .tour-preview-chips,
+    .tour-preview-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .tour-preview-description {
+      margin-top: 20px;
+      line-height: 1.7;
+      color: #374151;
+    }
+  }
+
+  .tour-dialog-side {
+    padding: 16px;
+    border-radius: 8px;
+    background: #f8fafc;
+  }
+
+  .tour-field-error {
+    color: #d32f2f;
+    font-size: 0.75rem;
+    margin: 4px 14px 0;
+  }
+}
+
+// MUI dialogs are rendered in a portal outside .tour-list, so this title style
+// must remain at the stylesheet root to match the other admin dialog headers.
+.tour-dialog-title {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  text-shadow: none;
+
+  .MuiTypography-root {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .tour-list {
+    padding: 12px;
+
+    .filters-card .filters-content {
+      align-items: stretch;
+
+      .tour-search-field {
+        min-width: 100%;
+      }
+    }
+
+    .tour-preview-card {
+      padding: 16px;
+    }
+  }
+}
