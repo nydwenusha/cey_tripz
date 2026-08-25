@@ -31,20 +31,20 @@ WORKDIR /var/www/html
 COPY api/ /var/www/html/
 
 # Debug: Show what was copied
-RUN echo "=== Files in /var/www/html ===" && ls -la /var/www/html/
-RUN echo "=== composer.json exists? ===" && cat /var/www/html/composer.json | head -20
+RUN echo "=== Checking copied files ===" && \
+    ls -la /var/www/html/ && \
+    echo "=== Checking composer.json ===" && \
+    cat /var/www/html/composer.json | head -5 || echo "composer.json not found!"
 
-# Install dependencies (force install if composer.json exists)
-RUN if [ -f /var/www/html/composer.json ]; then \
-        composer install --no-interaction --optimize-autoloader --no-dev --prefer-dist; \
-    else \
-        echo "composer.json not found!"; \
-    fi
+# Install dependencies
+RUN echo "=== Installing dependencies ===" && \
+    composer install --no-interaction --optimize-autoloader --no-dev --prefer-dist
 
 # Debug: Check if vendor was created
-RUN echo "=== Vendor folder exists? ===" && ls -la /var/www/html/vendor || echo "Vendor not found!"
+RUN echo "=== Checking vendor folder ===" && \
+    ls -la /var/www/html/vendor/ || echo "Vendor folder not found!"
 
-# Create .env file from example
+# Create .env file
 RUN cp .env.example .env || echo "APP_KEY=base64:placeholder" > .env
 
 # Override database connection to sqlite
@@ -72,5 +72,10 @@ RUN php artisan config:clear || true && \
 # Configure Apache to serve from public directory
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 RUN echo "DocumentRoot /var/www/html/public" >> /etc/apache2/apache2.conf
+
+# Enable error logging
+RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/errors.ini && \
+    echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/errors.ini && \
+    echo "display_errors = On" >> /usr/local/etc/php/conf.d/errors.ini
 
 EXPOSE 80
