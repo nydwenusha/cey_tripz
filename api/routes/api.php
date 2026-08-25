@@ -14,6 +14,24 @@ use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
+// Root API route
+Route::get('/', function () {
+    return response()->json([
+        'message' => 'Cey Tripz API is running!',
+        'version' => '1.0.0',
+        'status' => 'success',
+        'available_endpoints' => [
+            '/api/test',
+            '/api/tours',
+            '/api/vehicles',
+            '/api/blogPosts',
+            '/api/reviews',
+            '/api/register',
+            '/api/login',
+        ]
+    ]);
+});
+
 // Test route
 Route::get('/test', function () {
     return response()->json([
