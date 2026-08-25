@@ -33,25 +33,21 @@ COPY api/ /var/www/html/
 # Install dependencies
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# Create .env file
-RUN if [ -f .env.example ]; then cp .env.example .env; else echo "APP_KEY=" > .env; fi && \
-    echo "APP_ENV=" >> .env && \
-    echo "APP_DEBUG=" >> .env && \
-    echo "APP_URL=" >> .env && \
-    echo "DB_CONNECTION=" >> .env
+# Create .env file with default values (will be overridden by Render env vars)
+RUN cp .env.example .env || echo "APP_KEY=base64:placeholder" > .env
 
 # Generate APP_KEY
-RUN php artisan key:generate --force || true
+RUN php artisan key:generate --force
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/storage
 RUN chmod -R 777 /var/www/html/bootstrap/cache
 
-# Clear Laravel cache
-RUN php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan view:clear
+# Clear Laravel cache (without database connection)
+RUN php artisan config:clear || true && \
+    php artisan cache:clear || true && \
+    php artisan view:clear || true
 
 # Configure Apache to serve from public directory
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
