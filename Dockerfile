@@ -30,15 +30,28 @@ WORKDIR /var/www/html
 # Copy the entire api folder contents
 COPY api/ /var/www/html/
 
-# Install dependencies
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+# Debug: Show what was copied
+RUN echo "=== Files in /var/www/html ===" && ls -la /var/www/html/
+RUN echo "=== composer.json exists? ===" && cat /var/www/html/composer.json | head -20
+
+# Install dependencies (force install if composer.json exists)
+RUN if [ -f /var/www/html/composer.json ]; then \
+        composer install --no-interaction --optimize-autoloader --no-dev --prefer-dist; \
+    else \
+        echo "composer.json not found!"; \
+    fi
+
+# Debug: Check if vendor was created
+RUN echo "=== Vendor folder exists? ===" && ls -la /var/www/html/vendor || echo "Vendor not found!"
 
 # Create .env file from example
 RUN cp .env.example .env || echo "APP_KEY=base64:placeholder" > .env
 
 # Override database connection to sqlite
 RUN echo "DB_CONNECTION=sqlite" >> .env && \
-    echo "DB_DATABASE=/var/www/html/database/database.sqlite" >> .env
+    echo "DB_DATABASE=/var/www/html/database/database.sqlite" >> .env && \
+    echo "APP_DEBUG=true" >> .env && \
+    echo "APP_ENV=local" >> .env
 
 # Generate APP_KEY
 RUN php artisan key:generate --force
@@ -52,7 +65,7 @@ RUN chmod -R 777 /var/www/html/storage
 RUN chmod -R 777 /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/database
 
-# Clear Laravel cache (skip cache:clear to avoid missing table error)
+# Clear Laravel cache
 RUN php artisan config:clear || true && \
     php artisan view:clear || true
 
