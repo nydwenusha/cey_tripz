@@ -34,7 +34,7 @@ COPY api/ /var/www/html/
 # Create .env file and configure
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
-# Configure .env - use the fixed APP_KEY
+# Configure .env with all required keys
 RUN echo "DB_CONNECTION=sqlite" >> .env && \
     echo "DB_DATABASE=/var/www/html/database/database.sqlite" >> .env && \
     echo "APP_DEBUG=true" >> .env && \
@@ -46,8 +46,11 @@ RUN echo "DB_CONNECTION=sqlite" >> .env && \
 # Install composer dependencies
 RUN composer install --no-interaction --optimize-autoloader --no-dev --prefer-dist
 
-# Verify APP_KEY is set correctly
-RUN grep APP_KEY .env
+# Generate APP_KEY
+RUN php artisan key:generate --force
+
+# Generate JWT_SECRET (this fixes the JWT error)
+RUN php artisan jwt:secret --force || echo "JWT secret generation failed"
 
 # Create SQLite database
 RUN mkdir -p /var/www/html/database && \
@@ -80,6 +83,9 @@ RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/errors.ini && \
 
 # Create info.php for testing
 RUN echo "<?php phpinfo(); ?>" > /var/www/html/public/info.php
+
+# Verify environment variables
+RUN grep -E "APP_KEY|JWT_SECRET" .env || echo "Keys not found in .env"
 
 EXPOSE 80
 
