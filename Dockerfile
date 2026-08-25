@@ -36,7 +36,7 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev
 # Create .env file from example
 RUN cp .env.example .env || echo "APP_KEY=base64:placeholder" > .env
 
-# Override database connection to sqlite (so Laravel doesn't try to connect to MySQL)
+# Override database connection to sqlite
 RUN echo "DB_CONNECTION=sqlite" >> .env && \
     echo "DB_DATABASE=/var/www/html/database/database.sqlite" >> .env
 
@@ -52,9 +52,8 @@ RUN chmod -R 777 /var/www/html/storage
 RUN chmod -R 777 /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/database
 
-# Clear Laravel cache (skip database errors)
+# Clear Laravel cache (skip cache:clear to avoid missing table error)
 RUN php artisan config:clear || true && \
-    php artisan cache:clear || true && \
     php artisan view:clear || true
 
 # Configure Apache to serve from public directory
