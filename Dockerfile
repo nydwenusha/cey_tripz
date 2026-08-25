@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
     npm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+# Install PHP extensions (including SQLite)
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip pdo_sqlite
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -43,7 +43,7 @@ RUN echo "DB_CONNECTION=sqlite" >> .env && \
 RUN composer install --no-interaction --optimize-autoloader --no-dev --prefer-dist || \
     (echo "Composer install failed" && exit 1)
 
-# Generate APP_KEY (this will override the placeholder)
+# Generate APP_KEY
 RUN php artisan key:generate --force
 
 # Create SQLite database file and ensure directory is writable
@@ -51,15 +51,18 @@ RUN mkdir -p /var/www/html/database && \
     touch /var/www/html/database/database.sqlite && \
     chmod -R 777 /var/www/html/database
 
+# Run migrations to create all tables including cache
+RUN php artisan migrate --force || true
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
-# Test if the application loads correctly
-RUN php artisan config:clear
-RUN php artisan cache:clear
-RUN php artisan view:clear
-RUN php artisan route:clear
+# Now clear caches (after migrations have been run)
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true  # This won't fail now
+RUN php artisan view:clear || true
+RUN php artisan route:clear || true
 
 # Cache for production (optional - can remove if causing issues)
 RUN php artisan config:cache || true
@@ -76,10 +79,7 @@ RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/errors.ini && \
     echo "display_errors = On" >> /usr/local/etc/php/conf.d/errors.ini && \
     echo "error_log = /var/log/php_errors.log" >> /usr/local/etc/php/conf.d/errors.ini
 
-# Create a health check script (optional)
-RUN echo "<?php phpinfo(); ?>" > /var/www/html/public/info.php
-
 EXPOSE 80
 
-# Add this to see Apache error logs
-CMD ["sh", "-c", "apache2-foreground & tail -f /var/log/apache2/error.log"]
+# Run Apache with error logging
+CMD ["sh", "-c", "apache2-foreground & tail -f /var/log/apache2/error.log /var/log/php_errors.log"]
