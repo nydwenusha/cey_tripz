@@ -30,19 +30,8 @@ WORKDIR /var/www/html
 # Copy the entire api folder contents
 COPY api/ /var/www/html/
 
-# Debug: Show what was copied
-RUN echo "=== Checking copied files ===" && \
-    ls -la /var/www/html/ && \
-    echo "=== Checking composer.json ===" && \
-    cat /var/www/html/composer.json | head -5 || echo "composer.json not found!"
-
-# Install dependencies
-RUN echo "=== Installing dependencies ===" && \
-    composer install --no-interaction --optimize-autoloader --no-dev --prefer-dist
-
-# Debug: Check if vendor was created
-RUN echo "=== Checking vendor folder ===" && \
-    ls -la /var/www/html/vendor/ || echo "Vendor folder not found!"
+# Force Composer install (ignore cache)
+RUN composer install --no-interaction --optimize-autoloader --no-dev --prefer-dist
 
 # Create .env file
 RUN cp .env.example .env || echo "APP_KEY=base64:placeholder" > .env
@@ -69,7 +58,7 @@ RUN chmod -R 777 /var/www/html/database
 RUN php artisan config:clear || true && \
     php artisan view:clear || true
 
-# Configure Apache to serve from public directory
+# Configure Apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 RUN echo "DocumentRoot /var/www/html/public" >> /etc/apache2/apache2.conf
 
