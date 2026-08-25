@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Install dependencies
+# Install dependencies (including SQLite3 dev libraries)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libsqlite3-dev \
+    sqlite3 \
     zip \
     unzip \
     nodejs \
@@ -51,23 +53,18 @@ RUN mkdir -p /var/www/html/database && \
     touch /var/www/html/database/database.sqlite && \
     chmod -R 777 /var/www/html/database
 
-# Run migrations to create all tables including cache
-RUN php artisan migrate --force || true
-
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
-# Now clear caches (after migrations have been run)
+# Run migrations to create all tables
+RUN php artisan migrate --force || echo "Migrations failed, but continuing..."
+
+# Clear caches (with error handling)
 RUN php artisan config:clear || true
-RUN php artisan cache:clear || true  # This won't fail now
+RUN php artisan cache:clear || true
 RUN php artisan view:clear || true
 RUN php artisan route:clear || true
-
-# Cache for production (optional - can remove if causing issues)
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
-RUN php artisan view:cache || true
 
 # Configure Apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
