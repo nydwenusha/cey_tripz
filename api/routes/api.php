@@ -30,28 +30,52 @@ Route::get('/test-db', function () {
     }
 });
 
-// Import sample data
+// Import data - Simplified version
 Route::get('/import-data', function () {
     try {
-        // Import SQL file
         $sqlFile = database_path('cey_tripz_dashboard_demo_data.sql');
-        if (file_exists($sqlFile)) {
-            $sql = file_get_contents($sqlFile);
-            \DB::unprepared($sql);
-            $importOutput = "✅ SQL file imported successfully!";
-        } else {
-            $importOutput = "❌ SQL file not found at: " . $sqlFile;
+        
+        if (!file_exists($sqlFile)) {
+            return response()->json(['error' => 'SQL file not found'], 404);
         }
-
+        
+        $sql = file_get_contents($sqlFile);
+        
+        // Split into individual statements
+        $statements = array_filter(array_map('trim', explode(';', $sql)));
+        
+        $successCount = 0;
+        $errors = [];
+        
+        foreach ($statements as $statement) {
+            // Skip empty statements and comments
+            if (empty($statement) || str_starts_with($statement, '--')) {
+                continue;
+            }
+            
+            try {
+                \DB::unprepared($statement . ';');
+                $successCount++;
+            } catch (\Exception $e) {
+                // Skip ON DUPLICATE KEY UPDATE errors
+                if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                    $successCount++;
+                    continue;
+                }
+                $errors[] = $e->getMessage();
+            }
+        }
+        
         return response()->json([
             'status' => 'success',
-            'message' => '🎉 Data import completed!',
-            'import' => $importOutput,
+            'message' => "Imported $successCount statements",
+            'errors' => $errors,
+            'total_statements' => count($statements)
         ]);
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
-            'message' => $e->getMessage(),
+            'message' => $e->getMessage()
         ], 500);
     }
 });
