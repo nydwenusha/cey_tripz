@@ -17,6 +17,15 @@ use Illuminate\Http\Request;
 // TEMPORARY: One-click database setup (remove after use!)
 Route::get('/setup', function () {
     try {
+        // Drop all tables first
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        $tables = \DB::select('SHOW TABLES');
+        foreach ($tables as $table) {
+            $tableName = reset($table);
+            \DB::statement("DROP TABLE IF EXISTS $tableName");
+        }
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
         // Run migrations
         \Artisan::call('migrate', ['--force' => true]);
         $migrateOutput = \Artisan::output();
@@ -25,7 +34,7 @@ Route::get('/setup', function () {
         $sqlFile = database_path('cey_tripz_dashboard_demo_data.sql');
         if (file_exists($sqlFile)) {
             $sql = file_get_contents($sqlFile);
-            DB::unprepared($sql);
+            \DB::unprepared($sql);
             $importOutput = "✅ SQL file imported successfully!";
         } else {
             $importOutput = "❌ SQL file not found at: " . $sqlFile;
