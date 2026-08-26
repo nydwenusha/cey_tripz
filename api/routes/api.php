@@ -14,47 +14,18 @@ use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
-// TEMPORARY: One-click database setup (remove after use!)
-Route::get('/setup', function () {
+// Simple test route
+Route::get('/test-db', function () {
     try {
-        // Force drop all tables
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
         $tables = \DB::select('SHOW TABLES');
-        foreach ($tables as $table) {
-            $tableName = reset($table);
-            if ($tableName !== 'migrations') {
-                \DB::statement("DROP TABLE IF EXISTS $tableName");
-            }
-        }
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
-
-        // Delete migration records so they run again
-        \DB::table('migrations')->truncate();
-
-        // Run fresh migrations
-        \Artisan::call('migrate', ['--force' => true]);
-        $migrateOutput = \Artisan::output();
-
-        // Import SQL file
-        $sqlFile = database_path('cey_tripz_dashboard_demo_data.sql');
-        if (file_exists($sqlFile)) {
-            $sql = file_get_contents($sqlFile);
-            \DB::unprepared($sql);
-            $importOutput = "✅ SQL file imported successfully!";
-        } else {
-            $importOutput = "❌ SQL file not found at: " . $sqlFile;
-        }
-
         return response()->json([
             'status' => 'success',
-            'message' => '🎉 Database setup completed!',
-            'migrations' => $migrateOutput,
-            'import' => $importOutput,
+            'tables' => array_column($tables, 'Tables_in_defaultdb')
         ]);
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
-            'message' => $e->getMessage(),
+            'message' => $e->getMessage()
         ], 500);
     }
 });
