@@ -80,6 +80,127 @@ Route::get('/import-data', function () {
     }
 });
 
+// Simple import - essential data only
+Route::get('/import-simple', function () {
+    try {
+        // Check if admin already exists
+        $adminExists = \DB::table('users')->where('email', 'admin@gmail.com')->exists();
+        if (!$adminExists) {
+            \DB::table('users')->insert([
+                'name' => 'Administrator',
+                'email' => 'admin@gmail.com',
+                'email_verified_at' => now(),
+                'password' => '$2y$10$/jo6Bh7v3uNZMnP.Is.oOeBEZP/LeJ5P2MDzuUARjB513cUuLJEam',
+                'role' => 'admin',
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            $adminAdded = true;
+        } else {
+            $adminAdded = false;
+        }
+
+        // Insert Tours (12 tours)
+        $tours = [
+            ['Sigiriya Sunrise & Village Discovery', 'Sigiriya', 185.00, 'active', 'Cultural', 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1400&q=85', 'A private cultural journey combining an early Sigiriya Rock Fortress climb with a guided village experience and traditional lunch.', '2 Days / 1 Night', 12, 'Medium', '["Licensed English-speaking guide","Air-conditioned transport","Breakfast and village lunch","Entrance tickets","Bottled water"]', '["Travel insurance","Personal expenses","Alcoholic beverages"]', '["sigiriya","culture","village","sunrise"]', 1],
+            ['Kandy Heritage & Tea Country Escape', 'Kandy', 245.00, 'active', 'Historical', 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1400&q=85', 'A curated journey through the Temple of the Sacred Tooth Relic, Peradeniya gardens, and a working tea estate.', '3 Days / 2 Nights', 14, 'Easy', '["Private transport","Two nights accommodation","Daily breakfast","Cultural guide","Tea factory visit"]', '["Lunch and dinner","Camera permits","Tips"]', '["kandy","tea","heritage","highlands"]', 1],
+            ['Ella Highlands & Nine Arches Trail', 'Ella', 155.00, 'active', 'Hiking', 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=85', 'A guided highland adventure featuring Little Adams Peak, Nine Arches Bridge, local cuisine, and panoramic tea-country scenery.', '2 Days / 1 Night', 10, 'Medium', '["Resident hiking guide","Boutique guesthouse","Breakfast","Trail snacks","Local transfers"]', '["Train tickets to Ella","Dinner","Personal hiking equipment"]', '["ella","hiking","railway","nature"]', 1],
+            ['Yala Wildlife Safari Expedition', 'Yala', 295.00, 'active', 'Wildlife', 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1400&q=85', 'A responsibly operated safari with an experienced naturalist, private jeep, and carefully timed drives through Yala National Park.', '2 Days / 1 Night', 8, 'Easy', '["Private safari jeep","Naturalist guide","Eco-lodge stay","Breakfast and dinner","Park entrance fees"]', '["Travel insurance","Premium beverages","Gratuities"]', '["yala","wildlife","safari","leopard"]', 1],
+            ['Galle Fort, Coast & Culinary Journey', 'Galle', 210.00, 'active', 'Photography', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85', 'A relaxed south-coast itinerary combining Galle Fort architecture, local markets, a hands-on cooking session, and sunset photography.', '2 Days / 1 Night', 12, 'Easy', '["Fort specialist guide","Boutique hotel","Breakfast","Cooking workshop","Private transfers"]', '["Lunch outside the workshop","Personal shopping","Alcohol"]', '["galle","coast","food","photography"]', 1],
+            ['Mirissa Ocean & Whale Watching Retreat', 'Mirissa', 265.00, 'active', 'Beach', 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1400&q=85', 'A coastal escape with an ethical whale-watching operator, beach leisure, and a guided visit to the fishing harbour.', '3 Days / 2 Nights', 16, 'Easy', '["Two nights beachfront accommodation","Breakfast","Whale-watching ticket","Harbour transfer","Marine naturalist briefing"]', '["Lunch and dinner","Water sports","Travel insurance"]', '["mirissa","whales","beach","ocean"]', 0],
+            ['Anuradhapura Sacred City Explorer', 'Anuradhapura', 175.00, 'active', 'Historical', 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1400&q=85', 'An expert-led exploration of ancient monasteries, monumental stupas, reservoirs, and living Buddhist heritage.', '2 Days / 1 Night', 15, 'Easy', '["Archaeology guide","Private transport","Hotel with breakfast","Site tickets","Bicycle option"]', '["Temple offerings","Lunch and dinner","Personal expenses"]', '["anuradhapura","unesco","history","buddhism"]', 0],
+            ['Knuckles Range Eco Adventure', 'Kandy', 325.00, 'active', 'Adventure', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=85', 'A low-impact trekking programme through cloud forest, village landscapes, waterfalls, and biodiversity-rich sections.', '3 Days / 2 Nights', 8, 'Challenging', '["Certified trek leader","Eco-lodge accommodation","All main meals","Trail permits","Safety equipment"]', '["Specialist footwear","Travel insurance","Personal porters"]', '["knuckles","trekking","eco","mountains"]', 1],
+            ['Bentota Family River & Beach Holiday', 'Bentota', 390.00, 'active', 'Family', 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1400&q=85', 'A family-friendly coastal holiday with a calm river safari, beach time, turtle conservation visit, and flexible private transport.', '4 Days / 3 Nights', 18, 'Easy', '["Family resort stay","Daily breakfast","River safari","Turtle conservation visit","Private transfers"]', '["Optional water sports","Lunch and dinner","Childcare"]', '["bentota","family","river","beach"]', 0],
+            ['Nuwara Eliya Tea & Wellness Weekend', 'Nuwara Eliya', 285.00, 'active', 'Wellness', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=85', 'A restorative highland weekend with tea estate walks, gentle wellness sessions, seasonal cuisine, and time beside Gregory Lake.', '3 Days / 2 Nights', 10, 'Easy', '["Heritage bungalow stay","Daily breakfast","Guided tea walk","One wellness session","Private transfers"]', '["Spa upgrades","Lunch and dinner","Personal purchases"]', '["nuwara-eliya","tea","wellness","slow-travel"]', 0],
+            ['Polonnaruwa Cycling Heritage Trail', 'Polonnaruwa', 145.00, 'draft', 'Cultural', 'https://images.unsplash.com/photo-1533669955142-6a73332af4db?auto=format&fit=crop&w=1400&q=85', 'A proposed guided cycling route linking the main monuments of medieval Polonnaruwa with shaded rest stops and local refreshments.', '1 Day', 12, 'Medium', '["Bicycle and helmet","Heritage guide","Entrance ticket","Refreshments"]', '["Hotel transfer","Lunch","Travel insurance"]', '["polonnaruwa","cycling","heritage"]', 0],
+            ['Arugam Bay Surf & Lagoon Escape', 'Arugam Bay', 235.00, 'inactive', 'Beach', 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=1400&q=85', 'A seasonal surf and lagoon package designed for beginner and intermediate surfers, currently paused outside the operating season.', '3 Days / 2 Nights', 10, 'Medium', '["Guesthouse stay","Breakfast","Two surf lessons","Lagoon safari"]', '["Board rental outside lessons","Lunch and dinner","Insurance"]', '["arugam-bay","surf","lagoon"]', 0]
+        ];
+
+        $tourCount = 0;
+        foreach ($tours as $tour) {
+            $exists = \DB::table('tours')->where('name', $tour[0])->exists();
+            if (!$exists) {
+                \DB::table('tours')->insert([
+                    'name' => $tour[0],
+                    'destination' => $tour[1],
+                    'price' => $tour[2],
+                    'status' => $tour[3],
+                    'category' => $tour[4],
+                    'photo_path' => $tour[5],
+                    'description' => $tour[6],
+                    'duration' => $tour[7],
+                    'max_participants' => $tour[8],
+                    'difficulty' => $tour[9],
+                    'inclusions' => $tour[10],
+                    'exclusions' => $tour[11],
+                    'tags' => $tour[12],
+                    'featured' => $tour[13],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+                $tourCount++;
+            }
+        }
+
+        // Insert Vehicles (10 vehicles)
+        $vehicles = [
+            ['Toyota Prius Hybrid', 'Car', 'Comfortable and fuel-efficient hybrid sedan for airport transfers and private touring.', 'active', 'Sedan Car', 58.00, 350.00, 1180.00, 'Hybrid', 'Automatic', 2022, 'Pearl White', '22 km/l', '1800 cc', 4, '["air-conditioning","hybrid","airport-transfer"]', 1],
+            ['Toyota KDH High Roof', 'Van', 'Spacious high-roof van with luggage capacity for families and small tour groups.', 'active', 'Seater Van', 110.00, 690.00, 2250.00, 'Diesel', 'Automatic', 2021, 'Silver', '11 km/l', '3000 cc', 10, '["air-conditioning","large-luggage","group-travel"]', 1],
+            ['Toyota Hiace Luxury', 'Van', 'Executive passenger van configured for premium multi-day tours and corporate groups.', 'active', 'Luxury Van', 135.00, 840.00, 2780.00, 'Diesel', 'Automatic', 2023, 'Black', '10 km/l', '2800 cc', 9, '["executive-seats","wifi","premium"]', 1],
+            ['Suzuki Wagon R Hybrid', 'Car', 'Compact hybrid hatchback suited to city transfers and couples travelling with light luggage.', 'active', 'Hatchback Car', 42.00, 255.00, 850.00, 'Hybrid', 'Automatic', 2022, 'Blue', '24 km/l', '660 cc', 4, '["compact","hybrid","city"]', 0],
+            ['Honda Shuttle Hybrid', 'Car', 'Practical hybrid station wagon balancing passenger comfort with generous luggage space.', 'active', 'Station Wagon', 62.00, 380.00, 1260.00, 'Hybrid', 'Automatic', 2021, 'Grey', '21 km/l', '1500 cc', 4, '["hybrid","large-luggage","long-distance"]', 1],
+            ['Toyota Axio Hybrid', 'Car', 'Reliable sedan with a quiet cabin for business transfers and private island-wide journeys.', 'active', 'Sedan Car', 55.00, 335.00, 1120.00, 'Hybrid', 'Automatic', 2020, 'White', '23 km/l', '1500 cc', 4, '["business","hybrid","comfortable"]', 0],
+            ['Mitsubishi Montero Sport', 'SUV', 'Four-wheel-drive SUV for hill-country roads, wildlife areas, and premium family touring.', 'active', 'SUV', 125.00, 770.00, 2520.00, 'Diesel', 'Automatic', 2021, 'Graphite', '10 km/l', '2400 cc', 6, '["4x4","family","adventure"]', 1],
+            ['Toyota Coaster', 'Bus', 'Air-conditioned mini coach for organised groups, conferences, and extended round tours.', 'active', 'Mini Coach', 190.00, 1180.00, 3850.00, 'Diesel', 'Manual', 2019, 'White and Blue', '7 km/l', '4000 cc', 24, '["group-travel","microphone","large-luggage"]', 0],
+            ['Suzuki Alto', 'Car', 'Economical compact car for short city transfers and solo business travellers.', 'active', 'Mini Car', 35.00, 210.00, 700.00, 'Petrol', 'Automatic', 2021, 'Red', '20 km/l', '660 cc', 3, '["economy","city","compact"]', 0],
+            ['Nissan Caravan', 'Van', 'Versatile passenger van with strong air conditioning and flexible seating for regional tours.', 'active', 'Seater Van', 98.00, 610.00, 2020.00, 'Diesel', 'Automatic', 2020, 'Silver', '12 km/l', '2500 cc', 8, '["family","group-travel","luggage"]', 0]
+        ];
+
+        $vehicleCount = 0;
+        foreach ($vehicles as $vehicle) {
+            $exists = \DB::table('vehicles')->where('name', $vehicle[0])->exists();
+            if (!$exists) {
+                \DB::table('vehicles')->insert([
+                    'name' => $vehicle[0],
+                    'type' => $vehicle[1],
+                    'description' => $vehicle[2],
+                    'status' => $vehicle[3],
+                    'category' => $vehicle[4],
+                    'daily_rate' => $vehicle[5],
+                    'weekly_rate' => $vehicle[6],
+                    'monthly_rate' => $vehicle[7],
+                    'fuel_type' => $vehicle[8],
+                    'transmission' => $vehicle[9],
+                    'year' => $vehicle[10],
+                    'color' => $vehicle[11],
+                    'mileage' => $vehicle[12],
+                    'engine' => $vehicle[13],
+                    'capacity' => $vehicle[14],
+                    'tags' => $vehicle[15],
+                    'featured' => $vehicle[16],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+                $vehicleCount++;
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '✅ Data imported successfully!',
+            'admin_user' => $adminAdded ? 'Added' : 'Already exists',
+            'tours_added' => $tourCount,
+            'vehicles_added' => $vehicleCount
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
 // Root API route
 Route::get('/', function () {
     return response()->json([
