@@ -57,6 +57,11 @@ RUN mkdir -p /var/www/html/database && \
     touch /var/www/html/database/database.sqlite && \
     chmod -R 777 /var/www/html/database
 
+# Import sample data
+RUN echo "Importing sample dashboard data..." && \
+    sqlite3 /var/www/html/database/database.sqlite < /var/www/html/database/cey_tripz_dashboard_demo_data.sql || \
+    echo "Sample data import skipped or failed, continuing..."    
+
 # Run migrations
 RUN php artisan migrate --force || echo "Migrations failed, but continuing..."
 
