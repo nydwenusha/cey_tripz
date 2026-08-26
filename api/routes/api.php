@@ -35,7 +35,56 @@ Route::get('/', function () {
 
  
      
+  // Import dashboard demo data
+Route::get('/import-demo', function () {
+    try {
+        $sqlFile = database_path('cey_tripz_dashboard_demo_data.sql');
+        
+        if (!file_exists($sqlFile)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'SQL file not found at: ' . $sqlFile
+            ], 404);
+        }
+        
+        $sql = file_get_contents($sqlFile);
+        
+        // Split into individual statements
+        $statements = array_filter(array_map('trim', explode(';', $sql)));
+        
+        $successCount = 0;
+        $errors = [];
+        
+        foreach ($statements as $statement) {
+            if (empty($statement) || str_starts_with($statement, '--')) {
+                continue;
+            }
             
+            try {
+                \DB::unprepared($statement . ';');
+                $successCount++;
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                    $successCount++;
+                    continue;
+                }
+                $errors[] = $e->getMessage();
+            }
+        }
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => "✅ Imported $successCount statements",
+            'errors' => $errors,
+            'total_statements' => count($statements)
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});          
             
      
 
