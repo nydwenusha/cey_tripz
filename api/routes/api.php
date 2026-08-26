@@ -308,6 +308,92 @@ Route::get('/import-final', function () {
     }
 });
 
+// FIX: Create vehicles table and import
+Route::get('/fix-vehicles', function () {
+    try {
+        // Drop and recreate vehicles table with correct columns
+        \DB::statement("DROP TABLE IF EXISTS vehicles");
+        
+        \DB::statement("
+            CREATE TABLE vehicles (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                type VARCHAR(255) DEFAULT NULL,
+                description TEXT DEFAULT NULL,
+                status VARCHAR(255) DEFAULT NULL,
+                category VARCHAR(255) DEFAULT NULL,
+                daily_rate DECIMAL(10,2) DEFAULT NULL,
+                weekly_rate DECIMAL(10,2) DEFAULT NULL,
+                monthly_rate DECIMAL(10,2) DEFAULT NULL,
+                fuel_type VARCHAR(255) DEFAULT NULL,
+                transmission VARCHAR(255) DEFAULT NULL,
+                year INT DEFAULT NULL,
+                color VARCHAR(255) DEFAULT NULL,
+                mileage VARCHAR(255) DEFAULT NULL,
+                engine VARCHAR(255) DEFAULT NULL,
+                capacity INT DEFAULT NULL,
+                tags JSON DEFAULT NULL,
+                featured TINYINT(1) DEFAULT 0,
+                images JSON DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT NULL,
+                updated_at TIMESTAMP DEFAULT NULL
+            )
+        ");
+        
+        // Insert vehicles
+        $vehicles = [
+            ['Toyota Prius Hybrid', 'Car', 'Comfortable and fuel-efficient hybrid sedan.', 'active', 'Sedan Car', 58.00, 350.00, 1180.00, 'Hybrid', 'Automatic', 2022, 'Pearl White', '22 km/l', '1800 cc', 4, '["air-conditioning","hybrid"]', 1],
+            ['Toyota KDH High Roof', 'Van', 'Spacious high-roof van for families and groups.', 'active', 'Seater Van', 110.00, 690.00, 2250.00, 'Diesel', 'Automatic', 2021, 'Silver', '11 km/l', '3000 cc', 10, '["air-conditioning","group-travel"]', 1],
+            ['Toyota Hiace Luxury', 'Van', 'Executive passenger van for premium tours.', 'active', 'Luxury Van', 135.00, 840.00, 2780.00, 'Diesel', 'Automatic', 2023, 'Black', '10 km/l', '2800 cc', 9, '["executive","premium"]', 1],
+            ['Suzuki Wagon R Hybrid', 'Car', 'Compact hybrid for city transfers.', 'active', 'Hatchback Car', 42.00, 255.00, 850.00, 'Hybrid', 'Automatic', 2022, 'Blue', '24 km/l', '660 cc', 4, '["compact","city"]', 0],
+            ['Honda Shuttle Hybrid', 'Car', 'Hybrid station wagon with generous luggage space.', 'active', 'Station Wagon', 62.00, 380.00, 1260.00, 'Hybrid', 'Automatic', 2021, 'Grey', '21 km/l', '1500 cc', 4, '["hybrid","large-luggage"]', 1],
+            ['Toyota Axio Hybrid', 'Car', 'Reliable sedan for business transfers.', 'active', 'Sedan Car', 55.00, 335.00, 1120.00, 'Hybrid', 'Automatic', 2020, 'White', '23 km/l', '1500 cc', 4, '["business","comfortable"]', 0],
+            ['Mitsubishi Montero Sport', 'SUV', '4WD SUV for hill-country and wildlife areas.', 'active', 'SUV', 125.00, 770.00, 2520.00, 'Diesel', 'Automatic', 2021, 'Graphite', '10 km/l', '2400 cc', 6, '["4x4","adventure"]', 1],
+            ['Toyota Coaster', 'Bus', 'Mini coach for groups and conferences.', 'active', 'Mini Coach', 190.00, 1180.00, 3850.00, 'Diesel', 'Manual', 2019, 'White and Blue', '7 km/l', '4000 cc', 24, '["group-travel","conference"]', 0],
+            ['Suzuki Alto', 'Car', 'Economical compact car for city transfers.', 'active', 'Mini Car', 35.00, 210.00, 700.00, 'Petrol', 'Automatic', 2021, 'Red', '20 km/l', '660 cc', 3, '["economy","city"]', 0],
+            ['Nissan Caravan', 'Van', 'Versatile passenger van for regional tours.', 'active', 'Seater Van', 98.00, 610.00, 2020.00, 'Diesel', 'Automatic', 2020, 'Silver', '12 km/l', '2500 cc', 8, '["family","group-travel"]', 0]
+        ];
+
+        $count = 0;
+        foreach ($vehicles as $v) {
+            \DB::table('vehicles')->insert([
+                'name' => $v[0],
+                'type' => $v[1],
+                'description' => $v[2],
+                'status' => $v[3],
+                'category' => $v[4],
+                'daily_rate' => $v[5],
+                'weekly_rate' => $v[6],
+                'monthly_rate' => $v[7],
+                'fuel_type' => $v[8],
+                'transmission' => $v[9],
+                'year' => $v[10],
+                'color' => $v[11],
+                'mileage' => $v[12],
+                'engine' => $v[13],
+                'capacity' => $v[14],
+                'tags' => $v[15],
+                'featured' => $v[16],
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            $count++;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "✅ Vehicles table created and $count vehicles imported!",
+            'vehicles_added' => $count
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+});
+
 // Root API route
 Route::get('/', function () {
     return response()->json([
