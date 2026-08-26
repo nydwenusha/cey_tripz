@@ -1,5 +1,5 @@
 -- Hostinger-ready full schema for the CeyTripz application.
--- Generated from the current backend schema on 2026-05-16.
+-- Generated from the current backend schema on 2026-08-26.
 --
 -- Usage:
 --   1. Select the target database in phpMyAdmin first.
@@ -275,6 +275,7 @@ CREATE TABLE `blog_posts` (
     `excerpt` VARCHAR(255) DEFAULT NULL,
     `content` LONGTEXT NOT NULL,
     `category_id` BIGINT UNSIGNED DEFAULT NULL,
+    `user_id` BIGINT UNSIGNED DEFAULT NULL,
     `status` ENUM(
         'pending',
         'draft',
@@ -289,9 +290,11 @@ CREATE TABLE `blog_posts` (
     `updated_at` TIMESTAMP NULL DEFAULT NULL,
     PRIMARY KEY (`id`),
     KEY `blog_posts_category_id_foreign` (`category_id`),
+    KEY `blog_posts_user_id_foreign` (`user_id`),
     KEY `blog_posts_status_index` (`status`),
     KEY `blog_posts_scheduled_date_index` (`scheduled_date`),
-    CONSTRAINT `blog_posts_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `blog_post_categories` (`id`) ON DELETE SET NULL
+    CONSTRAINT `blog_posts_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `blog_post_categories` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `blog_posts_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `tags` (
@@ -437,9 +440,8 @@ VALUES
     ('2026_05_02_120000_create_payments_table', 1),
     ('2026_05_09_100000_create_reviews_table', 1),
     ('2026_05_09_100100_create_review_images_table', 1),
-    ('2026_05_29_000001_create_tours_table', 1),
-    ('2026_06_16_000001_add_photo_path_to_tours_table', 1),
-    ('2026_05_15_000001_add_pending_status_to_blog_posts_table', 1);
+    ('2026_05_15_000001_add_pending_status_to_blog_posts_table', 1),
+    ('2026_05_29_000001_create_tours_table', 1);
 
 -- Seed two active admin accounts for CeyTripz.
 -- The owner is stored with role "admin" because the users.role enum does not include "owner".
