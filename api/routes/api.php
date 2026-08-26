@@ -14,23 +14,7 @@ use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
-// Redirect old endpoints to new ones
-Route::post('/login', function (Request $request) {
-    return redirect()->to('/api/login');
-});
-
-Route::post('/register', function (Request $request) {
-    return redirect()->to('/api/register');
-});
-
-Route::post('/logout', function (Request $request) {
-    return redirect()->to('/api/logout');
-});
-
- 
- 
-
- 
+  
 // Root API route
 Route::get('/', function () {
     return response()->json([
