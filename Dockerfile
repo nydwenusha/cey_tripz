@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     zip \
     unzip \
+    mysql-client \
     nodejs \
     npm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
