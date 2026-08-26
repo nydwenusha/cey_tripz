@@ -201,6 +201,113 @@ Route::get('/import-simple', function () {
     }
 });
 
+// FINAL - Simple import that works
+Route::get('/import-final', function () {
+    try {
+        $results = [];
+        
+        // 1. Add Admin User
+        $userExists = \DB::table('users')->where('email', 'admin@gmail.com')->exists();
+        if (!$userExists) {
+            \DB::table('users')->insert([
+                'name' => 'Administrator',
+                'email' => 'admin@gmail.com',
+                'email_verified_at' => now(),
+                'password' => '$2y$10$/jo6Bh7v3uNZMnP.Is.oOeBEZP/LeJ5P2MDzuUARjB513cUuLJEam',
+                'role' => 'admin',
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            $results['user'] = 'Added';
+        } else {
+            $results['user'] = 'Already exists';
+        }
+
+        // 2. Get the actual columns from vehicles table
+        $vehicleColumns = array_column(\DB::select('DESCRIBE vehicles'), 'Field');
+        $results['vehicle_columns'] = $vehicleColumns;
+
+        // 3. Insert vehicles (only with columns that exist)
+        $vehicles = [
+            ['Toyota Prius Hybrid', 'Car', 58.00],
+            ['Toyota KDH High Roof', 'Van', 110.00],
+            ['Toyota Hiace Luxury', 'Van', 135.00],
+            ['Suzuki Wagon R Hybrid', 'Car', 42.00],
+            ['Honda Shuttle Hybrid', 'Car', 62.00],
+            ['Toyota Axio Hybrid', 'Car', 55.00],
+            ['Mitsubishi Montero Sport', 'SUV', 125.00],
+            ['Toyota Coaster', 'Bus', 190.00],
+            ['Suzuki Alto', 'Car', 35.00],
+            ['Nissan Caravan', 'Van', 98.00]
+        ];
+
+        $vehicleCount = 0;
+        foreach ($vehicles as $v) {
+            $exists = \DB::table('vehicles')->where('name', $v[0])->exists();
+            if (!$exists) {
+                $data = ['name' => $v[0]];
+                if (in_array('type', $vehicleColumns)) $data['type'] = $v[1];
+                if (in_array('daily_rate', $vehicleColumns)) $data['daily_rate'] = $v[2];
+                if (in_array('created_at', $vehicleColumns)) $data['created_at'] = now();
+                if (in_array('updated_at', $vehicleColumns)) $data['updated_at'] = now();
+                if (in_array('status', $vehicleColumns)) $data['status'] = 'active';
+                \DB::table('vehicles')->insert($data);
+                $vehicleCount++;
+            }
+        }
+        $results['vehicles_added'] = $vehicleCount;
+
+        // 4. Insert tours
+        $tourColumns = array_column(\DB::select('DESCRIBE tours'), 'Field');
+        $results['tour_columns'] = $tourColumns;
+
+        $tours = [
+            ['Sigiriya Sunrise & Village Discovery', 'Sigiriya', 185.00],
+            ['Kandy Heritage & Tea Country Escape', 'Kandy', 245.00],
+            ['Ella Highlands & Nine Arches Trail', 'Ella', 155.00],
+            ['Yala Wildlife Safari Expedition', 'Yala', 295.00],
+            ['Galle Fort, Coast & Culinary Journey', 'Galle', 210.00],
+            ['Mirissa Ocean & Whale Watching Retreat', 'Mirissa', 265.00],
+            ['Anuradhapura Sacred City Explorer', 'Anuradhapura', 175.00],
+            ['Knuckles Range Eco Adventure', 'Kandy', 325.00],
+            ['Bentota Family River & Beach Holiday', 'Bentota', 390.00],
+            ['Nuwara Eliya Tea & Wellness Weekend', 'Nuwara Eliya', 285.00],
+            ['Polonnaruwa Cycling Heritage Trail', 'Polonnaruwa', 145.00],
+            ['Arugam Bay Surf & Lagoon Escape', 'Arugam Bay', 235.00]
+        ];
+
+        $tourCount = 0;
+        foreach ($tours as $t) {
+            $exists = \DB::table('tours')->where('name', $t[0])->exists();
+            if (!$exists) {
+                $data = ['name' => $t[0]];
+                if (in_array('destination', $tourColumns)) $data['destination'] = $t[1];
+                if (in_array('price', $tourColumns)) $data['price'] = $t[2];
+                if (in_array('status', $tourColumns)) $data['status'] = 'active';
+                if (in_array('created_at', $tourColumns)) $data['created_at'] = now();
+                if (in_array('updated_at', $tourColumns)) $data['updated_at'] = now();
+                \DB::table('tours')->insert($data);
+                $tourCount++;
+            }
+        }
+        $results['tours_added'] = $tourCount;
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '✅ Data imported!',
+            'results' => $results
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ], 500);
+    }
+});
+
 // Root API route
 Route::get('/', function () {
     return response()->json([
