@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     npm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions (REMOVED pdo_sqlite)
+# Install PHP extensions (removed pdo_sqlite)
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Enable Apache mod_rewrite
@@ -32,18 +32,31 @@ WORKDIR /var/www/html
 # Copy the entire api folder contents
 COPY api/ /var/www/html/
 
+# Create .env file with MySQL credentials
+RUN echo "DB_CONNECTION=mysql" >> .env && \
+    echo "DB_URL=mysql://avnadmin:AVNS_5HV2HMYNUfza_0-tbN2@cey-tripz-db-dilmiwenusha999-efd8.l.aivencloud.com:23841/defaultdb?ssl-mode=REQUIRED" >> .env && \
+    echo "APP_ENV=production" >> .env && \
+    echo "APP_DEBUG=true" >> .env && \
+    echo "APP_URL=https://cey-tripz.onrender.com" >> .env
+
 # Install composer dependencies
 RUN composer install --no-interaction --optimize-autoloader --no-dev --prefer-dist
 
-# Generate APP_KEY (if needed)
+# Generate APP_KEY
 RUN php artisan key:generate --force || echo "Key generation skipped"
 
-# Skip the problematic migration (run migrations during setup)
-RUN php artisan migrate --force --pretend || echo "Migrations will run during setup"
+# Run migrations (skip the problematic one)
+RUN php artisan migrate --force || echo "Migrations failed, but continuing..."
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Clear all caches
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true
+RUN php artisan view:clear || true
+RUN php artisan route:clear || true
 
 # Configure Apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
@@ -58,6 +71,9 @@ RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/errors.ini && \
 
 # Create info.php for testing
 RUN echo "<?php phpinfo(); ?>" > /var/www/html/public/info.php
+
+# Verify environment variables
+RUN grep -E "APP_KEY|JWT_SECRET" .env || echo "Keys not found in .env"
 
 EXPOSE 80
 
