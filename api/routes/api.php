@@ -14,6 +14,37 @@ use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
+// TEMPORARY: One-click database setup (remove after use!)
+Route::get('/setup', function () {
+    try {
+        // Run migrations
+        \Artisan::call('migrate', ['--force' => true]);
+        $migrateOutput = \Artisan::output();
+
+        // Import SQL file
+        $sqlFile = database_path('cey_tripz_dashboard_demo_data.sql');
+        if (file_exists($sqlFile)) {
+            $sql = file_get_contents($sqlFile);
+            DB::unprepared($sql);
+            $importOutput = "✅ SQL file imported successfully!";
+        } else {
+            $importOutput = "❌ SQL file not found at: " . $sqlFile;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '🎉 Database setup completed!',
+            'migrations' => $migrateOutput,
+            'import' => $importOutput,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+});
+
 // Root API route
 Route::get('/', function () {
     return response()->json([
