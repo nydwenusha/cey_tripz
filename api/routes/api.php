@@ -30,6 +30,32 @@ Route::get('/test-db', function () {
     }
 });
 
+// Import sample data
+Route::get('/import-data', function () {
+    try {
+        // Import SQL file
+        $sqlFile = database_path('cey_tripz_dashboard_demo_data.sql');
+        if (file_exists($sqlFile)) {
+            $sql = file_get_contents($sqlFile);
+            \DB::unprepared($sql);
+            $importOutput = "✅ SQL file imported successfully!";
+        } else {
+            $importOutput = "❌ SQL file not found at: " . $sqlFile;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '🎉 Data import completed!',
+            'import' => $importOutput,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+});
+
 // Root API route
 Route::get('/', function () {
     return response()->json([
