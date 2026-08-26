@@ -17,16 +17,21 @@ use Illuminate\Http\Request;
 // TEMPORARY: One-click database setup (remove after use!)
 Route::get('/setup', function () {
     try {
-        // Drop all tables first
+        // Force drop all tables
         \DB::statement('SET FOREIGN_KEY_CHECKS=0');
         $tables = \DB::select('SHOW TABLES');
         foreach ($tables as $table) {
             $tableName = reset($table);
-            \DB::statement("DROP TABLE IF EXISTS $tableName");
+            if ($tableName !== 'migrations') {
+                \DB::statement("DROP TABLE IF EXISTS $tableName");
+            }
         }
         \DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-        // Run migrations
+        // Delete migration records so they run again
+        \DB::table('migrations')->truncate();
+
+        // Run fresh migrations
         \Artisan::call('migrate', ['--force' => true]);
         $migrateOutput = \Artisan::output();
 
