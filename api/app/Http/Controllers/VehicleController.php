@@ -487,7 +487,9 @@ class VehicleController extends Controller
             return $trimmedPath;
         }
 
-        return asset('storage/' . ltrim($trimmedPath, '/'));
+        // Use the current request origin so uploaded images do not inherit a
+        // stale local APP_URL after deployment.
+        return rtrim(request()->root(), '/') . '/storage/' . ltrim($trimmedPath, '/');
     }
 
     private function deleteStoredImage(?string $imagePath): void

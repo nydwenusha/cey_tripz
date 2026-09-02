@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Container, Form, Button, Row, Col, Card } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +25,7 @@ const initialFormData = {
 };
 
 function Booking() {
+  const location = useLocation();
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -93,6 +95,28 @@ function Booking() {
     }, {})
   ), [vehicleOptions]);
 
+  const selectedVehicle = useMemo(
+    () => vehicleOptions.find((vehicle) => vehicle.name === formData.vehicle_type),
+    [formData.vehicle_type, vehicleOptions]
+  );
+
+  useEffect(() => {
+    const requestedVehicle = location.state?.selectedVehicle;
+
+    if (!requestedVehicle || vehicleOptions.length === 0) {
+      return;
+    }
+
+    const isAvailable = vehicleOptions.some((vehicle) => (
+      vehicle.name === requestedVehicle &&
+      (!location.state?.selectedVehicleId || vehicle.id === location.state.selectedVehicleId)
+    ));
+
+    if (isAvailable) {
+      setFormData((current) => ({ ...current, vehicle_type: requestedVehicle }));
+    }
+  }, [location.state, vehicleOptions]);
+
   const handleDateChange = (date, fieldName) => {
     setFormData((prev) => ({
       ...prev,
@@ -143,6 +167,9 @@ function Booking() {
       const passengersCount = Number(data.passengers);
       if (!Number.isInteger(passengersCount) || passengersCount < 1) {
         nextErrors.passengers = "Number of passengers must be at least 1.";
+      } else if (selectedVehicle?.capacityValue && passengersCount > selectedVehicle.capacityValue) {
+        nextErrors.passengers = "This vehicle can carry a maximum of " +
+          selectedVehicle.capacityValue + " passengers.";
       }
     }
 
@@ -180,7 +207,6 @@ function Booking() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setSubmitStatus(null);
     setErrors({});
 
@@ -191,12 +217,13 @@ function Booking() {
         type: "error",
         message: "Please correct the highlighted fields.",
       });
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
+
     try {
-      await api.post("/booking", formattedData);
+      await api.post("/booking", formattedData, { timeout: 15000 });
       clearFormFields();
       setShowConfirm(true);
     } catch (error) {
@@ -210,7 +237,9 @@ function Booking() {
       } else {
         setSubmitStatus({
           type: "error",
-          message: error.response?.data?.message || "Something went wrong. Please try again.",
+          message: error.code === "ECONNABORTED"
+            ? "The server is taking too long to respond. Please check your connection before trying again."
+            : error.response?.data?.message || "Something went wrong. Please try again.",
         });
       }
     } finally {
@@ -242,8 +271,8 @@ function Booking() {
                   transition={{ duration: 0.35 }}
                 >
                   <div className="booking-success-icon">OK</div>
-                  <h2>Booking Confirmed!</h2>
-                  <p>We've received your details. Our team will contact you soon.</p>
+                  <h2>Booking Request Received!</h2>
+                  <p>We've saved your details. Our team will contact you to confirm your booking.</p>
                   <Button
                     variant="primary"
                     size="lg"
@@ -407,7 +436,7 @@ function Booking() {
                               <optgroup key={groupLabel} label={groupLabel}>
                                 {vehicles.map((vehicle) => (
                                   <option key={vehicle.id} value={vehicle.name}>
-                                    {vehicle.name}
+                                    {vehicle.name} ({vehicle.capacityValue} seats)
                                   </option>
                                 ))}
                               </optgroup>
@@ -428,11 +457,17 @@ function Booking() {
                             onChange={handleChange}
                             placeholder="e.g. 4"
                             min="1"
+                            max={selectedVehicle?.capacityValue || undefined}
                             isInvalid={!!errors.passengers}
                           />
                           <Form.Control.Feedback type="invalid">
                             {errors.passengers}
                           </Form.Control.Feedback>
+                          {selectedVehicle?.capacityValue > 0 && !errors.passengers && (
+                            <Form.Text className="text-muted">
+                              Maximum {selectedVehicle.capacityValue} passengers for this vehicle.
+                            </Form.Text>
+                          )}
                         </Form.Group>
                       </Col>
                     </Row>
@@ -456,8 +491,13 @@ function Booking() {
                         size="lg"
                         disabled={loading}
                       >
-                        {loading ? "Processing..." : "Confirm Booking"}
+                        {loading ? "Submitting booking..." : "Submit Booking Request"}
                       </Button>
+                      {loading && (
+                        <div className="text-muted small mt-2" role="status">
+                          Saving your booking securely. Please keep this page open.
+                        </div>
+                      )}
                     </div>
                   </Form>
                 </MotionDiv>

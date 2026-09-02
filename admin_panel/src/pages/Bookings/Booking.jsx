@@ -633,6 +633,9 @@ const Booking = () => {
 
   const validateEditForm = () => {
     const errors = {};
+    const selectedVehicle = vehicleOptions.find(
+      (vehicle) => vehicle.name === editFormData.vehicle_type
+    );
 
     if (!editFormData.customer_name.trim()) {
       errors.customer_name = 'Customer name is required.';
@@ -670,6 +673,9 @@ const Booking = () => {
       errors.passengers = 'Passenger count is required.';
     } else if (!Number.isInteger(Number(editFormData.passengers)) || Number(editFormData.passengers) < 1) {
       errors.passengers = 'Passengers must be at least 1.';
+    } else if (selectedVehicle?.capacityValue && Number(editFormData.passengers) > selectedVehicle.capacityValue) {
+      errors.passengers = 'This vehicle can carry a maximum of ' +
+        selectedVehicle.capacityValue + ' passengers.';
     }
 
     if (editFormData.amount === '' || editFormData.amount === null) {
@@ -1273,6 +1279,9 @@ const Booking = () => {
                 {vehicleTypes.map((vehicle) => (
                   <MenuItem key={vehicle} value={vehicle}>
                     {vehicle}
+                    {vehicleOptions.find((option) => option.name === vehicle)?.capacityValue
+                      ? ' (' + vehicleOptions.find((option) => option.name === vehicle).capacityValue + ' seats)'
+                      : ''}
                   </MenuItem>
                 ))}
               </TextField>
@@ -1319,7 +1328,12 @@ const Booking = () => {
                 onChange={handleEditFieldChange('passengers')}
                 error={Boolean(editFormErrors.passengers)}
                 helperText={editFormErrors.passengers}
-                inputProps={{ min: 1 }}
+                inputProps={{
+                  min: 1,
+                  max: vehicleOptions.find(
+                    (vehicle) => vehicle.name === editFormData.vehicle_type
+                  )?.capacityValue || undefined,
+                }}
                 fullWidth
               />
               <TextField

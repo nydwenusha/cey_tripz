@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import "../css/VehicleDetails.scss";
 import Layout from "../../Layout";
 import { getVehicleById } from "../data/vehicles";
+import fallbackVehicleImage from "../image/VCBG.jpg";
 
 function VehicleDetails() {
   const { id } = useParams();
@@ -13,6 +14,7 @@ function VehicleDetails() {
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mainImg, setMainImg] = useState("");
+  const [failedImages, setFailedImages] = useState([]);
 
   useEffect(() => {
     let isActive = true;
@@ -29,6 +31,7 @@ function VehicleDetails() {
 
         setVehicle(nextVehicle || null);
         setMainImg(nextVehicle?.images?.[0] || "");
+        setFailedImages([]);
       } catch (error) {
         if (!isActive) {
           return;
@@ -71,7 +74,25 @@ function VehicleDetails() {
     );
 
   const handleBooking = () => {
-    navigate("/booking", { state: { selectedVehicle: vehicle.name } });
+    navigate("/booking", {
+      state: {
+        selectedVehicle: vehicle.name,
+        selectedVehicleId: vehicle.id,
+      },
+    });
+  };
+
+  const handleImageError = (failedImage) => {
+    setFailedImages((current) => (
+      current.includes(failedImage) ? current : [...current, failedImage]
+    ));
+
+    if (mainImg === failedImage) {
+      const nextImage = vehicle.images.find(
+        (image) => image !== failedImage && !failedImages.includes(image)
+      );
+      setMainImg(nextImage || fallbackVehicleImage);
+    }
   };
 
   return (
@@ -84,9 +105,10 @@ function VehicleDetails() {
               <Col md={6}>
                 <div className="main-image-container">
                   <img
-                    src={mainImg}
+                    src={mainImg || fallbackVehicleImage}
                     alt={vehicle.name}
                     className="img-fluid rounded main-image"
+                    onError={() => handleImageError(mainImg)}
                   />
                 </div>
                 <div className="thumbnail-row mt-3 d-flex gap-2">
@@ -97,6 +119,10 @@ function VehicleDetails() {
                       alt={`thumb-${index}`}
                       className={`thumbnail ${mainImg === img ? "active" : ""}`}
                       onClick={() => setMainImg(img)}
+                      onError={(event) => {
+                        event.currentTarget.hidden = true;
+                        handleImageError(img);
+                      }}
                     />
                   ))}
                 </div>
