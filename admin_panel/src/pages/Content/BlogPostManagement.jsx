@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { sanitizeHtml } from '../../utils/sanitizeHtml';
 import {
     Box,
     Button,
@@ -176,7 +177,7 @@ const BlogPostManagement = () => {
         try {
             // Fetch posts and categories in parallel
             const [postsResponse, categoriesResponse] = await Promise.all([
-                api.get('/blogPosts'),
+                api.get('/admin/blogPosts'),
                 api.get('/blogPostCategories')
             ]);
 
@@ -534,24 +535,14 @@ const BlogPostManagement = () => {
                 {/* Header */}
                 <PageHeader
                     title="Blog Post Management"
+                    onRefresh={fetchData}
+                    refreshing={initialLoading}
                     subtitle="Create, edit, and manage all your blog posts in one place."
                     primaryAction={{
                         label: 'Add Blog',
                         onClick: () => navigate('/blogs/add'),
                         icon: <AddIcon />
                     }}
-                    secondaryActions={[
-                        {
-                            label: 'Print All',
-                            onClick: () => window.print(),
-                            icon: <Print />
-                        },
-                        {
-                            label: 'Email All',
-                            onClick: () => console.log('Email all'),
-                            icon: <Email />
-                        }
-                    ]}
                     variant="gradient"
                 />
 
@@ -982,7 +973,7 @@ const BlogPostManagement = () => {
                                                     color: 'text.secondary',
                                                 },
                                             }}
-                                            dangerouslySetInnerHTML={{ __html: previewPost.content || '<p>No content available.</p>' }}
+                                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewPost.content || '<p>No content available.</p>') }}
                                         />
                                     </Box>
 

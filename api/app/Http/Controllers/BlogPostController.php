@@ -14,6 +14,36 @@ use Illuminate\Support\Str;
 
 class BlogPostController extends Controller
 {
+    private ?array $postColumns = null;
+
+    private function hasPostColumn(string $column): bool
+    {
+        $this->postColumns ??= array_flip(Schema::getColumnListing('blog_posts'));
+
+        return isset($this->postColumns[$column]);
+    }
+
+    public function publicIndex(): JsonResponse
+    {
+        $posts = BlogPost::with(['tags:id,name', 'categoryRelation:id,name'])
+            ->where('status', 'published')->latest()->get();
+
+        return response()->json([
+            'blogPosts' => $posts->map(fn (BlogPost $post) => $this->formatBlogPost($post))->values()->all(),
+        ]);
+    }
+
+    public function publicShow(int $id): JsonResponse
+    {
+        $post = BlogPost::with(['tags:id,name', 'categoryRelation:id,name'])
+            ->where('status', 'published')->find($id);
+        if (! $post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        return response()->json(['status' => 'success', 'blogPost' => $this->formatBlogPost($post)]);
+    }
+
     public function index(): JsonResponse
     {
         $blogPosts = BlogPost::with(['tags:id,name', 'categoryRelation:id,name'])
@@ -30,7 +60,7 @@ class BlogPostController extends Controller
     {
         $post = BlogPost::with(['tags:id,name', 'categoryRelation:id,name'])->find($id);
 
-        if (!$post) {
+        if (! $post) {
             return response()->json(['message' => 'Post not found'], 404);
         }
 
@@ -77,24 +107,24 @@ class BlogPostController extends Controller
             'likes' => 0,
         ];
 
-        if (Schema::hasColumn('blog_posts', 'status')) {
+        if ($this->hasPostColumn('status')) {
             $blogPostAttributes['status'] = $normalizedInput['status'];
         }
-        if (Schema::hasColumn('blog_posts', 'scheduled_date')) {
+        if ($this->hasPostColumn('scheduled_date')) {
             $blogPostAttributes['scheduled_date'] = $normalizedInput['status'] === 'scheduled'
                 ? $normalizedInput['scheduled_date']
                 : null;
         }
-        if (Schema::hasColumn('blog_posts', 'is_featured')) {
+        if ($this->hasPostColumn('is_featured')) {
             $blogPostAttributes['is_featured'] = (bool) ($normalizedInput['is_featured'] ?? false);
         }
-        if (Schema::hasColumn('blog_posts', 'meta_title')) {
+        if ($this->hasPostColumn('meta_title')) {
             $blogPostAttributes['meta_title'] = $normalizedInput['meta_title'] ?: null;
         }
-        if (Schema::hasColumn('blog_posts', 'meta_description')) {
+        if ($this->hasPostColumn('meta_description')) {
             $blogPostAttributes['meta_description'] = $normalizedInput['meta_description'] ?: null;
         }
-        if (Schema::hasColumn('blog_posts', 'user_id')) {
+        if ($this->hasPostColumn('user_id')) {
             $blogPostAttributes['user_id'] = Auth::id();
         }
 
@@ -113,7 +143,7 @@ class BlogPostController extends Controller
     {
         $blogPost = BlogPost::with(['tags:id,name', 'categoryRelation:id,name'])->find($id);
 
-        if (!$blogPost) {
+        if (! $blogPost) {
             return response()->json([
                 'message' => 'Blog post not found.',
             ], 404);
@@ -150,21 +180,21 @@ class BlogPostController extends Controller
             'read_time' => trim((string) ($normalizedInput['read_time'] ?? '')),
         ];
 
-        if (Schema::hasColumn('blog_posts', 'status')) {
+        if ($this->hasPostColumn('status')) {
             $blogPostAttributes['status'] = $normalizedInput['status'];
         }
-        if (Schema::hasColumn('blog_posts', 'scheduled_date')) {
+        if ($this->hasPostColumn('scheduled_date')) {
             $blogPostAttributes['scheduled_date'] = $normalizedInput['status'] === 'scheduled'
                 ? $normalizedInput['scheduled_date']
                 : null;
         }
-        if (Schema::hasColumn('blog_posts', 'is_featured')) {
+        if ($this->hasPostColumn('is_featured')) {
             $blogPostAttributes['is_featured'] = (bool) ($normalizedInput['is_featured'] ?? false);
         }
-        if (Schema::hasColumn('blog_posts', 'meta_title')) {
+        if ($this->hasPostColumn('meta_title')) {
             $blogPostAttributes['meta_title'] = $normalizedInput['meta_title'] ?: null;
         }
-        if (Schema::hasColumn('blog_posts', 'meta_description')) {
+        if ($this->hasPostColumn('meta_description')) {
             $blogPostAttributes['meta_description'] = $normalizedInput['meta_description'] ?: null;
         }
 
@@ -183,7 +213,7 @@ class BlogPostController extends Controller
     {
         $post = BlogPost::find($id);
 
-        if (!$post) {
+        if (! $post) {
             return response()->json(['message' => 'Blog post not found.'], 404);
         }
 
@@ -251,7 +281,7 @@ class BlogPostController extends Controller
             }
         }
 
-        if (!is_array($tags)) {
+        if (! is_array($tags)) {
             return [];
         }
 
@@ -267,15 +297,15 @@ class BlogPostController extends Controller
     {
         $category = null;
 
-        if (!empty($input['category_id'])) {
+        if (! empty($input['category_id'])) {
             $category = BlogPostCategory::find($input['category_id']);
         }
 
-        if (!$category && !empty($input['category'])) {
+        if (! $category && ! empty($input['category'])) {
             $category = BlogPostCategory::where('name', $input['category'])->first();
         }
 
-        if (!$category) {
+        if (! $category) {
             return [
                 null,
                 response()->json([
@@ -292,32 +322,32 @@ class BlogPostController extends Controller
     {
         $file = $request->file('featuredImage') ?? $request->file('image');
 
-        if (!$file) {
+        if (! $file) {
             return $existingImage;
         }
 
         $directory = public_path('storage/blog_images');
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0777, true);
         }
 
         $this->deletePublicImage($existingImage);
 
-        $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+        $fileName = time().'_'.Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
         $extension = $file->getClientOriginalExtension();
-        $storedFileName = $fileName . '.' . $extension;
+        $storedFileName = $fileName.'.'.$extension;
         $file->move($directory, $storedFileName);
 
-        return 'blog_images/' . $storedFileName;
+        return 'blog_images/'.$storedFileName;
     }
 
     private function deletePublicImage(?string $imagePath): void
     {
-        if (!$imagePath) {
+        if (! $imagePath) {
             return;
         }
 
-        $absolutePath = public_path('storage/' . ltrim($imagePath, '/'));
+        $absolutePath = public_path('storage/'.ltrim($imagePath, '/'));
 
         if (is_file($absolutePath)) {
             @unlink($absolutePath);
@@ -328,6 +358,7 @@ class BlogPostController extends Controller
     {
         if (empty($tags)) {
             $blogPost->tags()->detach();
+
             return;
         }
 
@@ -360,14 +391,14 @@ class BlogPostController extends Controller
             'comments' => 0,
             'excerpt' => $post->excerpt,
             'content' => $post->content,
-            'status' => Schema::hasColumn('blog_posts', 'status') ? ($post->getAttribute('status') ?: 'draft') : 'published',
-            'is_featured' => Schema::hasColumn('blog_posts', 'is_featured') ? (bool) $post->getAttribute('is_featured') : false,
-            'meta_title' => Schema::hasColumn('blog_posts', 'meta_title') ? ($post->getAttribute('meta_title') ?? '') : '',
-            'meta_description' => Schema::hasColumn('blog_posts', 'meta_description') ? ($post->getAttribute('meta_description') ?? '') : '',
-            'scheduled_date' => Schema::hasColumn('blog_posts', 'scheduled_date') ? $post->getAttribute('scheduled_date') : null,
+            'status' => $this->hasPostColumn('status') ? ($post->getAttribute('status') ?: 'draft') : 'published',
+            'is_featured' => $this->hasPostColumn('is_featured') ? (bool) $post->getAttribute('is_featured') : false,
+            'meta_title' => $this->hasPostColumn('meta_title') ? ($post->getAttribute('meta_title') ?? '') : '',
+            'meta_description' => $this->hasPostColumn('meta_description') ? ($post->getAttribute('meta_description') ?? '') : '',
+            'scheduled_date' => $this->hasPostColumn('scheduled_date') ? $post->getAttribute('scheduled_date') : null,
             'created_at' => $post->created_at,
             'updated_at' => $post->updated_at,
-            'user_id' => Schema::hasColumn('blog_posts', 'user_id') ? $post->getAttribute('user_id') : null,
+            'user_id' => $this->hasPostColumn('user_id') ? $post->getAttribute('user_id') : null,
             'tags' => $post->tags->pluck('name')->values()->all(),
         ];
     }
@@ -384,6 +415,6 @@ class BlogPostController extends Controller
             return $trimmedPath;
         }
 
-        return asset('storage/' . ltrim($trimmedPath, '/'));
+        return asset('storage/'.ltrim($trimmedPath, '/'));
     }
 }

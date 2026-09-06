@@ -63,6 +63,7 @@ const Customers = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [viewCustomer, setViewCustomer] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -121,7 +122,7 @@ const Customers = () => {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [refreshVersion]);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -337,26 +338,8 @@ const Customers = () => {
     }
   };
 
-  const handleSave = () => {
-    console.log('Save action triggered');
-  };
 
-  const handlePrintAll = () => {
-    window.print();
-  };
 
-  const handleEmailAll = () => {
-    const emails = customers
-      .map((customer) => customer.email)
-      .filter((email) => email && email !== 'N/A')
-      .join(';');
-
-    if (!emails) {
-      return;
-    }
-
-    window.location.href = `mailto:${emails}`;
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -414,24 +397,10 @@ const Customers = () => {
     <div className="customers-container">
       <PageHeader
         title="Customers Management"
+        onRefresh={() => setRefreshVersion((value) => value + 1)}
+        refreshing={loading}
         subtitle="Manage customer details in one place. View contact info, booking history and more."
-        primaryAction={{
-          label: 'Save',
-          onClick: handleSave,
-          icon: <Save />
-        }}
-        secondaryActions={[
-          {
-            label: 'Print All',
-            onClick: handlePrintAll,
-            icon: <Print />
-          },
-          {
-            label: 'Email All',
-            onClick: handleEmailAll,
-            icon: <Email />
-          }
-        ]}
+
         variant="gradient"
       />
 

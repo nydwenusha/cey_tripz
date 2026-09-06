@@ -1,17 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
     AppBar,
+    Dialog, DialogTitle, DialogContent, DialogActions, Button,
     Toolbar,
     IconButton,
     Typography,
-    Badge,
     Box,
     Avatar,
     Menu,
     MenuItem,
     TextField,
     InputAdornment,
-    Tooltip,
     Divider,
     Chip,
     Paper,
@@ -25,23 +24,16 @@ import {
 import {
     Menu as MenuIcon,
     Search as SearchIcon,
-    Notifications as NotificationsIcon,
-    Email as EmailIcon,
     Person as PersonIcon,
-    Settings as SettingsIcon,
     Logout as LogoutIcon,
-    Brightness4,
-    Brightness7,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './Header.scss';
-import { AuthContext } from '../../../services/auth/AuthContext.jsx';
+import { AuthContext } from '../../../services/auth/AuthState.js';
 import api from '../../../services/api/api.js';
 
 const Header = ({
     onMenuClick,
-    onThemeToggle,
-    themeMode = 'light',
     sidebarOpen = true  // Add this prop
 }) => {
     const [todayBookings, setTodayBookings] = useState();
@@ -153,9 +145,9 @@ const Header = ({
         };
     }, [searchInput]);
 
-    const { user } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [notificationsAnchor, setNotificationsAnchor] = useState(null);
+    const [profileOpen, setProfileOpen] = useState(false);
 
 
 
@@ -170,31 +162,10 @@ const Header = ({
         setAnchorEl(null);
     };
 
-    const handleNotificationsClick = (event) => {
-        setNotificationsAnchor(event.currentTarget);
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login', { replace: true });
     };
-
-    const handleNotificationsClose = () => {
-        setNotificationsAnchor(null);
-    };
-
-    const handleLogout = () => {
-        api.post('/logout').then(() => {
-            console.log('Logout successful');
-            window.location.href = '/login'; // Redirect to login page after logout
-        }).catch(error => {
-            console.error('Error during logout:', error);
-        });
-    };
-
-    const notifications = [
-        { id: 1, message: 'New booking received for Bali Tour', time: '10 min ago', read: false },
-        { id: 2, message: 'Payment of $1,200 received', time: '1 hour ago', read: true },
-        { id: 3, message: 'Customer review submitted', time: '2 hours ago', read: false },
-        { id: 4, message: 'Tour availability updated', time: '5 hours ago', read: true },
-    ];
-
-    const unreadCount = notifications.filter(n => !n.read).length;
 
     const hasSearchResults =
         searchResults.bookings.length > 0 || searchResults.customers.length > 0;
@@ -258,7 +229,7 @@ const Header = ({
                     <ClickAwayListener onClickAway={() => setSearchOpen(false)}>
                         <Box sx={{ position: 'relative', width: { xs: '100%', sm: sidebarOpen ? 320 : 280 } }}>
                             <TextField
-                                placeholder="Search tours, customers, bookings..."
+                                placeholder="Search customers and bookings..."
                                 variant="outlined"
                                 size="small"
                                 value={searchInput}
@@ -410,34 +381,6 @@ const Header = ({
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Tooltip title="Toggle theme">
-                        <IconButton onClick={onThemeToggle} size="small">
-                            {themeMode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-                        </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Notifications">
-                        <IconButton
-                            size="small"
-                            onClick={handleNotificationsClick}
-                            sx={{ position: 'relative' }}
-                        >
-                            <Badge badgeContent={unreadCount} color="error" variant="dot">
-                                <NotificationsIcon />
-                            </Badge>
-                        </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Messages">
-                        <IconButton size="small">
-                            <Badge badgeContent={3} color="error">
-                                <EmailIcon />
-                            </Badge>
-                        </IconButton>
-                    </Tooltip>
-
-                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-
                     <Box
                         sx={{
                             display: 'flex',
@@ -449,6 +392,17 @@ const Header = ({
                             '&:hover': {
                                 backgroundColor: 'action.hover',
                             },
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Open account menu"
+                        aria-haspopup="menu"
+                        aria-expanded={Boolean(anchorEl)}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                handleProfileClick(event);
+                            }
                         }}
                         onClick={handleProfileClick}
                     >
@@ -495,13 +449,9 @@ const Header = ({
                     transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
-                    <MenuItem>
+                    <MenuItem onClick={() => setProfileOpen(true)}>
                         <PersonIcon sx={{ mr: 2, fontSize: 20 }} />
                         My Profile
-                    </MenuItem>
-                    <MenuItem>
-                        <SettingsIcon sx={{ mr: 2, fontSize: 20 }} />
-                        Account Settings
                     </MenuItem>
                     <Divider sx={{ my: 1 }} />
                     <MenuItem onClick={handleLogout}>
@@ -510,67 +460,16 @@ const Header = ({
                     </MenuItem>
                 </Menu>
 
-                {/* Notifications Menu */}
-                <Menu
-                    anchorEl={notificationsAnchor}
-                    open={Boolean(notificationsAnchor)}
-                    onClose={handleNotificationsClose}
-                    PaperProps={{
-                        elevation: 3,
-                        sx: {
-                            mt: 1.5,
-                            width: 360,
-                            maxHeight: 400,
-                            borderRadius: 2,
-                        },
-                    }}
-                >
-                    <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                            Notifications
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                            {unreadCount} unread messages
-                        </Typography>
-                    </Box>
-                    <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                        {notifications.map((notification) => (
-                            <MenuItem
-                                key={notification.id}
-                                sx={{
-                                    py: 1.5,
-                                    borderBottom: '1px solid',
-                                    borderColor: 'divider',
-                                    backgroundColor: notification.read ? 'transparent' : 'action.hover',
-                                }}
-                            >
-                                <Box sx={{ flexGrow: 1 }}>
-                                    <Typography variant="body2" sx={{ fontWeight: notification.read ? 400 : 600 }}>
-                                        {notification.message}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {notification.time}
-                                    </Typography>
-                                </Box>
-                                {!notification.read && (
-                                    <Box
-                                        sx={{
-                                            width: 8,
-                                            height: 8,
-                                            borderRadius: '50%',
-                                            backgroundColor: 'primary.main',
-                                        }}
-                                    />
-                                )}
-                            </MenuItem>
-                        ))}
-                    </Box>
-                    <MenuItem sx={{ justifyContent: 'center', py: 1.5 }}>
-                        <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>
-                            View All Notifications
-                        </Typography>
-                    </MenuItem>
-                </Menu>
+                <Dialog open={profileOpen} onClose={() => setProfileOpen(false)} fullWidth maxWidth="sm">
+                    <DialogTitle>My Profile</DialogTitle>
+                    <DialogContent>
+                        <Typography>Name: {user?.name}</Typography>
+                        <Typography>Email: {user?.email}</Typography>
+                        <Typography>Role: {user?.role}</Typography>
+                        <Typography>Status: {user?.status}</Typography>
+                    </DialogContent>
+                    <DialogActions><Button onClick={() => setProfileOpen(false)}>Close</Button></DialogActions>
+                </Dialog>
             </Toolbar>
         </AppBar>
     );

@@ -17,24 +17,25 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-            'phone_number' => ['required'],
-            'role' => ['required', 'string', 'in:admin,tourist,guide,agent'],
-            'status' => ['required', 'string', 'in:active,deactive,banned'],
+            'password' => 'required|string|min:8|max:255',
+            'phone_number' => ['required', 'string', 'max:20'],
+            'role' => ['sometimes', 'string', 'in:tourist'],
+            'status' => ['sometimes', 'string', 'in:active'],
         ]);
 
         if ($validator->fails()) {
             Log::info($validator->errors());
+
             return response()->json($validator->errors(), 422);
-        };
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone_number' => $request->phone_number,
-            'role' => $request->role,
-            'status' => $request->status
+            'role' => 'tourist',
+            'status' => 'active',
         ]);
 
         $token = JWTAuth::fromUser($user);
@@ -54,26 +55,21 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        Log::info('First Step Completed!!!');
-
         if ($validator->fails()) {
             Log::info($validator->errors());
+
             return response()->json($validator->errors(), 422);
         }
 
-        Log::info('Second Step Completed!!!');
-
         $credentials = $request->only('email', 'password');
+        $credentials['status'] = 'active';
 
-        if (!$token = JWTAuth::attempt($credentials)) {
-            Log::info('error detected');
+        if (! $token = JWTAuth::attempt($credentials)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Invalid credentials',
             ], 401);
         }
-
-        Log::info('Third Step Completed!!!');
 
         return response()->json([
             'status' => 'success',
@@ -89,10 +85,10 @@ class AuthController extends Controller
             //  Token එක check කරන්න
             $token = JWTAuth::getToken();
 
-            if (!$token) {
+            if (! $token) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Token not provided'
+                    'message' => 'Token not provided',
                 ], 401);
             }
 
@@ -102,15 +98,15 @@ class AuthController extends Controller
             //  Success response
             return response()->json([
                 'status' => 'success',
-                'message' => 'Successfully logged out'
+                'message' => 'Successfully logged out',
             ], 200);
         } catch (JWTException $e) {
             //  Token invalid නම්
-            Log::error('JWT Logout Error: ' . $e->getMessage());
+            Log::error('JWT Logout Error: '.$e->getMessage());
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to logout, please try again'
+                'message' => 'Failed to logout, please try again',
             ], 500);
         }
     }

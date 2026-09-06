@@ -1,4 +1,5 @@
-﻿// Reviews.jsx
+import { downloadCsv } from '../../utils/csv';
+// Reviews.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Paper,
@@ -209,12 +210,15 @@ const Reviews = () => {
     response: '',
     images: []
   });
+  const [loading, setLoading] = useState(true);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [bookingOptions, setBookingOptions] = useState([]);
 
   useEffect(() => {
     let isActive = true;
 
     const fetchReviewData = async () => {
+      setLoading(true);
       try {
         const [reviewsResponse, bookingsResponse] = await Promise.all([
           api.get('/GetReviews'),
@@ -233,10 +237,11 @@ const Reviews = () => {
         setBookingOptions(Array.isArray(bookingsResponse.data?.bookings) ? bookingsResponse.data.bookings : []);
       } catch (error) {
         if (isActive) {
-          setReviews([]);
-          setBookingOptions([]);
+          setSnackbarState({ open: true, severity: 'error', message: 'Unable to load reviews. Please refresh to retry.' });
         }
         console.error('Failed to load review data:', error);
+      } finally {
+        if (isActive) setLoading(false);
       }
     };
 
@@ -245,7 +250,7 @@ const Reviews = () => {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [refreshVersion]);
 
   const resetEditForm = () => {
     setEditForm({
@@ -476,28 +481,16 @@ const Reviews = () => {
     return matchesSearch && matchesStatus && matchesRating && matchesVerified;
   });
 
-  // Sorting
+  // Keep sorting derived from the complete data set, so refreshes and filters cannot discard records.
+  filteredReviews.sort((a, b) => {
+    const left = orderBy === 'date' ? new Date(a.date).getTime() : a[orderBy];
+    const right = orderBy === 'date' ? new Date(b.date).getTime() : b[orderBy];
+    const result = typeof left === 'number' ? left - right : String(left).localeCompare(String(right));
+    return order === 'asc' ? result : -result;
+  });
   const handleSort = (property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+    setOrder(orderBy === property && order === 'asc' ? 'desc' : 'asc');
     setOrderBy(property);
-
-    const sortedReviews = [...filteredReviews].sort((a, b) => {
-      if (property === 'rating') {
-        return isAsc ? a.rating - b.rating : b.rating - a.rating;
-      }
-      if (property === 'date') {
-        return isAsc ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
-      }
-      if (property === 'helpful') {
-        return isAsc ? a.helpful - b.helpful : b.helpful - a.helpful;
-      }
-      return isAsc
-        ? String(a[property]).localeCompare(String(b[property]))
-        : String(b[property]).localeCompare(String(a[property]));
-    });
-
-    setReviews(sortedReviews);
   };
 
   // Pagination
@@ -742,24 +735,15 @@ const Reviews = () => {
         {/* Header */}
         <PageHeader
           title="Reviews Management"
+          onRefresh={() => setRefreshVersion((value) => value + 1)}
+          refreshing={loading}
           subtitle="Manage and moderate customer reviews"
           primaryAction={{
-            label: 'Export',
-            onClick: () => console.log('Export clicked'),
+            label: 'Export CSV',
+            disabled: loading,
+            onClick: () => downloadCsv('reviews.csv', ['Review ID', 'Customer', 'Email', 'Tour', 'Rating', 'Comment', 'Status', 'Verified', 'Date'], filteredReviews.map((r) => [r.id, r.customer.name, r.customer.email, r.tour.name, r.rating, r.comment, r.status, r.verified ? 'Yes' : 'No', r.date])),
             icon: <Download />
           }}
-          secondaryActions={[
-            {
-              label: 'Print All',
-              onClick: () => console.log('Print All clicked'),
-              icon: <Print />
-            },
-            {
-              label: 'Email All',
-              onClick: () => console.log('Email All clicked'),
-              icon: <Email />
-            }
-          ]}
           variant="gradient"
         />
         
@@ -803,7 +787,7 @@ const Reviews = () => {
               size="small"
               placeholder="Search reviews..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -821,7 +805,7 @@ const Reviews = () => {
                 <Select
                   value={filterStatus}
                   label="Status"
-                  onChange={(e) => setFilterStatus(e.target.value)}
+                  onChange={(e) => { setFilterStatus(e.target.value); setPage(0); }}
                 >
                   <MenuItem value="all">All Status</MenuItem>
                   <MenuItem value="published">Published</MenuItem>
@@ -835,7 +819,7 @@ const Reviews = () => {
                 <Select
                   value={filterRating}
                   label="Rating"
-                  onChange={(e) => setFilterRating(e.target.value)}
+                  onChange={(e) => { setFilterRating(e.target.value); setPage(0); }}
                 >
                   <MenuItem value="all">All Ratings</MenuItem>
                   <MenuItem value="5">5 Stars</MenuItem>
@@ -850,22 +834,19 @@ const Reviews = () => {
                 control={
                   <Switch
                     checked={showVerifiedOnly}
-                    onChange={(e) => setShowVerifiedOnly(e.target.checked)}
+                    onChange={(e) => { setShowVerifiedOnly(e.target.checked); setPage(0); }}
                     size="small"
                   />
                 }
                 label="Verified Only"
               />
 
-              <Tooltip title="Refresh">
-                <IconButton>
-                  <Refresh />
-                </IconButton>
-              </Tooltip>
+
             </div>
           </div>
         </Paper>
 
+        {loading && <LinearProgress aria-label="Loading reviews" />}
         {/* Main Table */}
         <Paper className="reviews-table-paper">
           <TableContainer>

@@ -7,6 +7,7 @@ const api = axios.create({
     "accept": "application/json",
   },
   withCredentials: false,
+  timeout: 20000,
 });
 
 // Attach token dynamically before each request
@@ -31,9 +32,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if ([401, 403].includes(error.response?.status) && !["/login", "/register"].includes(error.config?.url)) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      if (window.location.pathname !== "/login") window.location.assign("/login");
     }
     return Promise.reject(error);
   }

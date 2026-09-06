@@ -158,48 +158,10 @@ const createVehicleFormFromVehicle = (vehicle) => ({
     featured: Boolean(vehicle?.featured),
 });
 
-const bookingsPageSize = 50;
-
-const getVehicleBookingKey = (vehicleName) => String(vehicleName || '').trim().toLowerCase();
-
-const fetchBookingCountsByVehicle = async () => {
-    const firstResponse = await api.get('/GetBookings', {
-        params: {
-            page: 1,
-            per_page: bookingsPageSize,
-        },
-    });
-    const lastPage = Number(firstResponse.data?.pagination?.last_page || 1);
-
-    const remainingResponses = await Promise.all(
-        Array.from({ length: Math.max(lastPage - 1, 0) }, (_, index) =>
-            api.get('/GetBookings', {
-                params: {
-                    page: index + 2,
-                    per_page: bookingsPageSize,
-                },
-            })
-        )
-    );
-
-    return [firstResponse, ...remainingResponses]
-        .flatMap((response) => (Array.isArray(response.data?.bookings) ? response.data.bookings : []))
-        .reduce((counts, booking) => {
-            const vehicleKey = getVehicleBookingKey(booking.vehicle_type);
-
-            if (!vehicleKey) {
-                return counts;
-            }
-
-            counts[vehicleKey] = (counts[vehicleKey] || 0) + 1;
-            return counts;
-        }, {});
-};
-
 const Vehicles = () => {
     const [vehicles, setVehicles] = useState([]);
-    const [bookingCountsByVehicle, setBookingCountsByVehicle] = useState({});
     const [loading, setLoading] = useState(true);
+    const [refreshVersion, setRefreshVersion] = useState(0);
     const [activeTab, setActiveTab] = useState(0);
     const [filter, setFilter] = useState('all');
     const [imageDialogOpen, setImageDialogOpen] = useState(false);
@@ -250,19 +212,12 @@ const Vehicles = () => {
             setLoading(true);
 
             try {
-                const [vehiclesResponse, nextBookingCounts] = await Promise.all([
-                    api.get('/GetVehicles'),
-                    fetchBookingCountsByVehicle().catch((error) => {
-                        console.error('Error fetching vehicle booking counts:', error);
-                        return {};
-                    }),
-                ]);
+                const vehiclesResponse = await api.get('/GetVehicles');
 
                 if (!isActive) {
                     return;
                 }
 
-                setBookingCountsByVehicle(nextBookingCounts);
                 setVehicles(vehiclesResponse.data?.vehicles || []);
             } catch (error) {
                 if (!isActive) {
@@ -270,7 +225,6 @@ const Vehicles = () => {
                 }
 
                 console.error('Error fetching vehicles:', error);
-                setBookingCountsByVehicle({});
                 setVehicles([]);
                 showSnackbar(error.response?.data?.message || 'Failed to load vehicles.', 'error');
             } finally {
@@ -285,9 +239,9 @@ const Vehicles = () => {
         return () => {
             isActive = false;
         };
-    }, []);
+    }, [refreshVersion]);
 
-    const getVehicleBookingCount = (vehicle) => bookingCountsByVehicle[getVehicleBookingKey(vehicle?.name)] || 0;
+    const getVehicleBookingCount = (vehicle) => Number(vehicle?.totalBookings || 0);
 
     useEffect(() => {
         if (!selectedVehicle) {
@@ -795,13 +749,7 @@ const Vehicles = () => {
         }
     };
 
-    const handlePrintAll = () => {
-        window.print();
-    };
 
-    const handleEmailAll = () => {
-        window.location.href = 'mailto:?subject=Vehicle%20Fleet%20Details';
-    };
 
     const nextImage = () => {
         if (selectedVehicle && mainImageIndex < selectedVehicle.images.length - 1) {
@@ -909,24 +857,14 @@ const Vehicles = () => {
         <Box className="vehicles-management">
             <PageHeader
                 title="Vehicle Management"
+                onRefresh={() => setRefreshVersion((value) => value + 1)}
+                refreshing={loading}
                 subtitle="Manage your fleet of vehicles with multiple images, view analytics and handle bookings"
                 primaryAction={{
                     label: 'Add Vehicle',
                     onClick: handleOpenAddDialog,
                     icon: <CarIcon />
                 }}
-                secondaryActions={[
-                    {
-                        label: 'Print All',
-                        onClick: handlePrintAll,
-                        icon: <Print />
-                    },
-                    {
-                        label: 'Email All',
-                        onClick: handleEmailAll,
-                        icon: <Email />
-                    }
-                ]}
                 variant="gradient"
             />
 

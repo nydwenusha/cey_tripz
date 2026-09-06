@@ -517,24 +517,14 @@ const TourList = () => {
     <Box className="tour-list">
       <PageHeader
         title="Tour Management"
+        onRefresh={fetchTours}
+        refreshing={loading}
         subtitle="Create, edit, and manage tour packages in one place."
         primaryAction={{
           label: 'Add New Tour',
           onClick: () => navigate('/addtours'),
           icon: <AddIcon />,
         }}
-        secondaryActions={[
-          {
-            label: 'Print All',
-            onClick: () => window.print(),
-            icon: <Print />,
-          },
-          {
-            label: 'Email All',
-            onClick: () => console.log('Email tours'),
-            icon: <Email />,
-          },
-        ]}
         variant="gradient"
       />
 

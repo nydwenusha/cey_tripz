@@ -1,3 +1,4 @@
+import { collectPages, downloadCsv } from '../../utils/csv';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Table,
@@ -216,6 +217,9 @@ const Booking = () => {
   //     status: 'cancelled'
   //   }
   // ];
+  const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [bookings, setBookings] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -306,6 +310,7 @@ const Booking = () => {
     let isActive = true;
 
     const loadBookings = async () => {
+      setLoading(true);
       try {
         const response = await getBookingsPage(
           page + 1,
@@ -328,6 +333,8 @@ const Booking = () => {
 
         console.error('Error fetching bookings:', error);
         showSnackbar(error.response?.data?.message || 'Failed to retrieve bookings.', 'error');
+      } finally {
+        if (isActive) setLoading(false);
       }
     };
 
@@ -336,7 +343,7 @@ const Booking = () => {
     return () => {
       isActive = false;
     };
-  }, [page, rowsPerPage, searchTerm, selectedVehicleType, selectedStatusFilter]);
+  }, [page, rowsPerPage, searchTerm, selectedVehicleType, selectedStatusFilter, refreshVersion]);
 
   useEffect(() => {
     let isActive = true;
@@ -824,17 +831,28 @@ const Booking = () => {
     }
   };
 
+  const handleExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const rows = await collectPages((nextPage) => getBookingsPage(nextPage, 50, searchTerm, selectedVehicleType, selectedStatusFilter), 'bookings');
+      downloadCsv('bookings.csv', ['Booking ID', 'Customer', 'Email', 'Phone', 'Pickup', 'Drop off', 'Vehicle', 'Pickup date', 'Return date', 'Passengers', 'Amount', 'Status'],
+        rows.map((b) => [b.id, b.customer_name, b.customer_email, b.customer_phone, b.pickup_location, b.drop_location, b.vehicle_type, b.pickup_date, b.return_date, b.passengers, b.amount, b.status]));
+      showSnackbar(`Exported ${rows.length} bookings.`);
+    } catch {
+      showSnackbar('Unable to export bookings. Please try again.', 'error');
+    } finally { setExporting(false); }
+  };
+
   return (
     <>
       <Card className="booking-container" elevation={0}>
         <PageHeader
           title="Bookings Management"
           subtitle="Manage and track all vehicle rental bookings"
-          primaryAction={{ label: 'Export', icon: <DownloadIcon /> }}
-          secondaryActions={[
-            { label: 'Print All', icon: <PrintIcon /> },
-            { label: 'Email All', icon: <EmailIcon /> }
-          ]}
+          primaryAction={{ label: exporting ? 'Exporting...' : 'Export CSV', icon: <DownloadIcon />, onClick: handleExport, disabled: exporting || loading }}
+          onRefresh={() => setRefreshVersion((value) => value + 1)}
+          refreshing={loading}
           variant="gradient"
         />
 
@@ -844,7 +862,7 @@ const Booking = () => {
             placeholder="Search by customer, email, phone, location, vehicle..."
             variant="outlined"
             size="small"
-            sx={{ width: 400 }}
+            sx={{ width: { xs: '100%', sm: 400 }, maxWidth: '100%' }}
             value={searchInput}
             onChange={handleSearchChange}
             InputProps={{
@@ -871,7 +889,7 @@ const Booking = () => {
               </Select>
             </FormControl>
 
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
               {['all', 'confirmed', 'pending', 'cancelled', 'completed'].map(status => (
                 <Chip
                   key={status}
@@ -891,15 +909,11 @@ const Booking = () => {
               ))}
             </Box>
 
-            <Tooltip title="More filters">
-              <IconButton size="small">
-                <FilterListIcon />
-              </IconButton>
-            </Tooltip>
+
           </Box>
         </Box>
 
-        <TableContainer component={Paper} elevation={0}>
+        <TableContainer component={Paper} elevation={0} aria-busy={loading}>
           <Table>
             <TableHead>
               <TableRow>
@@ -917,7 +931,7 @@ const Booking = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {bookings.length === 0 ? (
+              {loading ? (<TableRow><TableCell colSpan={11} align="center"><CircularProgress size={24} aria-label="Loading bookings" /></TableCell></TableRow>) : bookings.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
                     No bookings found.
