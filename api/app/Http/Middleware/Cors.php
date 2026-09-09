@@ -19,6 +19,10 @@ class Cors
             'http://localhost:5174',
             'http://127.0.0.1:5173',
             'http://127.0.0.1:5174',
+
+            'https://cey-tripz.onrender.com',
+            'https://cey-tripz-frontend.onrender.com',
+            'https://cey-tripz-admin.onrender.com',
         ];
 
         $origin = $request->header('Origin');
