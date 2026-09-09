@@ -23,6 +23,28 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# ============================================
+# CORS FIX: Enable headers and handle OPTIONS
+# ============================================
+# Enable Apache headers module for CORS
+RUN a2enmod headers
+
+# Create a custom Apache config for CORS
+RUN echo '<Directory /var/www/html/public>' >> /etc/apache2/apache2.conf && \
+    echo '    Header set Access-Control-Allow-Origin "*"' >> /etc/apache2/apache2.conf && \
+    echo '    Header set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"' >> /etc/apache2/apache2.conf && \
+    echo '    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-XSRF-TOKEN, Accept, Origin"' >> /etc/apache2/apache2.conf && \
+    echo '    Header set Access-Control-Allow-Credentials "true"' >> /etc/apache2/apache2.conf && \
+    echo '    Header always set Access-Control-Expose-Headers "Authorization"' >> /etc/apache2/apache2.conf && \
+    echo '</Directory>' >> /etc/apache2/apache2.conf
+
+# Handle OPTIONS requests at Apache level
+RUN echo '<IfModule mod_rewrite.c>' >> /etc/apache2/apache2.conf && \
+    echo '    RewriteEngine On' >> /etc/apache2/apache2.conf && \
+    echo '    RewriteCond %{REQUEST_METHOD} OPTIONS' >> /etc/apache2/apache2.conf && \
+    echo '    RewriteRule ^(.*)$ $1 [R=200,L]' >> /etc/apache2/apache2.conf && \
+    echo '</IfModule>' >> /etc/apache2/apache2.conf
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
