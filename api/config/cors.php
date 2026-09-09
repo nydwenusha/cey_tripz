@@ -30,11 +30,16 @@ return [
         'https://www.ceytripz.com',
         'https://www.admin.ceytripz.com',
 
+        'https://cey-tripz-frontend.onrender.com',
+        'https://cey-tripz-admin.onrender.com',
+        'https://cey-tripz.onrender.com',
+
     ],
 
     'allowed_origins_patterns' => [
         '#^https?://localhost(:\d+)?$#',
         '#^https?://127\.0\.0\.1(:\d+)?$#',
+        '#^https://.*\.onrender\.com$#',
     ],
 
     'allowed_headers' => [
@@ -43,6 +48,7 @@ return [
         'Authorization',
         'Accept',
         'Origin',
+        'X-XSRF-TOKEN',
     ],
 
     'exposed_headers' => [],
