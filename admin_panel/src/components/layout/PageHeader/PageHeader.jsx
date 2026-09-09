@@ -3,9 +3,7 @@ import React from 'react';
 import { Box, Typography, Button, Breadcrumbs, Link, IconButton, Tooltip, useTheme, useMediaQuery } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
-  Refresh as RefreshIcon,
-  Help as HelpIcon,
-  Settings as SettingsIcon
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
@@ -17,6 +15,8 @@ const PageHeader = ({
   onBackClick,
   primaryAction,
   secondaryActions = [],
+  onRefresh,
+  refreshing = false,
   variant = 'default',
   children
 }) => {
@@ -177,51 +177,14 @@ const PageHeader = ({
               </Tooltip>
             ))}
 
-            {/* Common utility actions */}
-            <Tooltip title="Refresh">
-              <IconButton
-                sx={{
-                  bgcolor: variant === 'gradient' ? 'rgba(255,255,255,0.2)' : 'action.hover',
-                  '&:hover': {
-                    bgcolor: variant === 'gradient' ? 'rgba(255,255,255,0.3)' : 'action.selected'
-                  }
-                }}
-              >
-                <RefreshIcon sx={{
-                  color: variant === 'gradient' ? 'white' : 'inherit'
-                }} />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Help">
-              <IconButton
-                sx={{
-                  bgcolor: variant === 'gradient' ? 'rgba(255,255,255,0.2)' : 'action.hover',
-                  '&:hover': {
-                    bgcolor: variant === 'gradient' ? 'rgba(255,255,255,0.3)' : 'action.selected'
-                  }
-                }}
-              >
-                <HelpIcon sx={{
-                  color: variant === 'gradient' ? 'white' : 'inherit'
-                }} />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Settings">
-              <IconButton
-                sx={{
-                  bgcolor: variant === 'gradient' ? 'rgba(255,255,255,0.2)' : 'action.hover',
-                  '&:hover': {
-                    bgcolor: variant === 'gradient' ? 'rgba(255,255,255,0.3)' : 'action.selected'
-                  }
-                }}
-              >
-                <SettingsIcon sx={{
-                  color: variant === 'gradient' ? 'white' : 'inherit'
-                }} />
-              </IconButton>
-            </Tooltip>
+            {onRefresh && (
+              <Tooltip title="Refresh">
+                <span><IconButton aria-label="Refresh" onClick={onRefresh} disabled={refreshing}
+                  sx={{ color: variant === 'gradient' ? 'white' : 'inherit' }}>
+                  <RefreshIcon />
+                </IconButton></span>
+              </Tooltip>
+            )}
 
             {/* Primary Action */}
             {primaryAction && (
@@ -229,6 +192,7 @@ const PageHeader = ({
                 variant={primaryAction.variant || 'contained'}
                 startIcon={primaryAction.icon}
                 onClick={primaryAction.onClick}
+                disabled={primaryAction.disabled}
                 size="medium"
                 sx={{
                   ml: 1,
@@ -263,6 +227,8 @@ PageHeader.propTypes = {
     label: PropTypes.string.isRequired,
     href: PropTypes.string
   })),
+  onRefresh: PropTypes.func,
+  refreshing: PropTypes.bool,
   showBackButton: PropTypes.bool,
   onBackClick: PropTypes.func,
   primaryAction: PropTypes.shape({

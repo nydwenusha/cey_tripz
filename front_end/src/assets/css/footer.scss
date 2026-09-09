@@ -1,0 +1,181 @@
+.footer-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #061827;
+  color: #fff;
+  padding: 60px 0 0;
+  font-family: inherit;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &::before {
+    z-index: -2;
+    background: url("../image/aboutBG.jpg") center 58%/cover no-repeat;
+    opacity: 0.1;
+    filter: saturate(0.65);
+  }
+
+  &::after {
+    z-index: -1;
+    background: linear-gradient(135deg, rgba(3, 18, 31, 0.9), rgba(8, 47, 79, 0.94));
+  }
+
+  > .container,
+  .footer-bottom {
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-col {
+    margin-bottom: 30px;
+  }
+
+  .footer-title {
+    color: var(--brand-accent);
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+
+  .footer-links {
+    list-style: none;
+    padding: 0;
+
+    li {
+      margin-bottom: 10px;
+
+      a {
+        color: rgba(255, 255, 255, 0.82);
+        text-decoration: none;
+        transition: color 0.25s ease, transform 0.25s ease;
+        display: inline-block;
+
+        &:hover {
+          color: var(--brand-accent);
+          transform: translateX(4px);
+        }
+      }
+    }
+  }
+
+  .footer-contact {
+    list-style: none;
+    padding: 0;
+
+    li {
+      color: #ddd;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+
+      a {
+        color: rgb(221, 221, 221);
+        text-decoration: none;
+      }
+
+      i {
+        color: var(--brand-accent);
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .footer-social {
+    display: flex;
+    gap: 15px;
+
+    .social-icon {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 1.2rem;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+
+      &:hover {
+        transform: translateY(-3px);
+        filter: brightness(1.08);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+      }
+    }
+
+    .social-facebook {
+      background-color: #1877f2;
+    }
+
+    .social-instagram {
+      background: radial-gradient(circle at 30% 30%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+    }
+
+    .social-whatsapp {
+      background-color: #25d366;
+    }
+  }
+
+  .footer-bottom {
+    background: rgba(2, 12, 22, 0.34);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 40px;
+
+    .footer-logo {
+      font-family: "Pacifico", cursive;
+      color: #fff;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+
+      span {
+        color: var(--brand-accent);
+      }
+    }
+
+    p {
+      font-size: 0.9rem;
+      margin-bottom: 2px !important;
+    }
+
+    small{
+      color: #bbb;
+      font-size: 13px !important;
+      a{
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--brand-accent);
+        }
+        
+      }
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .footer-section {
+    padding-top: 48px;
+    text-align: center;
+
+    .footer-contact li,
+    .footer-social {
+      justify-content: center;
+    }
+
+    .footer-col {
+      margin-bottom: 24px;
+    }
+  }
+}

@@ -15,7 +15,6 @@ import {
     Typography,
     Avatar,
     useTheme,
-    useMediaQuery,
 } from '@mui/material';
 import {
     Dashboard as DashboardIcon,
@@ -26,7 +25,6 @@ import {
     Article as ContentIcon,
     Reviews as ReviewIcon,
     Analytics as AnalyticsIcon,
-    Settings as SettingsIcon,
     ExpandLess,
     ExpandMore,
     ChevronLeft,
@@ -40,7 +38,7 @@ import {
     Category,
 } from '@mui/icons-material';
 import './Sidebar.scss';
-import { AuthContext } from '../../../services/auth/AuthContext';
+import { AuthContext } from '../../../services/auth/AuthState';
 
 const menuItems = [
     {
@@ -92,24 +90,13 @@ const menuItems = [
         icon: <AnalyticsIcon />,
         path: '/reports',
     },
-    {
-        title: 'Settings',
-        icon: <SettingsIcon />,
-        path: '/settings',
-        subItems: [
-            { title: 'General', path: '/settings/general' },
-            { title: 'Users & Roles', path: '/settings/users' },
-            { title: 'Notifications', path: '/settings/notifications' },
-        ],
-    },
 ];
 
 const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
+    const theme = useTheme();
     const { user } = useContext(AuthContext);
     const location = useLocation();
     const [expandedItems, setExpandedItems] = useState({});
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const toggleExpand = (title) => {
         setExpandedItems((prev) => ({
@@ -224,7 +211,7 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                     }),
                     overflowX: 'hidden',
                 },
-                zIndex: 2000,
+                zIndex: 1200,
             }}
         >
             {/* Header with toggle button */}
@@ -289,7 +276,7 @@ const Sidebar = ({ open, onClose, variant = 'permanent', onToggle }) => {
                                 width: 24,
                                 height: 24,
                                 display: variant === 'permanent' ? 'flex' : 'none',
-                                zIndex: 2000,
+                                zIndex: 1200,
                             }}
                         >
                             <ChevronRight fontSize="small" />

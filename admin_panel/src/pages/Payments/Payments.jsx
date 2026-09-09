@@ -1,3 +1,4 @@
+import { collectPages, downloadCsv } from '../../utils/csv';
 // Payments.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -221,6 +222,8 @@ const Payments = () => {
     severity: 'success',
     message: '',
   });
+  const [exporting, setExporting] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const [stats, setStats] = useState(createInitialStats());
 
   useEffect(() => {
@@ -261,7 +264,7 @@ const Payments = () => {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [refreshVersion]);
 
   useEffect(() => {
     let isActive = true;
@@ -310,7 +313,7 @@ const Payments = () => {
     return () => {
       isActive = false;
     };
-  }, [page, rowsPerPage, searchTerm, filterStatus, filterMethod]);
+  }, [page, rowsPerPage, searchTerm, filterStatus, filterMethod, refreshVersion]);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbarState({
@@ -820,17 +823,18 @@ const Payments = () => {
     }
   };
 
-  const handleExport = () => {
-    console.log('Exporting payments data...');
+  const handleExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const rows = await collectPages((nextPage) => getPaymentsPage(nextPage, 50, searchTerm, filterStatus, filterMethod), 'payments');
+      downloadCsv('payments.csv', ['Payment ID', 'Customer', 'Email', 'Amount', 'Currency', 'Method', 'Status', 'Date'], rows.map((p) => [p.payment_code, p.customer_name, p.customer_email, p.amount, p.currency, p.payment_method, p.status, p.payment_date]));
+      showSnackbar(`Exported ${rows.length} payments.`);
+    } catch { showSnackbar('Unable to export payments. Please try again.', 'error'); }
+    finally { setExporting(false); }
   };
 
-  const handlePrintAll = () => {
-    console.log('Printing all payments...');
-  };
 
-  const handleEmailAll = () => {
-    console.log('Emailing all payments...');
-  };
 
   // Stats grid data
   const statCards = [
@@ -880,24 +884,14 @@ const Payments = () => {
     <div className="payments-container">
       <PageHeader
         title="Payment Management"
+        onRefresh={() => setRefreshVersion((value) => value + 1)}
+        refreshing={tableLoading}
         subtitle="View and manage all your payments in one place"
         primaryAction={{
           label: 'Add',
           onClick: handleOpenSaveDialog,
           icon: <Add />
         }}
-        secondaryActions={[
-          {
-            label: 'Print All',
-            onClick: handlePrintAll,
-            icon: <Print />
-          },
-          {
-            label: 'Email All',
-            onClick: handleEmailAll,
-            icon: <Email />
-          }
-        ]}
         variant="gradient"
       />
 
@@ -947,7 +941,7 @@ const Payments = () => {
             <TextField
               variant="outlined"
               size="small"
-              placeholder="Search payments..."
+              placeholder="Search by Payment ID..."
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
               InputProps={{
@@ -998,7 +992,7 @@ const Payments = () => {
             </FormControl>
 
             <Tooltip title="Export">
-              <IconButton onClick={handleExport}>
+              <IconButton aria-label="Export payments CSV" onClick={handleExport} disabled={exporting || tableLoading}>
                 <Download />
               </IconButton>
             </Tooltip>

@@ -39,15 +39,9 @@ class PaymentController extends Controller
         $query = Payment::query();
 
         if ($search !== '') {
-            $likeSearch = '%' . $search . '%';
+            $likeSearch = '%'.$search.'%';
 
-            $query->where(function ($builder) use ($likeSearch) {
-                $builder->where('payment_code', 'like', $likeSearch)
-                    ->orWhere('customer_name', 'like', $likeSearch)
-                    ->orWhere('customer_email', 'like', $likeSearch)
-                    ->orWhere('transaction_id', 'like', $likeSearch)
-                    ->orWhere('description', 'like', $likeSearch);
-            });
+            $query->where('payment_code', 'like', $likeSearch);
         }
 
         if ($status !== '') {
@@ -84,7 +78,7 @@ class PaymentController extends Controller
     {
         $payment = Payment::find($id);
 
-        if (!$payment) {
+        if (! $payment) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Payment not found',
@@ -124,7 +118,7 @@ class PaymentController extends Controller
         $validated = $validator->validated();
         $booking = null;
 
-        if (!empty($validated['booking_id'])) {
+        if (! empty($validated['booking_id'])) {
             $booking = Booking::find($validated['booking_id']);
         }
 
@@ -159,7 +153,7 @@ class PaymentController extends Controller
                 'description' => $validated['description'] ?? null,
             ]);
 
-            $createdPayment->payment_code = 'PAY-' . str_pad((string) $createdPayment->id, 5, '0', STR_PAD_LEFT);
+            $createdPayment->payment_code = 'PAY-'.str_pad((string) $createdPayment->id, 5, '0', STR_PAD_LEFT);
             $createdPayment->save();
 
             return $createdPayment->fresh();
@@ -176,7 +170,7 @@ class PaymentController extends Controller
     {
         $payment = Payment::find($id);
 
-        if (!$payment) {
+        if (! $payment) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Payment not found',

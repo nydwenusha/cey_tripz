@@ -470,18 +470,6 @@ const TourEdit = ({ initialData = null, onSave, onCancel }) => {
             onClick: handleSubmit,
             icon: saving ? <CircularProgress size={18} /> : <Save />
           }}
-          secondaryActions={[
-            {
-              label: 'Print All',
-              onClick: () => window.print(),
-              icon: <Print />
-            },
-            {
-              label: 'Email All',
-              onClick: () => console.log('Email tours'),
-              icon: <Email />
-            }
-          ]}
           variant="gradient"
         />
 

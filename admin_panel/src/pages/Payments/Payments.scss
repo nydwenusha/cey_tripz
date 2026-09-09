@@ -304,41 +304,7 @@
   }
 
   // Optional: Dark mode support
-  @media (prefers-color-scheme: dark) {
-    .stats-grid .stat-card {
-      background: #1f2937;
-      border-color: #374151;
 
-      &:hover {
-        border-color: #4b5563;
-      }
-
-      .card-content {
-        .stat-value {
-          color: #f9fafb;
-        }
-
-        .stat-label {
-          color: #9ca3af;
-        }
-      }
-
-      .stat-progress {
-        .progress-bar {
-          background: #374151;
-        }
-      }
-
-      .stat-comparison {
-        border-color: #374151;
-        color: #9ca3af;
-
-        .comparison-value {
-          color: #d1d5db;
-        }
-      }
-    }
-  }
 
   .payments-paper {
     border-radius: 12px;

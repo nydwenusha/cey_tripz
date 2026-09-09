@@ -10,7 +10,6 @@ const MainLayout = ({ children }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-    const [themeMode, setThemeMode] = useState('light');
 
     
     
@@ -23,9 +22,6 @@ const MainLayout = ({ children }) => {
         setSidebarOpen(!sidebarOpen);
     };
 
-    const handleThemeToggle = () => {
-        setThemeMode(prev => prev === 'light' ? 'dark' : 'light');
-    };
 
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -41,8 +37,6 @@ const MainLayout = ({ children }) => {
             {/* Header */}
             <Header
                 onMenuClick={handleDrawerToggle}
-                onThemeToggle={handleThemeToggle}
-                themeMode={themeMode}
                 sidebarOpen={sidebarOpen}
             />
 

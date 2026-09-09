@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import DOMPurify from 'dompurify';
 import { Container, Row, Col } from "react-bootstrap";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -277,7 +278,7 @@ const BlogPost = () => {
               >
                 <div
                   className="post-content"
-                  dangerouslySetInnerHTML={{ __html: post.content || '' }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || '', { USE_PROFILES: { html: true }, FORBID_TAGS: ['style', 'form', 'input', 'button', 'textarea', 'select'], FORBID_ATTR: ['style', 'id', 'name'] }) }}
                 />
 
                 {post.tags && post.tags.length > 0 && (

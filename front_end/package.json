@@ -17,6 +17,7 @@
     "axios": "^1.13.5",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "dompurify": "^3.4.14",
     "framer-motion": "^12.25.0",
     "leaflet": "^1.9.4",
     "react": "^19.2.3",

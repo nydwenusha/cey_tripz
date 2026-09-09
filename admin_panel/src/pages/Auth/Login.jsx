@@ -9,7 +9,8 @@ import {
   Typography,
   Box,
   Paper,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import {
   Visibility,
@@ -20,7 +21,7 @@ import {
   FlightTakeoff
 } from '@mui/icons-material';
 import './Login.scss';
-import { AuthContext } from '../../services/auth/AuthContext';
+import { AuthContext } from '../../services/auth/AuthState';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -30,7 +31,6 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
   const { login } = useContext(AuthContext);
@@ -56,35 +56,21 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) {
+    if (loading || !validateForm()) {
       return;
     }
 
+    setAlert({ show: false, type: 'error', message: '' });
     setLoading(true);
 
     try {
 
-      const result = await login(formData);
+      const result = await login({ email: formData.email.trim(), password: formData.password });
       if (!result.success) {
-        const messages = result.message || {};
-        setErrors({
-          name: messages.name || '',
-          email: messages.email || '',
-          phone_number: messages.phone_number || '',
-          password: messages.password || '',
-        });
+        setAlert({ show: true, type: 'error', message: result.message || 'Login failed.' });
         return;
       }
 
-      console.log('Login successful:', result);
-      setFormData({
-        name: '',
-        email: '',
-        phone_number: '',
-        password: '',
-        role: 'admin',
-        status: 'active'
-      });
       navigate('/dashboard');
 
     } catch (error) {
@@ -151,6 +137,8 @@ const Login = () => {
               fullWidth
               label="Email"
               name="email"
+              autoComplete="username"
+              disabled={loading}
               type="email"
               value={formData.email}
               onChange={handleChange}
@@ -172,6 +160,8 @@ const Login = () => {
               fullWidth
               label="Password"
               name="password"
+              autoComplete="current-password"
+              disabled={loading}
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={handleChange}
@@ -188,6 +178,8 @@ const Login = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      onMouseDown={(event) => event.preventDefault()}
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
                       size="small"
@@ -200,21 +192,7 @@ const Login = () => {
               className="custom-input"
             />
 
-            {/* <Box className="form-options">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    size="small"
-                  />
-                }
-                label="Remember me"
-              />
-              <Button size="small" className="forgot-link">
-                Forgot password?
-              </Button>
-            </Box> */}
+
 
             <Button
               type="submit"
@@ -225,12 +203,11 @@ const Login = () => {
               size="medium"
               sx={{color:'white !important'}}
             >
+              {loading && <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />}
               {loading ? 'Signing In...' : 'Sign In'}
             </Button>
 
-            <Typography variant="body2" className="signup-text">
-              Don't have an account? <Button className="signup-link">Sign up</Button>
-            </Typography>
+
 
           </form>
         </Paper>

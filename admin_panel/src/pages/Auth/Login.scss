@@ -236,58 +236,7 @@
 }
 
 // Dark mode support (with background)
-@media (prefers-color-scheme: dark) {
-  .login-page {
-    .login-card {
-      background: rgba(45, 55, 72, 0.95);
-      
-      .login-header {
-        .logo-text {
-          color: #f7fafc;
-        }
-        
-        .login-title {
-          color: #f7fafc;
-        }
-        
-        .login-subtitle {
-          color: #cbd5e0;
-        }
-      }
-      
-      .login-alert {
-        background: rgba(74, 85, 104, 0.9);
-      }
-      
-      .login-form {
-        .custom-input {
-          .MuiOutlinedInput-root {
-            background: rgba(74, 85, 104, 0.5);
-            border-color: #4a5568;
-            
-            .MuiInputBase-input {
-              color: #f7fafc;
-            }
-          }
-          
-          .MuiInputLabel-root {
-            color: #a0aec0;
-          }
-        }
-        
-        .form-options {
-          .MuiFormControlLabel-root .MuiFormControlLabel-label {
-            color: #cbd5e0;
-          }
-        }
-        
-        .signup-text {
-          color: #a0aec0;
-        }
-      }
-    }
-  }
-}
+
 
 // Mobile responsive
 @media (max-width: 480px) {

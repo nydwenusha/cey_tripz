@@ -122,10 +122,11 @@ const AddBlogPost = () => {
     // Fetch categories from API
     api.get('/blogPostCategories')
       .then((res) => {
-        setCategories(res.data);
+        const rows = res.data?.categories ?? res.data;
+        setCategories(Array.isArray(rows) ? rows : []);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err.response?.data?.message || 'Unable to load categories. Please reload to retry.');
       });
   }, []);
 
@@ -261,19 +262,25 @@ const AddBlogPost = () => {
 
   const handleInsertImage = () => {
     const url = prompt('Enter image URL:', 'https://');
-    if (url) {
+    if (url && /^https?:\/\//i.test(url)) {
       execCommand('insertImage', url);
     }
   };
 
   const handleSaveLink = () => {
+    if (linkUrl && !/^https?:\/\//i.test(linkUrl)) {
+      setError('Links must start with https:// or http://.');
+      return;
+    }
     if (linkUrl && linkText) {
       const selection = window.getSelection();
+      if (!selection?.rangeCount) return;
       const range = selection.getRangeAt(0);
       const link = document.createElement('a');
       link.href = linkUrl;
       link.textContent = linkText;
       link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       link.style.color = '#667eea';
       link.style.textDecoration = 'underline';
 
@@ -656,6 +663,7 @@ const AddBlogPost = () => {
                         key={index}
                         size="small"
                         className="toolbar-btn"
+                        onMouseDown={(event) => event.preventDefault()}
                         onClick={tool.action}
                         title={tool.title}
                       >
@@ -668,6 +676,10 @@ const AddBlogPost = () => {
                   ref={contentEditorRef}
                   className="content-editor"
                   contentEditable
+                  role="textbox"
+                  aria-label="Blog content"
+                  aria-multiline="true"
+                  data-placeholder="Write your blog post here..."
                   dir="ltr"
                   onInput={handleContentChange}
                   onKeyDown={handleKeyDown}
