@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // Check if user is already logged in
   useEffect(() => {
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -42,7 +41,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ LOGIN FUNCTION - Uses POST method
   const login = async (credentials) => {
     try {
       const response = await api.post('/login', credentials);
@@ -63,7 +61,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -79,9 +76,9 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!token
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  return React.createElement(
+    AuthContext.Provider,
+    { value: value },
+    children
   );
 };
