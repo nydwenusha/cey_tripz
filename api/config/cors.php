@@ -56,6 +56,6 @@ return [
 
     'max_age' => 0, // 24 hours
 
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 
 ];
